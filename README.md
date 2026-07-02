@@ -2,9 +2,9 @@
 
 ## 👥 Member
 
-| 돌돌 | 시소 | 이브 | 
+| 돌돌 | 시소 | 이브 |
 |------|------|------|
-| 최서정 | 민선희 | 사석훈 |
+| [최서정](https://github.com/bum22) | [민선희](https://github.com/seonhi) | [사석훈](https://github.com/sukhoon912) |
 
 ## 🛠 기술 스택
 
@@ -46,5 +46,3 @@ main ← dev ← feature/기능명
 - 주차별 이슈에 체크리스트로 관리 (W1~W5)
 - 작업 완료 후 해당 체크박스 체크
 
-pnpm dev
-\```
