@@ -1,5 +1,21 @@
 # V_O Web
 
+## 👥 Member
+
+| 돌돌 | 시소 | 이브 | 
+|------|------|------|
+| 최서정 | 민선희 | 사석훈 |
+
+## 🛠 기술 스택
+
+| 분류 | 기술 |
+|------|------|
+| Framework | React, TypeScript |
+| Build Tool | Vite |
+| 상태 관리 | Zustand |
+| HTTP 클라이언트 | Axios |
+| 코드 컨벤션 | Biome |
+
 ## 🌿 브랜치 전략
 main ← dev ← feature/기능명
 
@@ -30,10 +46,5 @@ main ← dev ← feature/기능명
 - 주차별 이슈에 체크리스트로 관리 (W1~W5)
 - 작업 완료 후 해당 체크박스 체크
 
-## 🚀 개발 환경 세팅
-\```bash
-git clone https://github.com/V-O-dev/V_O_web.git
-cd V_O_web
-pnpm install
 pnpm dev
 \```
