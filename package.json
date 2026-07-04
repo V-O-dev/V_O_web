@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "name": "v_o_web",
+=======
+  "name": "v-o-web",
+>>>>>>> 453a74956a9e863661804da672b2835625c2a824
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +14,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "axios": "^1.18.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -29,5 +34,19 @@
     "tailwindcss": "^4.3.2",
     "typescript": "~6.0.2",
     "vite": "^8.1.1"
+=======
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.1",
+    "@types/node": "^24.13.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "oxlint": "^1.69.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.0"
+>>>>>>> 453a74956a9e863661804da672b2835625c2a824
   }
 }
