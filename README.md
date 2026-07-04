@@ -40,12 +40,13 @@ V_O는 매일 던져지는 질문에 10초 영상으로 답하고, 소중한 사
 ```
 src/
 ├── components/
-│   ├── Button.tsx
-│   ├── Input.tsx
-│   ├── BottomNav.tsx
-│   ├── VideoCard.tsx
-│   ├── GroupTab.tsx
-│   └── Timer.tsx
+│   ├── common/
+│       ├── Button.tsx
+│       ├── Input.tsx
+│       ├── BottomNav.tsx
+│       ├── VideoCard.tsx
+│       ├── GroupTab.tsx
+│       └── Timer.tsx
 ├── pages/
 │   ├── AuthPage.tsx
 │   ├── HomePage.tsx
