@@ -1,0 +1,24 @@
+/* v4 최신 불러오기 문법 및 기존 config 파일 연결 */
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  body {
+    @apply bg-slate-100 text-slate-900 antialiased;
+  }
+  #root {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
+@layer components {
+  /* 이미지 요구사항: 모바일 기기 규격 430px에 딱 맞춘 중앙 프레임 틀 */
+  .app-frame {
+    @apply w-full max-w-[430px] min-h-screen bg-white shadow-lg flex flex-col relative overflow-x-hidden;
+    height: 100dvh;
+  }
+}
