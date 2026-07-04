@@ -1,65 +1,34 @@
 import React, { useState } from 'react';
 import { Input } from './components/common/Input';
 import { Button } from './components/common/Button';
+import { BottomSheet } from './components/common/BottomSheet'; 
 
 export default function App() {
   const [name, setName] = useState('홍길동');
+  const [isSheetOpen, setIsSheetOpen] = useState(false); 
 
   return (
-    <div 
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#f8f9fa',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        fontFamily: 'sans-serif'
-      }}
-    >
-      {/* 중앙 카드 컨테이너 */}
-      <div 
-        style={{
-          width: '100%',
-          maxWidth: '440px',
-          backgroundColor: '#ffffff',
-          borderRadius: '24px',
-          padding: '40px 32px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        {/* 1. 상단 타이틀 */}
-        <h2 
-          style={{ 
-            fontSize: '24px', 
-            fontWeight: '900', 
-            color: '#111827', 
-            margin: '0 0 48px 0',
-            letterSpacing: '-0.05em'
-          }}
-        >
-          초기 세팅 오류 해결 완료! 🎉
-        </h2>
-
-        {/* 2. 중앙 인풋 컴포넌트 */}
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '48px' }}>
-          <Input 
-            value={name} 
-            onChange={(e) => setName(e.target.value)} 
-          />
-        </div>
-
-        {/* 3. 하단 버튼 컴포넌트 */}
-        <Button 
-          text="계속" 
-          onClick={() => console.log('제출된 이름:', name)} 
-        />
-        
+    <div style={{ padding: '24px', textAlign: 'center' }}>
+    
+      <h2>컴포넌트 UI 테스트</h2>
+      <Input value={name} onChange={(e) => setName(e.target.value)} />
+      
+      <div style={{ marginTop: '20px' }}>
+        <Button text="계속" onClick={() => setIsSheetOpen(true)} />
       </div>
+
+      <BottomSheet isOpen={isSheetOpen} onClose={() => setIsSheetOpen(false)}>
+        <div style={{ textAlign: 'center' }}>
+          <h3 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 16px 0' }}>
+            {name} 님이 맞으신가요?
+          </h3>
+          <p style={{ color: '#6b7280', marginBottom: '24px' }}>
+            입력하신 이름으로 세팅을 마무리합니다.
+          </p>
+          <Button text="확인 완료" onClick={() => setIsSheetOpen(false)} />
+        </div>
+      </BottomSheet>
+
     </div>
   );
 }

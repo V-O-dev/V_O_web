@@ -13,18 +13,20 @@ export function Input({ value, onChange, placeholder = '' }: InputProps) {
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      // Tailwind가 안 먹힐 때를 대비해 style 속성으로 강제 고정합니다.
       style={{
         border: 'none',
         borderBottom: '4px solid #6366f1',
         backgroundColor: 'transparent',
         textAlign: 'center',
         outline: 'none',
-        paddingBottom: '12px',
+        paddingBottom: '16px', 
         width: '100%',
-        maxWidth: '260px',
+        maxWidth: '340px',    
+        fontSize: '36px',      
+        fontWeight: '900',     
+        color: '#111827',
       }}
-      className="text-4xl font-black text-gray-950 tracking-wide focus:border-[#4f46e5] transition-colors placeholder-gray-300"
+      className="transition-colors focus:border-[#4f46e5] placeholder-gray-300"
     />
   );
 }
