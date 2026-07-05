@@ -1,0 +1,7 @@
+# .coderabbit.yaml
+language: "ko-KR" # AI가 한국어로 친절하게 리뷰를 달아주도록 설정하는 핵심 옵션입니다.
+reviews:
+  profile: "chill" # 너무 까다롭지 않고 부드럽게 팁을 주는 모드입니다.
+  auto_review:
+    enabled: true
+    drafts: false # 드래프트 PR에는 리뷰를 달지 않아 API 호출을 아낍니다.
