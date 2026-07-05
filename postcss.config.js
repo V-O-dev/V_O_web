@@ -1,6 +1,6 @@
 export default {
   plugins: {
-    '@tailwindcss/postcss': {}, // 📌 최신 버전에 맞게 패키지명 수정
+    '@tailwindcss/postcss': {}, // v4 전용 플러그인으로 변경 완료!
     autoprefixer: {},
   },
 }
