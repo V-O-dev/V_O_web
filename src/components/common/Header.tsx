@@ -14,21 +14,18 @@ export function Header({ showBackButton = true, title }: HeaderProps) {
   return (
     <header style={{
       position: 'relative',
-      
       marginTop: '40px', 
-      
       display: 'flex',
       alignItems: 'center', 
       justifyContent: 'center',
       width: '100%', 
       maxWidth: '360px', 
-      height: '43.3px', 
-      boxSizing: 'border-box',
+      padding: '4px 20px 0px 20px', 
       
-      padding: '4px 20px 4px 20px', 
       borderBottom: '1px solid rgba(178, 178, 178, 0.5)',
       backgroundColor: '#ffffff',
-      zIndex: 10
+      zIndex: 10,
+      boxSizing: 'border-box',
     }}>
       
       {showBackButton && (
@@ -46,6 +43,8 @@ export function Header({ showBackButton = true, title }: HeaderProps) {
             width: '24px',  
             height: '24px', 
             padding: 0,
+            top: '50%',
+            transform: 'translateY(-50%)'
           }}
         >
           <img 
@@ -66,7 +65,7 @@ export function Header({ showBackButton = true, title }: HeaderProps) {
           fontSize: '20px', 
           fontWeight: 500, 
           color: '#000000', 
-          margin: 0, 
+          margin: '0 0 12px 0',
           lineHeight: '150%', 
           letterSpacing: '0em'
         }}>
@@ -79,7 +78,8 @@ export function Header({ showBackButton = true, title }: HeaderProps) {
           height: '21.3px', 
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          margin: '0 0 12px 0' 
         }}>
           <img 
             src={logoImg} 
