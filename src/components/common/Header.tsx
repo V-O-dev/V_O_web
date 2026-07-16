@@ -13,17 +13,19 @@ export function Header({ showBackButton = true, title }: HeaderProps) {
 
   return (
     <header style={{
-      position: 'absolute',
-      top: '40px', 
-      left: '50%',
-      transform: 'translateX(-50%)',
+      position: 'relative',
+      
+      marginTop: '40px', 
+      
       display: 'flex',
       alignItems: 'center', 
       justifyContent: 'center',
-      width: '360px', 
+      width: '100%', 
+      maxWidth: '360px', 
       height: '43.3px', 
       boxSizing: 'border-box',
-      padding: '4px 20px 12px 20px', 
+      
+      padding: '4px 20px 4px 20px', 
       borderBottom: '1px solid rgba(178, 178, 178, 0.5)',
       backgroundColor: '#ffffff',
       zIndex: 10
