@@ -5,10 +5,20 @@ import logoImg from '../../assets/logo.png';
 interface HeaderProps {
   title?: string;
   showBackButton?: boolean;
+  onBackClick?: () => void; // 🎯 외부에서 커스텀 뒤로가기 이벤트를 받을 수 있도록 프롭 추가
 }
 
-export function Header({ title, showBackButton = true }: HeaderProps) {
+export function Header({ title, showBackButton = true, onBackClick }: HeaderProps) {
   const navigate = useNavigate();
+
+  // 🎯 커스텀 함수가 들어오면 그걸 실행하고, 없으면 기존처럼 브라우저 뒤로가기(navigate(-1))를 실행
+  const handleBack = () => {
+    if (onBackClick) {
+      onBackClick();
+    } else {
+      navigate(-1);
+    }
+  };
 
   return (
     <header
@@ -26,11 +36,10 @@ export function Header({ title, showBackButton = true }: HeaderProps) {
         flexShrink: 0,
       }}
     >
-
       {showBackButton && (
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={handleBack} // 🎯 수정된 핸들러 연결
           style={{
             position: 'absolute',
             left: '16px',
