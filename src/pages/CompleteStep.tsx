@@ -4,7 +4,7 @@ import completeBadge from '../assets/complete_badge.svg';
 
 interface CompleteStepProps {
   onStart: () => void;
-  onBack: () => void; // 🎯 뒤로가기 함수 타입 추가
+  onBack: () => void;
 }
 
 export default function CompleteStep({ onStart, onBack }: CompleteStepProps) {
@@ -19,10 +19,8 @@ export default function CompleteStep({ onStart, onBack }: CompleteStepProps) {
         boxSizing: 'border-box',
       }}
     >
-      {/* 1. 상단 공통 헤더: 뒤로가기 버튼 활성화 및 핸들러 연결 */}
       <Header showBackButton={true} onBackClick={onBack} />
 
-      {/* 2. 메인 콘텐츠 영역 */}
       <div
         style={{
           flex: 1,
@@ -33,7 +31,6 @@ export default function CompleteStep({ onStart, onBack }: CompleteStepProps) {
           boxSizing: 'border-box',
         }}
       >
-        {/* 체크 뱃지 이미지 (Margin Top 109px, 크기 134x134) */}
         <div style={{ marginTop: '109px', width: '134px', height: '134px' }}>
           <img
             src={completeBadge}
@@ -46,7 +43,6 @@ export default function CompleteStep({ onStart, onBack }: CompleteStepProps) {
           />
         </div>
 
-        {/* 타이틀 영역: Margin Top 20px */}
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
           <h1
             style={{
@@ -64,7 +60,6 @@ export default function CompleteStep({ onStart, onBack }: CompleteStepProps) {
           </h1>
         </div>
 
-        {/* 서브 타이틀 영역: Margin Top 29px */}
         <div style={{ marginTop: '29px', textAlign: 'center' }}>
           <p
             style={{
@@ -82,7 +77,6 @@ export default function CompleteStep({ onStart, onBack }: CompleteStepProps) {
           </p>
         </div>
 
-        {/* 시작하기 버튼 영역: Margin Top 243.7px */}
         <div
           style={{
             marginTop: '243.7px',

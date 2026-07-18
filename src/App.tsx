@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import ProfileStep from './pages/ProfileStep';
 import NameStep from './pages/NameStep';
-import CompleteStep from './pages/CompleteStep'; // 🎯 완료 컴포넌트 추가
+import CompleteStep from './pages/CompleteStep'; 
 
 export default function App() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -19,7 +19,7 @@ export default function App() {
 
   const handleNameComplete = (name: string) => {
     setUserName(name);
-    setStep(3); // 🎯 이름 검증 통과 후 완료 화면 단계로 이동
+    setStep(3); 
   };
 
   const handleFinalStart = () => {
@@ -44,7 +44,7 @@ export default function App() {
         {step === 1 && (
           <ProfileStep 
             onNext={handleProfileComplete} 
-            onBack={() => window.history.back()} // 🎯 1단계용 뒤로가기 함수 추가!
+            onBack={() => window.history.back()}
           />
         )}
         
@@ -58,7 +58,7 @@ export default function App() {
         {step === 3 && (
           <CompleteStep 
             onStart={handleFinalStart} 
-            onBack={() => setStep(2)} // 🎯 완료 화면에서 뒤로가기 누르면 2단계 이름 입력으로 컴백!
+            onBack={() => setStep(2)} 
           />
         )}
       </div>
