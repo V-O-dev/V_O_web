@@ -1,18 +1,16 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/common/Header';
 import { Button } from '../components/common/Button';
 
 import completeBadgeImg from '../assets/complete_badge.svg'; 
 
-export default function GroupThemeCompletePage() {
+export default function GroupCreateCompletePage() {
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const selectedThemeLabel = location.state?.themeLabel || '선택한';
-
+  // 🎯 '계속' 클릭 시 그룹 초대 페이지(/group/invite)로 이동
   const handleNext = () => {
-    navigate('/group/time-picker', { state: { themeLabel: selectedThemeLabel } });
+    navigate('/group/invite'); 
   };
 
   return (
@@ -26,15 +24,16 @@ export default function GroupThemeCompletePage() {
       margin: '0 auto',  
       boxSizing: 'border-box',
       position: 'relative', 
+      overflow: 'hidden'
     }}>
       
-      {/* 1. 헤더 영역 (공통 컴포넌트) */}
+      {/* 1. 공통 헤더 */}
       <Header />
 
-      {/* 2. 중앙 컨텐츠 전체 정렬 박스 */}
+      {/* 2. 중앙 컨텐츠 영역 (타이틀 상단 위치 337.3px 동일 적용) */}
       <div style={{
         position: 'absolute',
-        top: '183.3px', // 🎯 배지(134px) + 여백(20px) 포함하여 타이틀 Y위치가 정확히 337.3px에 위치함
+        top: '183.3px', 
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
@@ -44,10 +43,10 @@ export default function GroupThemeCompletePage() {
         boxSizing: 'border-box'
       }}>
         
-        {/* 완료 배지 이미지 (134px) */}
+        {/* 완료 배지 이미지 (134x134) */}
         <img 
           src={completeBadgeImg} 
-          alt="완료 배지" 
+          alt="그룹 생성 완료 배지" 
           style={{ 
             width: '134px', 
             height: '134px', 
@@ -56,17 +55,18 @@ export default function GroupThemeCompletePage() {
           }} 
         />
 
-        {/* 🎯 메인 타이틀 (상단 Y축 위치 337.3px 달성) */}
+        {/* 그룹 생성 완료! 타이틀 (Y축 337.3px 위치) */}
         <h1 style={{
           fontFamily: 'Manrope, sans-serif',
           fontSize: '24px',
           fontWeight: 500,
-          color: '#000000',
-          margin: '0 0 8px 0', // 타이틀과 아래 서브문구 간격
-          lineHeight: '36px',
+          color: '#0F0F0F',
+          margin: 0,
+          marginBottom: '8px', // 타이틀과 서브 문구 사이 간격
+          lineHeight: '150%',
           textAlign: 'center'
         }}>
-          테마가 선택되었어요!
+          그룹 생성 완료!
         </h1>
 
         {/* 서브 설명 문구 */}
@@ -79,12 +79,12 @@ export default function GroupThemeCompletePage() {
           lineHeight: '150%',
           textAlign: 'center'
         }}>
-          <span style={{ color: '#DB2777' }}>{selectedThemeLabel}</span> 테마로 그룹이 시작됩니다
+          이제 다른 사람들에게 그룹을 공유해보세요
         </p>
 
       </div>
 
-      {/* 3. 하단 버튼 영역 */}
+      {/* 3. 하단 버튼 영역 (🎯 통일된 bottom 94px 스펙 적용) */}
       <div style={{
         position: 'absolute',
         bottom: '94px', 
@@ -106,7 +106,7 @@ export default function GroupThemeCompletePage() {
         </div>
       </div>
 
-      {/* 4. 바닥 여백 영역 */}
+      {/* 4. 바닥 여백 영역 (통일) */}
       <div style={{ position: 'absolute', bottom: 0, height: '94px', width: '100%' }} />
 
     </div>

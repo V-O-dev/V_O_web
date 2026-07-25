@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
-import backArrowIcon from '../assets/back_arrow.svg'; 
-import logoImg from '../assets/logo.png';
+import { useNavigate } from 'react-router-dom';
+import { Header } from '../components/common/Header';
 import { Button } from '../components/common/Button'; 
 
 import themeFriendImg from '../assets/theme_friend.png'; 
@@ -25,15 +24,12 @@ export default function GroupThemeSelect() {
     setSelectedTheme(id); 
   };
 
-const handleShowExamples = () => {
-  if (!selectedTheme) return;
-  
-  // 현재 선택된 id('friend', 'couple' 등)를 가지고 THEME_DATA에서 한글 라벨('친구', '연인' 등)을 찾음
-  const currentTheme = THEME_DATA.find(t => t.id === selectedTheme);
-  
-  // 3페이지로 이동하면서 선택한 테마 라벨을 state로 넘겨줌
-  navigate('/group/examples', { state: { themeLabel: currentTheme?.label } });
-};
+  const handleShowExamples = () => {
+    if (!selectedTheme) return;
+    
+    const currentTheme = THEME_DATA.find(t => t.id === selectedTheme);
+    navigate('/group/examples', { state: { themeLabel: currentTheme?.label } });
+  };
 
   return (
     <div style={{
@@ -42,52 +38,19 @@ const handleShowExamples = () => {
       backgroundColor: '#ffffff',
       width: '100%',
       maxWidth: '360px', 
-      height: '800px',   // 피그마 전체 높이 800 고정
+      height: '800px',
       margin: '0 auto',  
       boxSizing: 'border-box',
       position: 'relative', 
     }}>
       
       {/* 1. 헤더 영역 */}
-      <header style={{
-        position: 'absolute',
-        top: '54px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '312px', 
-        height: '43.3px', 
-        boxSizing: 'border-box',
-        padding: '4px 0 12px 0',
-        borderBottom: '1px solid rgba(178, 178, 178, 0.5)' 
-      }}>
-        <button 
-          onClick={() => window.history.back()} 
-          style={{
-            position: 'absolute', 
-            left: '0', 
-            background: 'none', 
-            border: 'none',
-            cursor: 'pointer', 
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '24px',  
-            height: '24px', 
-            padding: 0
-          }}
-        >
-          <img src={backArrowIcon} alt="뒤로가기" style={{ width: '11.95px', height: '19.35px' }} />
-        </button>
-        <img src={logoImg} alt="v_o 로고" style={{ height: '18px', width: 'auto', objectFit: 'contain' }} />
-      </header>
+      <Header />
 
-      {/* 2. 타이틀 영역 (좌측 여백 32.5px 고정) */}
+      {/* 2. 타이틀 영역 */}
       <div style={{ 
         position: 'absolute',
-        top: '149.3px', 
+        top: '135.3px', 
         left: '32.5px', 
         textAlign: 'left', 
         width: '292px', 
@@ -104,7 +67,7 @@ const handleShowExamples = () => {
       {/* 3. 테마 카드 2x2 그리드 영역 */}
       <div style={{ 
         position: 'absolute',
-        top: '232.3px', 
+        top: '212.3px', 
         left: '32.5px', 
         display: 'grid',
         gridTemplateColumns: '136px 136px', 
@@ -120,11 +83,11 @@ const handleShowExamples = () => {
               key={theme.id}
               onClick={() => handleSelectCard(theme.id)}
               style={{
-                position: 'relative', // 🎯 [핵심] 체크 아이콘의 기준점이 되도록 relative 추가!
+                position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'space-between', 
+                justify: 'space-between', 
                 backgroundColor: '#ffffff',
                 width: '136px',  
                 height: '170px', 
@@ -139,18 +102,18 @@ const handleShowExamples = () => {
                 transition: 'all 0.15s ease-in-out',
               }}
             >
-              {/* 🎯 [핵심] 선택되었을 때만 우측 상단에 체크 아이콘 렌더링 */}
+              {/* 🎯 카드 모서리 안쪽에 착 들어맞도록 2px 여백 적용 */}
               {isSelected && (
                 <img 
                   src={checkIcon} 
                   alt="선택됨" 
                   style={{
                     position: 'absolute',
-                    top: '12px',   // 위에서 12px 떨어짐 (피그마 캡처본 느낌의 여백)
-                    right: '12px', // 오른쪽에서 12px 떨어짐
-                    width: '22px', // 아이콘 크기 (필요시 피그마 스펙에 맞춰 조절해!)
-                    height: '22px',
-                    zIndex: 2,     // 다른 일러스트보다 위에 오도록
+                    bottom: '2px',  // 🎯 카드 테두리 안쪽 끝에 자연스럽게 밀착
+                    right: '2px',   // 🎯 카드 테두리 안쪽 끝에 자연스럽게 밀착
+                    width: '24px',  // 🎯 피그마 규격 24px
+                    height: '24px',  
+                    zIndex: 2,
                   }}
                 />
               )}
@@ -166,7 +129,7 @@ const handleShowExamples = () => {
         })}
       </div>
 
-      {/* 🎯 4. 하단 버튼 영역 (1페이지와 완벽 동기화 - 바닥 기준 94px 고정) */}
+      {/* 4. 하단 버튼 영역 */}
       <div style={{
         position: 'absolute',
         bottom: '94px', 
@@ -188,7 +151,7 @@ const handleShowExamples = () => {
         </div>
       </div>
 
-      {/* 5. 바닥 여백 영역 (피그마 총 하단 마진 94px 확보선) */}
+      {/* 5. 바닥 여백 영역 */}
       <div style={{ position: 'absolute', bottom: 0, height: '94px', width: '100%' }} />
 
     </div>

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import backArrowIcon from '../assets/back_arrow.svg';
-import logoImg from '../assets/logo.png';
+import { Header } from '../components/common/Header';
 import { Button } from '../components/common/Button';
 
 import speechBubbleIcon from '../assets/speech_bubble.svg'; 
 import arrowRightIcon from '../assets/arrow_right.svg'; 
-import arrowDownIcon from '../assets/arrow_down.svg';   
+import arrowDownIcon from '../assets/arrow_down.svg';    
 
 interface ExampleItem {
   id: number;
@@ -24,24 +23,19 @@ export default function GroupExamplesPage() {
   const navigate = useNavigate();
   const location = useLocation(); 
 
-  // 🎯 1. 다중 펼침을 위해 단일 id가 아닌 배열(Array) 상태로 변경! (기본값으로 1번이 열려있도록 세팅)
-  const [expandedIds, setExpandedIds] = useState<number[]>([1]);
+  // 🎯 기본값을 빈 배열([])로 세팅하여 초기 진입 시 모두 닫힌 상태로 변경
+  const [expandedIds, setExpandedIds] = useState<number[]>([]);
 
-  // 2페이지에서 넘겨받은 테마 이름 가져오기
   const themeLabel = location.state?.themeLabel || '선택한';
 
-  // 🎯 2. 여러 개 펴놓을 수 있도록 토글 함수 수정
   const toggleExpand = (id: number) => {
     if (expandedIds.includes(id)) {
-      // 이미 열려있으면 배열에서 제거해서 닫기
       setExpandedIds(expandedIds.filter(expandedId => expandedId !== id));
     } else {
-      // 닫혀있으면 기존 배열에 새로 클릭한 id를 누적(추가)해서 계속 열어두기
       setExpandedIds([...expandedIds, id]);
     }
   };
 
-  // 최종 완료 페이지로 갈 때 받은 테마명을 그대로 릴레이 토스!
   const handleSelectTheme = () => {
     navigate('/group/complete', { state: { themeLabel: themeLabel } });
   };
@@ -53,52 +47,19 @@ export default function GroupExamplesPage() {
       backgroundColor: '#ffffff',
       width: '100%',
       maxWidth: '360px', 
-      height: '800px',   
+      height: '800px',    
       margin: '0 auto',  
       boxSizing: 'border-box',
       position: 'relative', 
     }}>
       
-      {/* 1. 헤더 영역 */}
-      <header style={{
-        position: 'absolute',
-        top: '54px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '312px', 
-        height: '43.3px', 
-        boxSizing: 'border-box',
-        padding: '4px 0 12px 0',
-        borderBottom: '1px solid rgba(178, 178, 178, 0.5)' 
-      }}>
-        <button 
-          onClick={() => window.history.back()} 
-          style={{
-            position: 'absolute', 
-            left: '0', 
-            background: 'none', 
-            border: 'none',
-            cursor: 'pointer', 
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '24px',  
-            height: '24px', 
-            padding: 0
-          }}
-        >
-          <img src={backArrowIcon} alt="뒤로가기" style={{ width: '11.95px', height: '19.35px' }} />
-        </button>
-        <img src={logoImg} alt="v_o 로고" style={{ height: '18px', width: 'auto', objectFit: 'contain' }} />
-      </header>
+      {/* 1. 헤더 영역 (공통 컴포넌트로 대체) */}
+      <Header />
 
-      {/* 2. 타이틀 영역 (좌측 시작선 32px) */}
+      {/* 2. 타이틀 영역 */}
       <div style={{ 
         position: 'absolute',
-        top: '149.3px', 
+        top: '135.3px', 
         left: '32px', 
         textAlign: 'left', 
         width: '296px', 
@@ -117,10 +78,10 @@ export default function GroupExamplesPage() {
         </h1>
       </div>
 
-      {/* 3. 질문 예시 리스트 영역 (좌측 시작선 20px) */}
+      {/* 3. 질문 예시 리스트 영역 */}
       <div style={{
         position: 'absolute',
-        top: '203.3px',
+        top: '189.3px',
         left: '20px', 
         width: '320px', 
         display: 'flex',
@@ -129,7 +90,6 @@ export default function GroupExamplesPage() {
         boxSizing: 'border-box'
       }}>
         {EXAMPLES_DATA.map((item) => {
-          // 🎯 3. 배열 안에 현재 카드의 id가 포함되어 있는지로 오픈 여부 체크!
           const isExpanded = expandedIds.includes(item.id);
           return (
             <div 
@@ -146,15 +106,15 @@ export default function GroupExamplesPage() {
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center', 
-                justifyContent: 'space-between',
+                justify: 'space-between',
                 transition: 'all 0.15s ease-in-out',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
               }}
             >
-              {/* 왼쪽 텍스트 및 아이콘 정렬 뭉치 */}
+              {/* 왼쪽 텍스트 및 아이콘 영역 */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}> 
                 
-                {/* 말풍선 배경 영역 */}
+                {/* 말풍선 아이콘 래퍼 */}
                 <div style={{
                   width: '40px',   
                   height: '40px',  
@@ -162,7 +122,7 @@ export default function GroupExamplesPage() {
                   backgroundColor: '#EAE2FF', 
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  justify: 'center',
                   padding: '10px', 
                   boxSizing: 'border-box',
                   flexShrink: 0
@@ -170,11 +130,11 @@ export default function GroupExamplesPage() {
                   <img src={speechBubbleIcon} alt="말풍선" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 </div>
                 
-                {/* 타이틀 & 본문 세로 배치 래퍼 */}
+                {/* 타이틀 & 본문 */}
                 <div style={{ 
                   display: 'flex', 
                   flexDirection: 'column', 
-                  justifyContent: 'center',
+                  justify: 'center',
                   gap: isExpanded ? '2px' : '0px'
                 }}>
                   <span style={{ 
@@ -187,7 +147,7 @@ export default function GroupExamplesPage() {
                     {item.title}
                   </span>
                   
-                  {/* 펼쳐졌을 때 노출되는 피그마 예시 문구 */}
+                  {/* 클릭하여 펼쳐졌을 때만 질문 내용 노출 */}
                   {isExpanded && (
                     <p style={{
                       fontFamily: 'Manrope, sans-serif',
@@ -205,7 +165,7 @@ export default function GroupExamplesPage() {
 
               </div>
               
-              {/* 우측 접고 펼치기 화살표 아이콘 */}
+              {/* 우측 접기/펼치기 화살표 아이콘 */}
               <img 
                 src={isExpanded ? arrowDownIcon : arrowRightIcon} 
                 alt="화살표" 
@@ -216,7 +176,7 @@ export default function GroupExamplesPage() {
         })}
       </div>
 
-      {/* 4. 하단 버튼 영역 (바닥 기준 94px 고정) */}
+      {/* 4. 하단 버튼 영역 */}
       <div style={{
         position: 'absolute',
         bottom: '94px', 
