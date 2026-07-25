@@ -1,11 +1,20 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import SplashPage from '@/pages/SplashPage';
+import QuestionPage from '@/pages/QuestionPage';
+import CameraPage from '@/pages/CameraPage';
+import CalendarPage from './pages/CalendarPage';
+
 function App() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <h1 className="text-3xl font-bold text-blue-600">
-        V_O 프로젝트 초기 세팅
-      </h1>
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<SplashPage />} />
+        <Route path="/question" element={<QuestionPage />} />
+        <Route path="/camera" element={<CameraPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
