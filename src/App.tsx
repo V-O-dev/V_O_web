@@ -1,11 +1,22 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import ProfilePage from "./pages/ProfilePage";
+import GroupPage from "./pages/GroupPage";
+import EditNicknamePage from "./pages/EditNicknamePage";
+import AlertPage from "./pages/AlertPage";
+
 function App() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <h1 className="text-3xl font-bold text-blue-600">
-        V_O 프로젝트 초기 세팅
-      </h1>
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/group/:groupId" element={<GroupPage />} />
+        <Route path="/edit-nickname/:userId" element={<EditNicknamePage />} />
+        <Route path="/alert" element={<AlertPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
