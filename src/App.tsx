@@ -39,6 +39,7 @@ export default function App() {
           border: '1px solid #eaeaea',
           backgroundColor: '#ffffff',
           boxSizing: 'border-box',
+          backgroundColor: '#ffffff',
         }}
       >
         {step === 1 && (
