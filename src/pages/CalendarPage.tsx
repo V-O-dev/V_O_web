@@ -9,8 +9,8 @@ const dummyRecords: Record<string, { question: string; group: string }> = {
   '2026-05-06': { question: '오늘의 질문은?', group: '가족그룹' },
   '2026-05-13': { question: '오늘 기분은?', group: '가족그룹' },
   '2026-05-20': { question: '오늘 뭐 먹었어?', group: '가족그룹' },
-  '2026-05-21': { question: '오늘 날씨는?', group: '가족그룹' },
-  '2026-05-24': { question: '오늘 하루는?', group: '가족그룹' },
+  '2026-07-21': { question: '오늘 날씨는?', group: '가족그룹' },
+  '2026-07-24': { question: '오늘 하루는?', group: '가족그룹' },
 };
 
 export default function CalendarPage() {

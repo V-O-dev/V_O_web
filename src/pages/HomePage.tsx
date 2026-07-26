@@ -112,6 +112,7 @@ function HomeMainContent() {
             </p>
             <button
               className="home-banner-camera-btn" /*영상촬영 페이지 이동 추가하기*/
+              onClick={() => navigate("/splash")}
             >
               <img
                 src="/src/assets/home/video_button.svg"
