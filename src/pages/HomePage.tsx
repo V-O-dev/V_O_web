@@ -39,7 +39,7 @@ function HomeMainContent() {
 
   const getGroupIconSrc = (group: PrivateGroupData) => {
     if (group.groupImageUrl) return group.groupImageUrl;
-    if (group.name === "가족") return "/src/asset/home/home_img.svg";
+    if (group.name === "가족") return "/src/assets/home/home_img.svg";
     return "/src/asset/home/heart_img.svg";
   };
 
@@ -77,7 +77,7 @@ function HomeMainContent() {
                     alt={group.name}
                     style={{ width: "24px", height: "24px" }}
                     onError={(e) => {
-                      e.currentTarget.src = "/src/asset/home/home_img.svg";
+                      e.currentTarget.src = "/src/assets/home/home_img.svg";
                     }}
                   />
                 </div>
@@ -99,7 +99,7 @@ function HomeMainContent() {
       {selectedTabId !== 0 && !isCurrentGroupAnswered && (
         <div className="home-group-question-banner">
           <img
-            src="/src/asset/home/purple_frame.svg"
+            src="/src/assets/home/purple_frame.svg"
             alt="배경 배너"
             className="home-banner-svg-bg"
           />
@@ -114,7 +114,7 @@ function HomeMainContent() {
               className="home-banner-camera-btn" /*영상촬영 페이지 이동 추가하기*/
             >
               <img
-                src="/src/asset/home/video_button.svg"
+                src="/src/assets/home/video_button.svg"
                 alt="카메라 버튼"
                 className="home-camera-icon"
               />
@@ -127,7 +127,7 @@ function HomeMainContent() {
       {isFeedEmpty ? (
         <div className="home-waiting-content">
           <img
-            src="/src/asset/home/character.svg"
+            src="/src/assets/home/character.svg"
             alt="대기 캐릭터"
             className="home-waiting-img"
           />
@@ -203,7 +203,7 @@ function HomeMainContent() {
                         <div className="home-lock-box">
                           <div className="home-lock-icon-wrapper">
                             <img
-                              src="/src/asset/home/lock_icon.svg"
+                              src="/src/assets/home/lock_icon.svg"
                               alt="잠금"
                               className="home-lock-icon"
                             />
@@ -237,11 +237,11 @@ function HomeMainContent() {
 
                 <div className="home-card-reaction-bar">
                   <div className="home-reaction-item">
-                    <img src="/src/asset/home/heart_icon.svg" alt="좋아요" />
+                    <img src="/src/assets/home/heart_icon.svg" alt="좋아요" />
                     <span>{feed.likesCount}</span>
                   </div>
                   <div className="home-reaction-item">
-                    <img src="/src/asset/home/chat_icon.svg" alt="댓글" />
+                    <img src="/src/assets/home/chat_icon.svg" alt="댓글" />
                     <span>{feed.commentsCount}</span>
                   </div>
                 </div>

@@ -18,7 +18,7 @@ export default function TimePickerPage() {
   const [startTime, setStartTime] = useState('00:00');
   const [endTime, setEndTime] = useState('00:00');
 
-  // 🎯 타임피커 설정 후 '그룹생성완료'(/group/create-complete) 페이지로 이동
+  // 타임피커 설정 후 '그룹생성완료'(/group/create-complete) 페이지로 이동
   const handleNext = () => {
     console.log('최종 설정된 시간대:', startTime, '~', endTime);
     
@@ -48,10 +48,10 @@ export default function TimePickerPage() {
       {/* 1. 공통 헤더 */}
       <Header />
 
-      {/* 2. 타이틀 영역 */}
+      {/* 2. 타이틀 영역 (top: 135.3px -> 95.3px) */}
       <div style={{ 
         position: 'absolute',
-        top: '135.3px', 
+        top: '95.3px', 
         left: '32px', 
         textAlign: 'left', 
         width: '296px', 
@@ -80,10 +80,10 @@ export default function TimePickerPage() {
         </p>
       </div>
 
-      {/* 3. 시간 선택 휠 영역 */}
+      {/* 3. 시간 선택 휠 영역 (top: 288.3px -> 248.3px) */}
       <div style={{
         position: 'absolute',
-        top: '288.3px', 
+        top: '248.3px', 
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
@@ -207,7 +207,7 @@ export default function TimePickerPage() {
 
       </div>
 
-      {/* 4. 하단 버튼 영역 (🎯 통일된 bottom 94px 적용) */}
+      {/* 4. 하단 버튼 영역 (위치 고정) */}
       <div style={{
         position: 'absolute',
         bottom: '94px', 
@@ -229,7 +229,7 @@ export default function TimePickerPage() {
         </div>
       </div>
 
-      {/* 5. 바닥 여백 영역 (통일) */}
+      {/* 5. 바닥 여백 영역 */}
       <div style={{ position: 'absolute', bottom: 0, height: '94px', width: '100%' }} />
 
     </div>

@@ -77,7 +77,7 @@ export default function ProfilePage() {
             <div className="profile-avatar-main">
               <img
                 src={
-                  profile.profileImageUrl || "src/asset/profile/pencil_icon.svg"
+                  profile.profileImageUrl || "src/assets/profile/pencil_icon.svg"
                 }
                 alt="프로필"
                 className="profile-avatar-img"
@@ -94,7 +94,7 @@ export default function ProfilePage() {
                 onClick={handleCameraClick}
               >
                 <img
-                  src="src/asset/profile/camera_button.svg"
+                  src="src/assets/profile/camera_button.svg"
                   alt="카메라"
                   style={{ width: 19, height: 17 }}
                 />
@@ -119,7 +119,7 @@ export default function ProfilePage() {
                     onClick={() => setIsEditingName(true)}
                   >
                     <img
-                      src="src/asset/profile/pencil_icon.svg"
+                      src="src/assets/profile/pencil_icon.svg"
                       alt="편집"
                       style={{ width: 11, height: 11 }}
                     />
@@ -137,7 +137,7 @@ export default function ProfilePage() {
                 <div className="profile-row-left">
                   <div className="profile-icon-bg bg-purple">
                     <img
-                      src="src/asset/profile/star_icon.svg"
+                      src="src/assets/profile/star_icon.svg"
                       alt="스타"
                       className="profile-row-icon-img"
                     />
@@ -165,7 +165,7 @@ export default function ProfilePage() {
                 <div className="profile-row-left">
                   <div className="profile-icon-bg bg-pink">
                     <img
-                      src="src/asset/profile/lineheart_icon.svg"
+                      src="src/assets/profile/lineheart_icon.svg"
                       alt="하트"
                       className="profile-row-icon-img"
                     />
@@ -198,7 +198,7 @@ export default function ProfilePage() {
                 <div className="profile-row-left">
                   <div className="profile-icon-bg bg-red">
                     <img
-                      src="src/asset/profile/exit_icon.svg"
+                      src="src/assets/profile/exit_icon.svg"
                       alt="로그아웃"
                       className="profile-row-icon-img"
                     />
@@ -218,7 +218,7 @@ export default function ProfilePage() {
                 <div className="profile-row-left">
                   <div className="profile-icon-bg bg-red">
                     <img
-                      src="src/asset/profile/remove_icon.svg"
+                      src="src/assets/profile/remove_icon.svg"
                       alt="탈퇴"
                       className="profile-row-icon-img"
                     />

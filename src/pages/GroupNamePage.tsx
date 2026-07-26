@@ -40,10 +40,10 @@ export default function GroupNamePage() {
     }
   };
 
-  // 다음 단계 이동
+  // 🎯 다음 버튼 클릭 시 HomePage(/home)로 이동
   const handleNext = () => {
     if (!isButtonEnabled) return;
-    navigate('/group/theme', { state: { groupName, groupImage: selectedImage } });
+    navigate('/home', { state: { groupName, groupImage: selectedImage } });
   };
 
   return (
@@ -63,10 +63,10 @@ export default function GroupNamePage() {
       {/* 1. 공통 헤더 */}
       <Header />
 
-      {/* 2. 메인 컨텐츠 영역 */}
+      {/* 2. 메인 컨텐츠 영역 (top: 95.3px) */}
       <div style={{
         position: 'absolute',
-        top: '83.3px',
+        top: '95.3px',
         left: '25px',
         width: '310px',
         display: 'flex',
@@ -81,7 +81,7 @@ export default function GroupNamePage() {
           fontSize: '20px',
           lineHeight: '30px',
           color: '#0F0F0F',
-          margin: '32px 0 0 0',
+          margin: 0,
           letterSpacing: '0px',
           textAlign: 'left',
           whiteSpace: 'nowrap'
@@ -158,7 +158,7 @@ export default function GroupNamePage() {
                 )}
               </div>
 
-              {/* 카메라 배지 아이콘 (배경색 제거, SVG 단독 노출) */}
+              {/* 카메라 배지 아이콘 */}
               <img 
                 src={cameraBadgeIcon} 
                 alt="카메라" 

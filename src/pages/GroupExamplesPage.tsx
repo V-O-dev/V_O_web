@@ -5,7 +5,7 @@ import { Button } from '../components/common/Button';
 
 import speechBubbleIcon from '../assets/speech_bubble.svg'; 
 import arrowRightIcon from '../assets/arrow_right.svg'; 
-import arrowDownIcon from '../assets/arrow_down.svg';    
+import arrowDownIcon from '../assets/arrow_down.svg';     
 
 interface ExampleItem {
   id: number;
@@ -23,7 +23,7 @@ export default function GroupExamplesPage() {
   const navigate = useNavigate();
   const location = useLocation(); 
 
-  // 🎯 기본값을 빈 배열([])로 세팅하여 초기 진입 시 모두 닫힌 상태로 변경
+  // 기본값을 빈 배열([])로 세팅하여 초기 진입 시 모두 닫힌 상태
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
 
   const themeLabel = location.state?.themeLabel || '선택한';
@@ -51,15 +51,16 @@ export default function GroupExamplesPage() {
       margin: '0 auto',  
       boxSizing: 'border-box',
       position: 'relative', 
+      overflow: 'hidden'
     }}>
       
-      {/* 1. 헤더 영역 (공통 컴포넌트로 대체) */}
+      {/* 1. 헤더 영역 */}
       <Header />
 
-      {/* 2. 타이틀 영역 */}
+      {/* 2. 타이틀 영역 (top: 135.3px -> 95.3px) */}
       <div style={{ 
         position: 'absolute',
-        top: '135.3px', 
+        top: '95.3px', 
         left: '32px', 
         textAlign: 'left', 
         width: '296px', 
@@ -78,10 +79,10 @@ export default function GroupExamplesPage() {
         </h1>
       </div>
 
-      {/* 3. 질문 예시 리스트 영역 */}
+      {/* 3. 질문 예시 리스트 영역 (top: 189.3px -> 149.3px) */}
       <div style={{
         position: 'absolute',
-        top: '189.3px',
+        top: '149.3px',
         left: '20px', 
         width: '320px', 
         display: 'flex',
@@ -106,7 +107,7 @@ export default function GroupExamplesPage() {
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center', 
-                justify: 'space-between',
+                justifyContent: 'space-between',
                 transition: 'all 0.15s ease-in-out',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
               }}
@@ -122,7 +123,7 @@ export default function GroupExamplesPage() {
                   backgroundColor: '#EAE2FF', 
                   display: 'flex',
                   alignItems: 'center',
-                  justify: 'center',
+                  justifyContent: 'center',
                   padding: '10px', 
                   boxSizing: 'border-box',
                   flexShrink: 0
@@ -134,7 +135,7 @@ export default function GroupExamplesPage() {
                 <div style={{ 
                   display: 'flex', 
                   flexDirection: 'column', 
-                  justify: 'center',
+                  justifyContent: 'center',
                   gap: isExpanded ? '2px' : '0px'
                 }}>
                   <span style={{ 
@@ -176,7 +177,7 @@ export default function GroupExamplesPage() {
         })}
       </div>
 
-      {/* 4. 하단 버튼 영역 */}
+      {/* 4. 하단 버튼 영역 (위치 고정) */}
       <div style={{
         position: 'absolute',
         bottom: '94px', 

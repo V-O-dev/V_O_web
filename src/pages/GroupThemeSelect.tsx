@@ -42,15 +42,16 @@ export default function GroupThemeSelect() {
       margin: '0 auto',  
       boxSizing: 'border-box',
       position: 'relative', 
+      overflow: 'hidden'
     }}>
       
       {/* 1. 헤더 영역 */}
       <Header />
 
-      {/* 2. 타이틀 영역 */}
+      {/* 2. 타이틀 영역 (top: 135.3px -> 95.3px) */}
       <div style={{ 
         position: 'absolute',
-        top: '135.3px', 
+        top: '95.3px', 
         left: '32.5px', 
         textAlign: 'left', 
         width: '292px', 
@@ -64,10 +65,10 @@ export default function GroupThemeSelect() {
         </p>
       </div>
 
-      {/* 3. 테마 카드 2x2 그리드 영역 */}
+      {/* 3. 테마 카드 2x2 그리드 영역 (top: 212.3px -> 172.3px) */}
       <div style={{ 
         position: 'absolute',
-        top: '212.3px', 
+        top: '172.3px', 
         left: '32.5px', 
         display: 'grid',
         gridTemplateColumns: '136px 136px', 
@@ -87,7 +88,7 @@ export default function GroupThemeSelect() {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justify: 'space-between', 
+                justifyContent: 'space-between', 
                 backgroundColor: '#ffffff',
                 width: '136px',  
                 height: '170px', 
@@ -102,16 +103,15 @@ export default function GroupThemeSelect() {
                 transition: 'all 0.15s ease-in-out',
               }}
             >
-              {/* 🎯 카드 모서리 안쪽에 착 들어맞도록 2px 여백 적용 */}
               {isSelected && (
                 <img 
                   src={checkIcon} 
                   alt="선택됨" 
                   style={{
                     position: 'absolute',
-                    bottom: '2px',  // 🎯 카드 테두리 안쪽 끝에 자연스럽게 밀착
-                    right: '2px',   // 🎯 카드 테두리 안쪽 끝에 자연스럽게 밀착
-                    width: '24px',  // 🎯 피그마 규격 24px
+                    bottom: '2px',  
+                    right: '2px',   
+                    width: '24px',  
                     height: '24px',  
                     zIndex: 2,
                   }}
@@ -129,7 +129,7 @@ export default function GroupThemeSelect() {
         })}
       </div>
 
-      {/* 4. 하단 버튼 영역 */}
+      {/* 4. 하단 버튼 영역 (위치 고정) */}
       <div style={{
         position: 'absolute',
         bottom: '94px', 
