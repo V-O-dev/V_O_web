@@ -87,15 +87,15 @@ export default function GroupPage() {
           <div className="group-avatar-container">
             <div className="group-avatar-main">
               <img
-                src={groupInfo.groupImageUrl || "/src/asset/home/profile.svg"}
+                src={groupInfo.groupImageUrl || "/src/assets/home/profile.svg"}
                 alt="그룹 프로필"
                 className="group-avatar-img"
                 onError={(e) => {
-                  e.currentTarget.src = "/src/asset/home/profile.svg";
+                  e.currentTarget.src = "/src/assets/home/profile.svg";
                 }}
               />
               <button className="group-camera-btn">
-                <img src="/src/asset/profile/camera_button.svg" alt="카메라" />
+                <img src="/src/assets/profile/camera_button.svg" alt="카메라" />
               </button>
             </div>
 
@@ -116,7 +116,7 @@ export default function GroupPage() {
                     className="group-edit-name-btn"
                     onClick={() => setIsEditingName(true)}
                   >
-                    <img src="/src/asset/profile/pencil_icon.svg" alt="편집" />
+                    <img src="/src/assets/profile/pencil_icon.svg" alt="편집" />
                   </button>
                 </>
               )}
@@ -155,20 +155,20 @@ export default function GroupPage() {
                       {member.isMe && <span className="group-tag-me">나</span>}
 
                       {isOwner ? (
-                        <img src="/src/asset/group/owner_button.svg"></img>
+                        <img src="/src/assets/group/owner_button.svg"></img>
                       ) : isCurrentLeader ? (
                         <div className="group-leader-action-panel">
                           <button
                             className="group-btn-delegate"
                             onClick={() => handleOpenModal("DELEGATE", member)}
                           >
-                            <img src="/src/asset/group/transfer_button.svg"></img>
+                            <img src="/src/assets/group/transfer_button.svg"></img>
                           </button>
                           <button
                             className="group-btn-kick"
                             onClick={() => handleOpenModal("KICK", member)}
                           >
-                            <img src="/src/asset/group/remove_button.svg"></img>
+                            <img src="/src/assets/group/remove_button.svg"></img>
                           </button>
                         </div>
                       ) : null}
@@ -199,7 +199,7 @@ export default function GroupPage() {
                 <div className="group-row-left">
                   <div className="group-danger-icon">
                     <img
-                      src="/src/asset/profile/remove_icon.svg"
+                      src="/src/assets/profile/remove_icon.svg"
                       alt="나가기"
                     />
                   </div>
@@ -217,7 +217,7 @@ export default function GroupPage() {
               >
                 <div className="group-row-left">
                   <div className="group-danger-icon">
-                    <img src="/src/asset/group/delete_icon.svg" alt="삭제" />
+                    <img src="/src/assets/group/delete_icon.svg" alt="삭제" />
                   </div>
                   <div className="group-row-text">
                     <h4 className="text-danger">그룹 삭제하기</h4>

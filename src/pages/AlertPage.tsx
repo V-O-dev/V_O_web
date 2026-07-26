@@ -89,11 +89,11 @@ const AlertPage: React.FC = () => {
         <div className="noti-avatar-container">
           <div className={"noti-profile-img-container"}>
             <img
-              src="/src/asset/home/profile.svg"
+              src="/src/assets/home/profile.svg"
               alt={item.actor.nickname}
               className="noti-avatar-img"
               onError={(e) => {
-                e.currentTarget.src = "/src/asset/home/profile.svg";
+                e.currentTarget.src = "/src/assets/home/profile.svg";
               }}
             />
           </div>
@@ -101,8 +101,8 @@ const AlertPage: React.FC = () => {
             <img
               src={
                 isReaction
-                  ? "/src/asset/alert/heart_colorIcon.svg"
-                  : "/src/asset/alert/chat_colorIcon.svg"
+                  ? "/src/assets/alert/heart_colorIcon.svg"
+                  : "/src/assets/alert/chat_colorIcon.svg"
               }
               alt={isReaction ? "하트" : "댓글"}
               className="noti-badge-img"
@@ -133,7 +133,7 @@ const AlertPage: React.FC = () => {
         {item.video && (
           <button className="noti-video-btn">
             <img
-              src="/src/asset/alert/video_icon.svg"
+              src="/src/assets/alert/video_icon.svg"
               alt="비디오 보기"
               className="noti-video-icon-img"
             />

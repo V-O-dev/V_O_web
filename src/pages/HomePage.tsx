@@ -40,7 +40,7 @@ function HomeMainContent() {
   const getGroupIconSrc = (group: PrivateGroupData) => {
     if (group.groupImageUrl) return group.groupImageUrl;
     if (group.name === "가족") return "/src/assets/home/home_img.svg";
-    return "/src/asset/home/heart_img.svg";
+    return "/src/assets/home/heart_img.svg";
   };
 
   return (
