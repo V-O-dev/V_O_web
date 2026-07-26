@@ -9,7 +9,7 @@ export function UserProfileInfo({
   nickname,
   subText,
 }: UserProfileInfoProps) {
-  const defaultImage = "/src/asset/home/profile.svg";
+  const defaultImage = "/src/assets/home/profile.svg";
 
   return (
     <div

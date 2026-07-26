@@ -59,11 +59,11 @@ export default function EditNicknamePage() {
           <div className="edit-nickname-avatar-section">
             <div className="edit-nickname-avatar-circle">
               <img
-                src={userInfo.profileImageUrl || "/src/asset/home/profile.svg"}
+                src={userInfo.profileImageUrl || "/src/assets/home/profile.svg"}
                 alt="프로필"
                 className="edit-nickname-avatar-img"
                 onError={(e) => {
-                  e.currentTarget.src = "/src/asset/home/profile.svg";
+                  e.currentTarget.src = "/src/assets/home/profile.svg";
                 }}
               />
             </div>

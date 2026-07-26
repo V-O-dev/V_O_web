@@ -39,7 +39,7 @@ export function HomeBottomNav() {
       >
         <button
           type="button"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/home")}
           style={{
             background: "none",
             border: "none",
