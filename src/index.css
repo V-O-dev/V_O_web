@@ -23,3 +23,8 @@ html, body, #root {
   height: 100dvh;
   overflow: hidden;
 }
+
+/* 전체 기본 글씨체를 Manrope로 설정 */
+body {
+  font-family: "Manrope", sans-serif;
+}

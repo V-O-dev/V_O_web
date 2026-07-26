@@ -61,7 +61,7 @@ export function HomeBottomNav() {
             }}
           >
             <img
-              src="public/home_button.svg" //올바른 이미지 경로로 수정
+              src="/home_button.svg"
               alt="홈"
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
@@ -102,7 +102,7 @@ export function HomeBottomNav() {
             }}
           >
             <img
-              src="public/calender_button.svg" //올바른 이미지 경로로 수정
+              src="/calender_button.svg"
               alt="나의 달력"
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />

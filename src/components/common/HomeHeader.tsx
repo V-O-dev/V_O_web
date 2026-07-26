@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 
 export function HomeHeader() {
   const navigate = useNavigate();
-
   return (
     <header
       style={{
@@ -12,7 +11,7 @@ export function HomeHeader() {
         height: "52px",
         padding: "0 20px",
         backgroundColor: "#ffffff",
-        //borderBottom: "1px solid #eaeaea",
+        borderBottom: "1px solid #eaeaea",
         flexShrink: 0,
         width: "100%",
         boxSizing: "border-box",
@@ -25,11 +24,11 @@ export function HomeHeader() {
           fontWeight: 700,
           lineHeight: "125%",
           margin: 0,
+          fontFamily: "Pretendard",
         }}
       >
         V_O
       </h1>
-
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
         <button
           type="button"
@@ -49,12 +48,11 @@ export function HomeHeader() {
           }}
         >
           <img
-            src="public/notification.svg" //올바른 이미지 경로로 수정
+            src="/notification.svg"
             alt="알림"
             style={{ width: "12px", height: "12px", objectFit: "contain" }}
           />
         </button>
-
         <button
           type="button"
           onClick={() => navigate("/profile")}
@@ -73,7 +71,7 @@ export function HomeHeader() {
           }}
         >
           <img
-            src="public/profile.svg" //올바른 이미지 경로로 수정
+            src="/profile.svg"
             alt="프로필"
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
