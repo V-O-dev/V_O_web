@@ -101,8 +101,50 @@ pnpm dev
 
 ## 📱 화면 목록 및 플로우
 
-| 화면 | 페이지 ID | 담당자 |
-|------|---------|--------|
-| 로그인/회원가입 | AuthPage | 이브 |
-| 메인 피드 | HomePage | 시소 |
-| 나의 달력/아카이브 | CalendarPage | 돌돌 |
+### 1) 온보딩 (시작 → 로그인 → 회원가입)
+
+```mermaid
+flowchart LR
+    A["StartPage<br/>/"] --> B["LoginPage<br/>/login"]
+    B -->|소셜 로그인 클릭| C["ProfileStep<br/>/signup"]
+    C -->|프로필 설정| D["NameStep<br/>/signup/name"]
+    D -->|닉네임 설정| E["CompleteStep<br/>/signup/complete"]
+    E --> F["GroupMainPage<br/>/group/create"]
+```
+
+### 2) 그룹 생성
+
+```mermaid
+flowchart LR
+    F["GroupMainPage<br/>/group/create"] --> G["GroupThemeSelect<br/>/group/theme"]
+    G --> H["GroupExamplesPage<br/>/group/examples"]
+    H --> I["GroupThemeCompletePage<br/>/group/complete"]
+    I --> J["TimePickerPage<br/>/group/time-picker"]
+    J --> K["GroupCreateCompletePage<br/>/group/create-complete"]
+    K --> L["GroupInvitePage<br/>/group/invite"]
+    L -->|공유하기 버튼| M["GroupInviteSharePage<br/>/group/invite-share"]
+    M --> N["GroupNamePage<br/>/group/name"]
+    L -->|완료 버튼| N
+    N --> O["HomePage<br/>/home"]
+```
+
+> 공유는 선택 사항이며, "완료" 버튼으로 공유 없이 바로 다음 단계로 넘어갈 수 있습니다.
+
+### 3) 데일리 루틴 (알림 → 촬영 → 축적)
+
+```mermaid
+flowchart LR
+    O["HomePage<br/>/home"] -->|상단 배너 클릭| P["SplashPage<br/>/splash"]
+    P -->|1초 후 자동 전환| Q["QuestionPage<br/>/question"]
+    Q -->|'준비됐어요!' 클릭| R["CameraPage<br/>/camera"]
+    R -->|'업로드 하기' 클릭| O
+```
+
+### 4) 메인 피드 내 이동
+
+```mermaid
+flowchart TD
+    O["HomePage<br/>/home"] -->|하단 네비게이션| S["CalendarPage<br/>/calendar"]
+    O -->|그룹 탭 클릭| T["GroupPage<br/>/group/:groupId"]
+    O -->|프로필 클릭| U["EditNicknamePage<br/>/edit-nickname/:userId"]
+    O -->|피드 영상 클릭| V
