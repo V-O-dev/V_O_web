@@ -4,6 +4,7 @@ import ProfilePage from "./pages/ProfilePage";
 import GroupPage from "./pages/GroupPage";
 import EditNicknamePage from "./pages/EditNicknamePage";
 import AlertPage from "./pages/AlertPage";
+import SignupFlow from "./pages/SignupFlow";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/group/:groupId" element={<GroupPage />} />
         <Route path="/edit-nickname/:userId" element={<EditNicknamePage />} />
         <Route path="/alert" element={<AlertPage />} />
+        <Route path="/signup" element={<SignupFlow />} />
       </Routes>
     </BrowserRouter>
   );
