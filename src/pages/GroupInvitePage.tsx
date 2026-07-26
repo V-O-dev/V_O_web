@@ -26,7 +26,7 @@ export default function GroupInvitePage() {
     }
   };
 
-  // 🎯 1. 친구 초대하기 클릭 시 이동하도록 수정된 부분!
+  // 친구 초대하기 클릭 시 이동
   const handleShare = () => {
     navigate('/group/invite-share', { 
       state: { 
@@ -36,8 +36,9 @@ export default function GroupInvitePage() {
     });
   };
 
+  // 🎯 완료 버튼 클릭 시 GroupNamePage 경로로 이동
   const handleComplete = () => {
-    navigate('/group/create-complete', { 
+    navigate('/group/name', { 
       state: { 
         ...location.state, 
         inviteCode 
@@ -301,7 +302,6 @@ export default function GroupInvitePage() {
         alignItems: 'center',
         boxSizing: 'border-box',
       }}>
-        {/* 🎯 handleShare가 호출되면서 새로운 공유 페이지로 이동! */}
         <Button 
           text="친구 초대하기" 
           onClick={handleShare} 

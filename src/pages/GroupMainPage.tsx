@@ -22,15 +22,16 @@ export default function GroupMainPage() {
       margin: '0 auto',  
       boxSizing: 'border-box',
       position: 'relative', 
+      overflow: 'hidden'
     }}>
       
       {/* 1. 헤더 영역 (공통 컴포넌트) */}
       <Header />
 
-      {/* 2. 일러스트 영역 */}
+      {/* 2. 일러스트 영역 (top: 185px -> 158.57px) */}
       <div style={{
         position: 'absolute',
-        top: '185px', 
+        top: '158.57px', 
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
@@ -51,10 +52,10 @@ export default function GroupMainPage() {
         />
       </div>
 
-      {/* 3. 대타이틀 영역 */}
+      {/* 3. 대타이틀 영역 (top: 463px -> 436.57px) */}
       <div style={{ 
         position: 'absolute',
-        top: '463px', 
+        top: '436.57px', 
         left: '50%',
         transform: 'translateX(-50%)',
         textAlign: 'center', 
@@ -75,10 +76,10 @@ export default function GroupMainPage() {
         </h1>
       </div>
 
-      {/* 4. 소설명 문구 영역 (방법 1: 16px 피그마 스펙 유지 + 자간 조절로 1줄 고정) */}
+      {/* 4. 소설명 문구 영역 (top: 513px -> 486.57px) */}
       <div style={{
         position: 'absolute',
-        top: '513px', 
+        top: '486.57px', 
         left: '50%',
         transform: 'translateX(-50%)',
         textAlign: 'center', 
@@ -92,14 +93,14 @@ export default function GroupMainPage() {
           color: '#989898',   
           margin: 0, 
           lineHeight: '20px', 
-          letterSpacing: '-0.5px', // 미세 자간 조절로 2줄 넘침 방지
-          whiteSpace: 'nowrap'     // 한 줄 정렬 고정
+          letterSpacing: '-0.5px',
+          whiteSpace: 'nowrap' 
         }}>
           소중한 사람들과 함께 질문을 주고 받아보세요
         </p>
       </div>
 
-      {/* 5. 하단 버튼 영역 */}
+      {/* 5. 하단 고정 버튼 영역 (위치 고정) */}
       <div style={{
         position: 'absolute',
         bottom: '94px', 
