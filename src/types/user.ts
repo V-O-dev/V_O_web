@@ -26,7 +26,7 @@ export interface UpdateUserProfilePayload {
 export const MOCK_USER_PROFILE: UserProfileData = {
   id: 1,
   nickname: "홍길동",
-  profileImageUrl: "/src/asset/home/profile.svg",
+  profileImageUrl: "/src/assets/home/profile.svg",
   profileImageObjectKey: null,
   dailyQuestionNotificationEnabled: true,
   interactionNotificationEnabled: false,
