@@ -4,6 +4,11 @@ import { SubPageHeader } from "../components/common/SubHeader";
 
 import { AppNotification, MOCK_NOTIFICATIONS } from "@/types/notification";
 
+import profileIcon from "@/assets/home/profile.svg";
+import heartColorIcon from "@/assets/alert/heart_colorIcon.svg";
+import chatColorIcon from "@/assets/alert/chat_colorIcon.svg";
+import videoIcon from "@/assets/alert/video_icon.svg";
+
 const AlertPage: React.FC = () => {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
@@ -89,21 +94,17 @@ const AlertPage: React.FC = () => {
         <div className="noti-avatar-container">
           <div className={"noti-profile-img-container"}>
             <img
-              src="/src/assets/home/profile.svg"
+              src={profileIcon}
               alt={item.actor.nickname}
               className="noti-avatar-img"
               onError={(e) => {
-                e.currentTarget.src = "/src/assets/home/profile.svg";
+                e.currentTarget.src = profileIcon;
               }}
             />
           </div>
           <span className="noti-badge">
             <img
-              src={
-                isReaction
-                  ? "/src/assets/alert/heart_colorIcon.svg"
-                  : "/src/assets/alert/chat_colorIcon.svg"
-              }
+              src={isReaction ? heartColorIcon : chatColorIcon}
               alt={isReaction ? "하트" : "댓글"}
               className="noti-badge-img"
             />
@@ -133,7 +134,7 @@ const AlertPage: React.FC = () => {
         {item.video && (
           <button className="noti-video-btn">
             <img
-              src="/src/assets/alert/video_icon.svg"
+              src={videoIcon}
               alt="비디오 보기"
               className="noti-video-icon-img"
             />

@@ -13,6 +13,15 @@ import {
   MOCK_VIDEOS,
 } from "../types/home";
 
+import purpleFrame from "@/assets/home/purple_frame.svg";
+import videoButton from "@/assets/home/video_button.svg";
+import character from "@/assets/home/character.svg";
+import lockIcon from "@/assets/home/lock_icon.svg";
+import heartIcon from "@/assets/home/heart_icon.svg";
+import chatIcon from "@/assets/home/chat_icon.svg";
+import homeImg from "@/assets/home/home_img.svg";
+import heartImg from "@/assets/home/heart_img.svg";
+
 function HomeMainContent() {
   const navigate = useNavigate();
 
@@ -39,8 +48,8 @@ function HomeMainContent() {
 
   const getGroupIconSrc = (group: PrivateGroupData) => {
     if (group.groupImageUrl) return group.groupImageUrl;
-    if (group.name === "가족") return "/src/assets/home/home_img.svg";
-    return "/src/assets/home/heart_img.svg";
+    if (group.name === "가족") return homeImg;
+    return heartImg;
   };
 
   return (
@@ -77,7 +86,7 @@ function HomeMainContent() {
                     alt={group.name}
                     style={{ width: "24px", height: "24px" }}
                     onError={(e) => {
-                      e.currentTarget.src = "/src/assets/home/home_img.svg";
+                      e.currentTarget.src = homeImg;
                     }}
                   />
                 </div>
@@ -99,7 +108,7 @@ function HomeMainContent() {
       {selectedTabId !== 0 && !isCurrentGroupAnswered && (
         <div className="home-group-question-banner">
           <img
-            src="/src/assets/home/purple_frame.svg"
+            src={purpleFrame}
             alt="배경 배너"
             className="home-banner-svg-bg"
           />
@@ -115,7 +124,7 @@ function HomeMainContent() {
               onClick={() => navigate("/splash")}
             >
               <img
-                src="/src/assets/home/video_button.svg"
+                src={videoButton}
                 alt="카메라 버튼"
                 className="home-camera-icon"
               />
@@ -128,7 +137,7 @@ function HomeMainContent() {
       {isFeedEmpty ? (
         <div className="home-waiting-content">
           <img
-            src="/src/assets/home/character.svg"
+            src={character}
             alt="대기 캐릭터"
             className="home-waiting-img"
           />
@@ -204,7 +213,7 @@ function HomeMainContent() {
                         <div className="home-lock-box">
                           <div className="home-lock-icon-wrapper">
                             <img
-                              src="/src/assets/home/lock_icon.svg"
+                              src={lockIcon}
                               alt="잠금"
                               className="home-lock-icon"
                             />
@@ -238,11 +247,11 @@ function HomeMainContent() {
 
                 <div className="home-card-reaction-bar">
                   <div className="home-reaction-item">
-                    <img src="/src/assets/home/heart_icon.svg" alt="좋아요" />
+                    <img src={heartIcon} alt="좋아요" />
                     <span>{feed.likesCount}</span>
                   </div>
                   <div className="home-reaction-item">
-                    <img src="/src/assets/home/chat_icon.svg" alt="댓글" />
+                    <img src={chatIcon} alt="댓글" />
                     <span>{feed.commentsCount}</span>
                   </div>
                 </div>

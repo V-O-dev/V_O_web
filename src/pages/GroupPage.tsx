@@ -12,6 +12,15 @@ import {
   MOCK_MEMBER_LIST,
 } from "@/types/group";
 
+import profileIcon from "@/assets/home/profile.svg";
+import cameraButton from "@/assets/profile/camera_button.svg";
+import pencilIcon from "@/assets/profile/pencil_icon.svg";
+import ownerButton from "@/assets/group/owner_button.svg";
+import transferButton from "@/assets/group/transfer_button.svg";
+import removeButton from "@/assets/group/remove_button.svg";
+import removeIcon from "@/assets/profile/remove_icon.svg";
+import deleteIcon from "@/assets/group/delete_icon.svg";
+
 type ModalType = "NONE" | "DELEGATE" | "KICK" | "LEAVE";
 
 export default function GroupPage() {
@@ -87,15 +96,15 @@ export default function GroupPage() {
           <div className="group-avatar-container">
             <div className="group-avatar-main">
               <img
-                src={groupInfo.groupImageUrl || "/src/assets/home/profile.svg"}
+                src={groupInfo.groupImageUrl || profileIcon}
                 alt="그룹 프로필"
                 className="group-avatar-img"
                 onError={(e) => {
-                  e.currentTarget.src = "/src/assets/home/profile.svg";
+                  e.currentTarget.src = profileIcon;
                 }}
               />
               <button className="group-camera-btn">
-                <img src="/src/assets/profile/camera_button.svg" alt="카메라" />
+                <img src={cameraButton} alt="카메라" />
               </button>
             </div>
 
@@ -116,7 +125,7 @@ export default function GroupPage() {
                     className="group-edit-name-btn"
                     onClick={() => setIsEditingName(true)}
                   >
-                    <img src="/src/assets/profile/pencil_icon.svg" alt="편집" />
+                    <img src={pencilIcon} alt="편집" />
                   </button>
                 </>
               )}
@@ -155,20 +164,20 @@ export default function GroupPage() {
                       {member.isMe && <span className="group-tag-me">나</span>}
 
                       {isOwner ? (
-                        <img src="/src/assets/group/owner_button.svg"></img>
+                        <img src={ownerButton}></img>
                       ) : isCurrentLeader ? (
                         <div className="group-leader-action-panel">
                           <button
                             className="group-btn-delegate"
                             onClick={() => handleOpenModal("DELEGATE", member)}
                           >
-                            <img src="/src/assets/group/transfer_button.svg"></img>
+                            <img src={transferButton}></img>
                           </button>
                           <button
                             className="group-btn-kick"
                             onClick={() => handleOpenModal("KICK", member)}
                           >
-                            <img src="/src/assets/group/remove_button.svg"></img>
+                            <img src={removeButton}></img>
                           </button>
                         </div>
                       ) : null}
@@ -198,10 +207,7 @@ export default function GroupPage() {
               >
                 <div className="group-row-left">
                   <div className="group-danger-icon">
-                    <img
-                      src="/src/assets/profile/remove_icon.svg"
-                      alt="나가기"
-                    />
+                    <img src={removeIcon} alt="나가기" />
                   </div>
                   <div className="group-row-text">
                     <h4 className="text-danger">그룹 나가기</h4>
@@ -217,7 +223,7 @@ export default function GroupPage() {
               >
                 <div className="group-row-left">
                   <div className="group-danger-icon">
-                    <img src="/src/assets/group/delete_icon.svg" alt="삭제" />
+                    <img src={deleteIcon} alt="삭제" />
                   </div>
                   <div className="group-row-text">
                     <h4 className="text-danger">그룹 삭제하기</h4>
