@@ -7,6 +7,14 @@ import {
   MOCK_USER_PROFILE,
 } from "@/types/user";
 
+import profileIcon from "@/assets/home/profile.svg";
+import cameraButton from "@/assets/profile/camera_button.svg";
+import pencilIcon from "@/assets/profile/pencil_icon.svg";
+import starIcon from "@/assets/profile/star_icon.svg";
+import lineheartIcon from "@/assets/profile/lineheart_icon.svg";
+import exitIcon from "@/assets/profile/exit_icon.svg";
+import removeIcon from "@/assets/profile/remove_icon.svg";
+
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -77,7 +85,7 @@ export default function ProfilePage() {
             <div className="profile-avatar-main">
               <img
                 src={
-                  profile.profileImageUrl || "src/assets/profile/pencil_icon.svg"
+                  profile.profileImageUrl || profileIcon
                 }
                 alt="프로필"
                 className="profile-avatar-img"
@@ -94,7 +102,7 @@ export default function ProfilePage() {
                 onClick={handleCameraClick}
               >
                 <img
-                  src="src/assets/profile/camera_button.svg"
+                  src={cameraButton}
                   alt="카메라"
                   style={{ width: 19, height: 17 }}
                 />
@@ -119,7 +127,7 @@ export default function ProfilePage() {
                     onClick={() => setIsEditingName(true)}
                   >
                     <img
-                      src="src/assets/profile/pencil_icon.svg"
+                      src={pencilIcon}
                       alt="편집"
                       style={{ width: 11, height: 11 }}
                     />
@@ -137,7 +145,7 @@ export default function ProfilePage() {
                 <div className="profile-row-left">
                   <div className="profile-icon-bg bg-purple">
                     <img
-                      src="src/assets/profile/star_icon.svg"
+                      src={starIcon}
                       alt="스타"
                       className="profile-row-icon-img"
                     />
@@ -165,7 +173,7 @@ export default function ProfilePage() {
                 <div className="profile-row-left">
                   <div className="profile-icon-bg bg-pink">
                     <img
-                      src="src/assets/profile/lineheart_icon.svg"
+                      src={lineheartIcon}
                       alt="하트"
                       className="profile-row-icon-img"
                     />
@@ -198,7 +206,7 @@ export default function ProfilePage() {
                 <div className="profile-row-left">
                   <div className="profile-icon-bg bg-red">
                     <img
-                      src="src/assets/profile/exit_icon.svg"
+                      src={exitIcon}
                       alt="로그아웃"
                       className="profile-row-icon-img"
                     />
@@ -218,7 +226,7 @@ export default function ProfilePage() {
                 <div className="profile-row-left">
                   <div className="profile-icon-bg bg-red">
                     <img
-                      src="src/assets/profile/remove_icon.svg"
+                      src={removeIcon}
                       alt="탈퇴"
                       className="profile-row-icon-img"
                     />
