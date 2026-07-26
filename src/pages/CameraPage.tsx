@@ -13,7 +13,7 @@ export default function CameraPage() {
 
   const [phase, setPhase] = useState<Phase>('countdown');
   const [countdown, setCountdown] = useState(5);
-  const [recordingProgress, setRecordingProgress] = useState(0);
+  const [, setRecordingProgress] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
