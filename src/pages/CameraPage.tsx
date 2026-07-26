@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/common/Button';
+import { useNavigate } from 'react-router-dom';
 
 type Phase = 'countdown' | 'recording' | 'result';
 
@@ -8,6 +9,7 @@ export default function CameraPage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const navigate = useNavigate();
 
   const [phase, setPhase] = useState<Phase>('countdown');
   const [countdown, setCountdown] = useState(5);
@@ -164,14 +166,14 @@ export default function CameraPage() {
               }}>촬영 중</span>
             </div>
             {/* 게이지 */}
-            <svg style={{
+            {/* <svg style={{
               position: 'absolute',
               inset: 0,
               width: '100%',
               height: '100%',
               pointerEvents: 'none',
             }} viewBox="0 0 312 556">
-              {/*게이지*/}
+              //게이지
               <rect
                 x="2" y="2"
                 width="308" height="552"
@@ -183,6 +185,7 @@ export default function CameraPage() {
                 strokeLinecap="round"
               />
             </svg>
+            */}
             <style>{`
               @keyframes gauge {
                 from { stroke-dashoffset: 392; }
@@ -214,7 +217,7 @@ export default function CameraPage() {
 
       {/* 업로드 버튼 */}
       {phase === 'result' && (
-        <Button text="업로드 하기" onClick={() => {}} />
+        <Button text="업로드 하기" onClick={() => navigate("/home")} />
       )}
     </div>
   );
