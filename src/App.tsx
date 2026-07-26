@@ -14,6 +14,10 @@ import GroupCreateCompletePage from "./pages/GroupCreateCompletePage";
 import GroupInvitePage from "./pages/GroupInvitePage";
 import GroupInviteSharePage from "./pages/GroupInviteSharePage";
 import GroupNamePage from "./pages/GroupNamePage";
+import SplashPage from "./pages/SplashPage";
+import QuestionPage from "./pages/QuestionPage";
+import CameraPage from "./pages/CameraPage";
+import CalendarPage from "./pages/CalendarPage";
 
 function App() {
   return (
@@ -37,6 +41,12 @@ function App() {
         <Route path="/group/invite" element={<GroupInvitePage />} />
         <Route path="/group/invite-share" element={<GroupInviteSharePage />} />
         <Route path="/group/name" element={<GroupNamePage />} />
+
+        {/* 촬영/나의 달력 (돌돌 담당) */}
+        <Route path="/splash" element={<SplashPage />} />
+        <Route path="/question" element={<QuestionPage />} />
+        <Route path="/camera" element={<CameraPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,7 +1,11 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export function HomeBottomNav() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isHome = location.pathname === '/';
+  const isCalendar = location.pathname === '/calendar';
 
   return (
     <nav
@@ -57,14 +61,14 @@ export function HomeBottomNav() {
             }}
           >
             <img
-              src="src/asset/home/home_button.svg"
+              src="/home_button.svg"
               alt="홈"
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </div>
           <span
             style={{
-              color: "#7b3ff2",
+              color: isHome ? '#7b3ff2' : '#9491a8',
               fontSize: "12px",
               fontWeight: 600,
               lineHeight: "16.5px",
@@ -76,7 +80,7 @@ export function HomeBottomNav() {
 
         <button
           type="button"
-          // 달력 페이지로 넘어가는 경로 추가
+          onClick={() => navigate("/calendar")}
           style={{
             background: "none",
             border: "none",
@@ -98,14 +102,14 @@ export function HomeBottomNav() {
             }}
           >
             <img
-              src="src/asset/home/calender_button.svg"
+              src="/calender_button.svg"
               alt="나의 달력"
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </div>
           <span
             style={{
-              color: "#9491a8",
+              color: isCalendar ? '#7b3ff2' : '#9491a8',
               fontSize: "12px",
               lineHeight: "16.5px",
               fontWeight: 600,

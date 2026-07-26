@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 
 export function HomeHeader() {
   const navigate = useNavigate();
-
   return (
     <header
       style={{
@@ -30,7 +29,6 @@ export function HomeHeader() {
       >
         V_O
       </h1>
-
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
         <button
           type="button"
@@ -50,12 +48,11 @@ export function HomeHeader() {
           }}
         >
           <img
-            src="src/asset/home/notification.svg"
+            src="/notification.svg"
             alt="알림"
             style={{ width: "12px", height: "12px", objectFit: "contain" }}
           />
         </button>
-
         <button
           type="button"
           onClick={() => navigate("/profile")}
@@ -74,7 +71,7 @@ export function HomeHeader() {
           }}
         >
           <img
-            src="src/asset/home/profile.svg"
+            src="/profile.svg"
             alt="프로필"
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
