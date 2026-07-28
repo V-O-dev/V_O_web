@@ -1,3 +1,5 @@
+import profileIcon from "@/assets/home/profile.svg";
+
 export interface UserProfile {
   user: number;
   nickname: string;
@@ -26,7 +28,7 @@ export interface UpdateUserProfilePayload {
 export const MOCK_USER_PROFILE: UserProfileData = {
   id: 1,
   nickname: "홍길동",
-  profileImageUrl: "/src/asset/home/profile.svg",
+  profileImageUrl: profileIcon,
   profileImageObjectKey: null,
   dailyQuestionNotificationEnabled: true,
   interactionNotificationEnabled: false,

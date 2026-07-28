@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react'; 
 import { Header } from '../components/common/Header';

@@ -12,7 +12,6 @@ export function ArrowButton({ direction, onClick }: ArrowButtonProps) {
         background: '#F7F5FC',
         border: 'none',
         cursor: 'pointer',
-        fontSize: '14px',
         width: '36px',
         height: '36px',
         borderRadius: '10px',

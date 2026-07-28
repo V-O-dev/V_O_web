@@ -54,13 +54,13 @@ export const MOCK_VIDEOS: VideoFeedItem[] = [
   {
     id: 501,
     videoUrl: null,
-    thumbnailUrl: "/src/asset/thumb1.png",
+    thumbnailUrl: "/src/assets/thumb1.png",
     createdAt: "2시간 전",
     user: {
       id: 201,
       nickname: "홍길동",
       customName: "엄마",
-      profileImageUrl: "/src/asset/profile2.png",
+      profileImageUrl: "/src/assets/profile2.png",
     },
     group: MOCK_GROUPS[0],
     likesCount: 3,
@@ -68,14 +68,14 @@ export const MOCK_VIDEOS: VideoFeedItem[] = [
   },
   {
     id: 502,
-    videoUrl: "/src/asset/video2.mp4",
-    thumbnailUrl: "/src/asset/thumb2.png",
+    videoUrl: "/src/assets/video2.mp4",
+    thumbnailUrl: "/src/assets/thumb2.png",
     createdAt: "2시간 전",
     user: {
       id: 202,
       nickname: "김철수",
       customName: "아빠",
-      profileImageUrl: "/src/asset/profile2.png",
+      profileImageUrl: "/src/assets/profile2.png",
     },
     group: MOCK_GROUPS[0],
     likesCount: 5,

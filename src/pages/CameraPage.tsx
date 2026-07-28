@@ -13,7 +13,7 @@ export default function CameraPage() {
 
   const [phase, setPhase] = useState<Phase>('countdown');
   const [countdown, setCountdown] = useState(5);
-  const [recordingProgress, setRecordingProgress] = useState(0);
+  const [, setRecordingProgress] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -78,7 +78,7 @@ export default function CameraPage() {
   return (
     <div style={{
       width: '100%',
-      height: '100dvh',
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',

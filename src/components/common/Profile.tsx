@@ -1,3 +1,5 @@
+import profileIcon from "@/assets/home/profile.svg";
+
 interface UserProfileInfoProps {
   profileImageUrl?: string | null;
   nickname: string;
@@ -9,7 +11,7 @@ export function UserProfileInfo({
   nickname,
   subText,
 }: UserProfileInfoProps) {
-  const defaultImage = "/src/assets/home/profile.svg";
+  const defaultImage = profileIcon;
 
   return (
     <div

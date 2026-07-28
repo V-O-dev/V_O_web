@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./EditNicknamePage.css";
 import { SubPageHeader } from "@/components/common/SubHeader";
+import profileIcon from "@/assets/home/profile.svg";
 
 interface TargetUserProfile {
   userId: number;
@@ -59,11 +60,11 @@ export default function EditNicknamePage() {
           <div className="edit-nickname-avatar-section">
             <div className="edit-nickname-avatar-circle">
               <img
-                src={userInfo.profileImageUrl || "/src/assets/home/profile.svg"}
+                src={userInfo.profileImageUrl || profileIcon}
                 alt="프로필"
                 className="edit-nickname-avatar-img"
                 onError={(e) => {
-                  e.currentTarget.src = "/src/assets/home/profile.svg";
+                  e.currentTarget.src = profileIcon
                 }}
               />
             </div>

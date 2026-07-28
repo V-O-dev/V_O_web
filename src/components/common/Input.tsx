@@ -1,20 +1,17 @@
-import React, { useMemo } from 'react';
+import { forwardRef, useMemo } from 'react';
+import type { InputHTMLAttributes } from 'react';
 
-interface InputProps {
+interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  minWidth?: number | string; 
-  paddingRight?: number; 
+  minWidth?: number | string;
+  paddingRight?: number;
 }
 
-export function Input({
-  value,
-  onChange,
-  placeholder = '',
-  minWidth = 100, 
-  paddingRight = 10, 
-}: InputProps) {
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  { value, onChange, placeholder = '', minWidth = 100, paddingRight = 10, style, ...rest },
+  ref
+) {
   const textWidth = useMemo(() => {
     const charWidths: { [key: string]: number } = {
       default: 0.5,
@@ -39,13 +36,14 @@ export function Input({
     return totalWidthMultiplier;
   }, [value]);
 
-  const fontSize = 32; 
+  const fontSize = 32;
   const computedTextWidth = textWidth * fontSize;
   const inputWidth = computedTextWidth + paddingRight;
   const finalInputWidth = Math.max(inputWidth, Number(minWidth));
 
   return (
     <input
+      ref={ref}
       type="text"
       value={value}
       onChange={onChange}
@@ -60,11 +58,13 @@ export function Input({
         width: `${finalInputWidth}px`,
         maxWidth: '340px',
         fontFamily: 'Manrope, sans-serif',
-        fontSize: '32px',                 
-        fontWeight: '600',                
-        color: '#0F0F0F',                 
+        fontSize: '32px',
+        fontWeight: '600',
+        color: '#0F0F0F',
+        ...style,
       }}
       className="transition-colors focus:border-[#7E49E9] placeholder-gray-300"
+      {...rest}
     />
   );
-}
+});
