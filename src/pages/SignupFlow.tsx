@@ -24,7 +24,7 @@ export default function SignupFlow() {
         flexDirection: 'column',
         width: '100%',
         maxWidth: '360px',
-        minHeight: '100vh',
+        minHeight: '100%',
         margin: '0 auto',
         border: '1px solid #eaeaea',
         boxSizing: 'border-box',
