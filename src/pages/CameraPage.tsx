@@ -78,7 +78,7 @@ export default function CameraPage() {
   return (
     <div style={{
       width: '100%',
-      height: '100dvh',
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',

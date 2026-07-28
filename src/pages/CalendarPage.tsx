@@ -44,7 +44,7 @@ export default function CalendarPage() {
   return (
     <div style={{
       width: '100%',
-      height: '100dvh',
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
       background: '#ffffff',
@@ -53,7 +53,7 @@ export default function CalendarPage() {
       <HomeHeader />
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 80px' }}>
-        <h2 style={{ fontSize: '26px', fontWeight: 900, marginBottom: '16px', WebkitTextStroke: '0.3px black' }}>나의 달력</h2>
+        <h2 style={{ fontSize: '26px', fontWeight: 600, marginBottom: '16px', WebkitTextStroke: '0.3px black' }}>나의 달력</h2>
 
         {/* 달력 */}
         <div style={{

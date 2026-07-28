@@ -1,0 +1,19 @@
+/* src/components/ScaledViewport.css */
+.scaled-viewport-wrapper {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh; /* 모바일 주소창 대응, 위 100vh는 구형 브라우저 폴백 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #fff; /* 레터박스(양옆/위아래 여백) 배경색, 원하는 색으로 변경 */
+  position: fixed;
+  inset: 0;
+}
+
+.scaled-viewport-inner {
+  transform-origin: center center;
+  flex-shrink: 0;
+  /*overflow: hidden; /* 혹시 내부에서 360x800 넘치는 요소 있어도 안전하게 */
+}

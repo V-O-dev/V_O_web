@@ -22,7 +22,7 @@ export default function SplashPage() {
   }, [showQuestion]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100dvh', overflow: 'hidden' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
       <div style={{
         position: 'absolute',
         width: '100%',
