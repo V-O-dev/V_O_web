@@ -98,7 +98,12 @@ function HomeMainContent() {
 
         <div className="home-category-item">
           <div className="home-circle-icon-frame">
-            <button className="home-add-circle">+</button>
+            <button
+              className="home-add-circle"
+              onClick={() => navigate("/group/create")}
+            >
+              +
+            </button>
           </div>
           <span className="home-add-name">추가</span>
         </div>
