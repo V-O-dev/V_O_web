@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/common/Header';
+import { Input } from '../components/common/Input';
 
 // 에셋 임포트
 import addPhotoIcon from '../assets/add_photo_icon.svg';
@@ -8,7 +9,7 @@ import cameraBadgeIcon from '../assets/camera_badge_icon.svg';
 import clearInputIcon from '../assets/clear_input_icon.svg';
 import errorInfoIcon from '../assets/error_info_icon.svg';
 
-// 빠른 선택 이모지 에셋 (PNG 파일)
+// 빠른 선택 이모지 에셋
 import quickHome from '../assets/quick_home.png'; 
 import quickHeart from '../assets/quick_heart.png';
 import quickHandshake from '../assets/quick_handshake.png';
@@ -18,20 +19,21 @@ export default function GroupNamePage() {
   const navigate = useNavigate();
   const [groupName, setGroupName] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
+  // 포커스 상태 관리
+  const [isFocused, setIsFocused] = useState(false);
 
-  // 특수문자 검증 (한글, 영문, 숫자, 공백만 허용)
+  // 특수문자 검증
   const hasSpecialChar = /[^a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣ\s]/.test(groupName);
   const isLengthError = groupName.length > 15;
   const isError = hasSpecialChar || isLengthError;
 
   const isButtonEnabled = groupName.trim().length > 0 && !isError;
 
-  // 텍스트 지우기
   const handleClear = () => {
     setGroupName('');
   };
 
-  // 프로필 이미지 업로드
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -40,11 +42,13 @@ export default function GroupNamePage() {
     }
   };
 
-  // 🎯 다음 버튼 클릭 시 HomePage(/home)로 이동
   const handleNext = () => {
     if (!isButtonEnabled) return;
     navigate('/home', { state: { groupName, groupImage: selectedImage } });
   };
+
+  // 디폴트 밑줄 길이를 X버튼 바로 앞(165px)까지 설정
+  const dynamicMinWidth = (groupName.length > 0 || isFocused) ? 10 : 165;
 
   return (
     <div style={{
@@ -63,7 +67,7 @@ export default function GroupNamePage() {
       {/* 1. 공통 헤더 */}
       <Header />
 
-      {/* 2. 메인 컨텐츠 영역 (top: 95.3px) */}
+      {/* 2. 메인 컨텐츠 영역 */}
       <div style={{
         position: 'absolute',
         top: '95.3px',
@@ -151,7 +155,14 @@ export default function GroupNamePage() {
                   <img 
                     src={selectedImage} 
                     alt="그룹 프로필" 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      objectFit: 'cover', 
+                      borderRadius: '20px', 
+                      transform: 'scale(1.35)', 
+                      display: 'block' 
+                    }} 
                   />
                 ) : (
                   <img src={addPhotoIcon} alt="사진 추가" style={{ width: '24px', height: '24px' }} />
@@ -185,59 +196,56 @@ export default function GroupNamePage() {
                 letterSpacing: '0.4px',
                 color: '#7B3FF2',
                 display: 'block',
+                marginTop: '2px',
                 marginBottom: '2px'
               }}>
                 그룹 이름
               </span>
 
-              {/* 입력 영역 및 우측 삭제/카운터 레이아웃 */}
+              {/* 입력창 + 우측 버튼 레이아웃 */}
               <div style={{
                 display: 'flex',
-                alignItems: 'flex-end',
+                alignItems: 'center',
                 justifyContent: 'space-between',
                 width: '100%'
               }}>
-                {/* 160px 너비 밑줄 입력창 */}
-                <div style={{
-                  position: 'relative',
-                  width: '160px',
-                  borderBottom: '1.5px solid #000000',
-                  paddingBottom: '2px'
+                <div style={{ 
+                  position: 'relative', 
+                  maxWidth: '165px',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center'
                 }}>
-                  <textarea 
-                    rows={2}
+                  <Input
+                    type="text"
                     value={groupName}
                     onChange={(e) => setGroupName(e.target.value)}
-                    placeholder="이름을 입력해주세요"
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    placeholder={isFocused || groupName ? "" : "이름을 입력해주세요"}
+                    minWidth={dynamicMinWidth}
                     style={{
-                      width: '100%',
-                      height: '42px',
-                      border: 'none',
-                      outline: 'none',
-                      resize: 'none',
-                      padding: 0,
-                      margin: 0,
                       fontFamily: 'Manrope, sans-serif',
-                      fontWeight: 600,
                       fontSize: '16px',
-                      lineHeight: '21px',
+                      fontWeight: '600',
                       color: '#260C36',
-                      backgroundColor: 'transparent',
-                      boxSizing: 'border-box',
-                      overflow: 'hidden'
+                      textAlign: 'left',
+                      paddingBottom: '4px',
+                      borderBottom: '1.5px solid #000000',
+                      caretColor: '#7B3FF2'
                     }}
                   />
                 </div>
 
-                {/* X버튼(상시 노출) & 0/15 카운터 */}
+                {/* X버튼 & 0/15 카운터 */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'flex-end',
+                  justifyContent: 'center',
                   gap: '2px',
-                  marginBottom: '2px',
-                  marginRight: '4px'
+                  marginLeft: '4px',
+                  flexShrink: 0
                 }}>
                   <button 
                     onClick={handleClear}
@@ -315,49 +323,59 @@ export default function GroupNamePage() {
           빠른 선택
         </span>
 
-        {/* 빠른 선택 이모지 버튼 그룹 */}
+        {/* 🎯 이모지 크기 및 scale 수치는 그대로 고정하고, 선택 실선 상자만 2px 밖으로 확장 */}
         <div style={{
           marginTop: '10px',
           display: 'flex',
-          gap: '0px'
+          gap: '8px'
         }}>
           {[
             { icon: quickHome, key: 'home' },
             { icon: quickHeart, key: 'heart' },
             { icon: quickHandshake, key: 'handshake' },
             { icon: quickSparkles, key: 'sparkles' }
-          ].map((item) => (
-            <button
-              key={item.key}
-              onClick={() => setSelectedImage(item.icon)}
-              style={{
-                width: '56px',
-                height: '56px',
-                border: selectedImage === item.icon ? '2px dashed #7B3FF2' : 'none',
-                borderRadius: '18px',
-                backgroundColor: 'transparent',
-                padding: 0,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxSizing: 'border-box',
-                overflow: 'hidden',
-                flexShrink: 0
-              }}
-            >
-              <img 
-                src={item.icon} 
-                alt="빠른 선택 이모지" 
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  objectFit: 'cover',
-                  display: 'block'
-                }} 
-              />
-            </button>
-          ))}
+          ].map((item) => {
+            const isSelected = selectedImage === item.icon;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setSelectedImage(item.icon)}
+                style={{
+                  width: '56px',
+                  height: '56px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderRadius: '20px',
+                  padding: 0,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxSizing: 'border-box',
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                  // 🎯 이미지 변경 없이 실선 테두리 규격만 바깥으로 2px 확장
+                  outline: isSelected ? '2px solid #7B3FF2' : 'none',
+                  outlineOffset: '2px',
+                  transition: 'outline 0.15s ease'
+                }}
+              >
+                <img 
+                  src={item.icon} 
+                  alt="빠른 선택 이모지" 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'cover',
+                    transform: 'scale(1.35)', 
+                    borderRadius: '20px',
+                    display: 'block'
+                  }} 
+                />
+              </button>
+            );
+          })}
         </div>
 
       </div>

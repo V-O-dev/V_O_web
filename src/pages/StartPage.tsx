@@ -17,7 +17,8 @@ export default function StartPage() {
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      backgroundColor: '#F8F7FC',
+      // 🎯 피그마 명세에 따른 선형 그라데이션 배경 적용 (0%: #F8F5FA, 100%: #F6F1F8)
+      background: 'linear-gradient(180deg, #F8F5FA 0%, #F6F1F8 100%)',
       width: '360px',
       height: '800px',
       margin: '0 auto',
@@ -26,7 +27,7 @@ export default function StartPage() {
       overflow: 'hidden'
     }}>
 
-      {/* 1. 브랜드 로고 이미지 (요청하신 top: 61px) */}
+      {/* 1. 브랜드 로고 이미지 (top: 61px) */}
       <div style={{
         position: 'absolute',
         top: '61px',
@@ -45,7 +46,7 @@ export default function StartPage() {
         />
       </div>
 
-      {/* 2. 메인 서브 타이틀 (로고 밑 + 32px -> top: 178px) */}
+      {/* 2. 메인 서브 타이틀 (top: 178px) */}
       <p style={{
         position: 'absolute',
         top: '178px',
@@ -65,7 +66,7 @@ export default function StartPage() {
         질문으로 열리는 진짜 기록
       </p>
 
-      {/* 3. 칩 1: X 63, Y 277 (중앙 정렬 적용) */}
+      {/* 3. 칩 1: X 63, Y 277 */}
       <div style={{
         position: 'absolute',
         left: '63px',
@@ -76,12 +77,12 @@ export default function StartPage() {
         borderRadius: '20px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center', // 🎯 이미지 + 텍스트 중앙 정렬
+        justifyContent: 'center',
         gap: '6px',
         boxShadow: '0px 4px 12px rgba(126, 73, 233, 0.08)',
         boxSizing: 'border-box'
       }}>
-        <img src={alarmIcon} alt="시계" style={{ width: '16px', height: '16px' }} />
+        <img src={alarmIcon} alt="시계" style={{ width: '20px', height: '20px' }} />
         <span style={{
           fontFamily: 'Manrope, sans-serif',
           fontSize: '12px',
@@ -94,7 +95,7 @@ export default function StartPage() {
         </span>
       </div>
 
-      {/* 4. 칩 2: X 119, Y 325 (중앙 정렬 적용) */}
+      {/* 4. 칩 2: X 119, Y 325 */}
       <div style={{
         position: 'absolute',
         left: '119px',
@@ -105,12 +106,13 @@ export default function StartPage() {
         borderRadius: '20px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center', // 🎯 이미지 + 텍스트 중앙 정렬
+        justifyContent: 'center',
         gap: '6px',
         boxShadow: '0px 4px 12px rgba(126, 73, 233, 0.08)',
         boxSizing: 'border-box'
       }}>
-        <img src={chatIcon} alt="말풍선" style={{ width: '14px', height: '14px' }} />
+        {/* 🎯 speech_bubble 크기 확대 (기존 14px -> 18px) */}
+        <img src={chatIcon} alt="말풍선" style={{ width: '20px', height: '20px' }} />
         <span style={{
           fontFamily: 'Manrope, sans-serif',
           fontSize: '12px',
@@ -133,7 +135,8 @@ export default function StartPage() {
         height: '240px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        zIndex: 2
       }}>
         <img 
           src={startCharacter} 
@@ -141,6 +144,21 @@ export default function StartPage() {
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
       </div>
+
+      {/* 🎯 5-1. 피그마 명세 기반 캐릭터 발 밑 타원형 그림자 추가 */}
+      <div style={{
+        position: 'absolute',
+        top: '565px', // 캐릭터 바로 발 밑 위치에 맞춰 조정
+        left: '53%',
+        transform: 'translateX(-50%)',
+        width: '80px',
+        height: '8px',
+        backgroundColor: '#7B3FF2',
+        borderRadius: '50%',
+        filter: 'blur(10px)', // 피그마 '레이어 흐림' 효과
+        opacity: 0.8,
+        zIndex: 1
+      }} />
 
       {/* 6. 하단 시작하기 버튼 (바닥에서 94px) */}
       <div style={{
@@ -150,7 +168,8 @@ export default function StartPage() {
         transform: 'translateX(-50%)',
         width: '312px',
         height: '48px',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        zIndex: 3
       }}>
         <button
           type="button"

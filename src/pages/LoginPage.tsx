@@ -1,5 +1,3 @@
-import { useNavigate } from 'react-router-dom';
-
 // 에셋 임포트
 import mainLogo from '../assets/main_logo.svg';
 import kakaoIcon from '../assets/kakao_icon.svg'; 
@@ -7,18 +5,21 @@ import naverIcon from '../assets/naver_icon.svg';
 import googleIcon from '../assets/google_icon.svg'; 
 
 export default function LoginPage() {
-  const navigate = useNavigate();
+  // 🎯 백엔드에서 제공한 소셜 로그인 시작 URL
+  const KAKAO_AUTH_URL = "https://54.206.52.35.nip.io/api/v1/auth/dev/login/kakao";
+  const NAVER_AUTH_URL = "https://54.206.52.35.nip.io/api/v1/auth/dev/login/naver";
+  const GOOGLE_AUTH_URL = "https://54.206.52.35.nip.io/api/v1/auth/dev/login/google";
 
   const handleKakaoLogin = () => {
-    navigate('/signup'); 
+    window.location.href = KAKAO_AUTH_URL;
   };
 
   const handleNaverLogin = () => {
-    navigate('/signup');
+    window.location.href = NAVER_AUTH_URL;
   };
 
   const handleGoogleLogin = () => {
-    navigate('/signup');
+    window.location.href = GOOGLE_AUTH_URL;
   };
 
   return (
@@ -37,7 +38,7 @@ export default function LoginPage() {
       {/* 1. 브랜드 로고 (크기: 93.6 x 51) */}
       <div style={{
         position: 'absolute',
-        top: '190px', // 🎯 보정된 최상단 Y 좌표
+        top: '190px',
         left: '50%',
         transform: 'translateX(-50%)',
         width: '93.6px',
@@ -53,7 +54,7 @@ export default function LoginPage() {
         />
       </div>
 
-      {/* 2. 서브 타이틀 (로고 밑 17px -> top: 258px) */}
+      {/* 2. 서브 타이틀 */}
       <p style={{
         position: 'absolute',
         top: '258px',
@@ -63,27 +64,27 @@ export default function LoginPage() {
         height: '60px',
         fontFamily: 'Manrope, sans-serif',
         fontSize: '16px',
-        fontWeight: 400, // 🎯 Regular
+        fontWeight: 400,
         color: '#000000',
         margin: 0,
         textAlign: 'center',
-        lineHeight: '30px', // 🎯 행간 30px
-        letterSpacing: '0px' // 🎯 자간 0%
+        lineHeight: '30px',
+        letterSpacing: '0px'
       }}>
         매일 10초, 질문으로 열리는<br />
         우리들의 진짜 일상
       </p>
 
-      {/* 3. 소셜 로그인 버튼 영역 (서브타이틀 밑 120px, 하단 여백 112px 고정) */}
+      {/* 3. 소셜 로그인 버튼 영역 */}
       <div style={{
         position: 'absolute',
-        bottom: '112px', // 🎯 [수정] 피그마 하단 간격 112px
+        bottom: '112px',
         left: '50%',
         transform: 'translateX(-50%)',
         width: '312px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px' // 🎯 [수정] 버튼 간격 12px
+        gap: '12px'
       }}>
 
         {/* 카카오 로그인 */}
