@@ -1,3 +1,6 @@
+import homeImg from "@/assets/home/home_img.svg";
+import heartImg from "@/assets/home/heart_img.svg";
+
 export interface GroupTheme {
   id: number;
   code?: string;
@@ -7,7 +10,7 @@ export interface GroupTheme {
 export interface PrivateGroupData {
   id: number;
   name: string;
-  groupImageUrl: string | null;
+  groupImageUrl: string;
   ownerUserId?: number;
   theme?: GroupTheme;
   isAnsweredToday?: boolean;
@@ -35,7 +38,7 @@ export const MOCK_GROUPS: PrivateGroupData[] = [
   {
     id: 1,
     name: "가족",
-    groupImageUrl: null,
+    groupImageUrl: homeImg,
     ownerUserId: 101,
     theme: { id: 10, name: "가족테마" },
     isAnsweredToday: false,
@@ -43,7 +46,7 @@ export const MOCK_GROUPS: PrivateGroupData[] = [
   {
     id: 2,
     name: "연인",
-    groupImageUrl: null,
+    groupImageUrl: heartImg,
     ownerUserId: 101,
     theme: { id: 11, name: "연인테마" },
     isAnsweredToday: true,
@@ -54,7 +57,7 @@ export const MOCK_VIDEOS: VideoFeedItem[] = [
   {
     id: 501,
     videoUrl: null,
-    thumbnailUrl: "/src/assets/thumb1.png",
+    thumbnailUrl: null,
     createdAt: "2시간 전",
     user: {
       id: 201,
@@ -69,7 +72,7 @@ export const MOCK_VIDEOS: VideoFeedItem[] = [
   {
     id: 502,
     videoUrl: "/src/assets/video2.mp4",
-    thumbnailUrl: "/src/assets/thumb2.png",
+    thumbnailUrl: null,
     createdAt: "2시간 전",
     user: {
       id: 202,

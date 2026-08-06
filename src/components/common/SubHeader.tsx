@@ -5,6 +5,8 @@ interface SubPageHeaderProps {
   leftType?: "close" | "back";
   onLeftClick?: () => void;
   onSave?: () => void;
+  rightText?: string;
+  onRightClick?: () => void;
 }
 
 export function SubPageHeader({
@@ -12,6 +14,8 @@ export function SubPageHeader({
   leftType = "back",
   onLeftClick,
   onSave,
+  rightText,
+  onRightClick,
 }: SubPageHeaderProps) {
   const navigate = useNavigate();
 
@@ -23,18 +27,27 @@ export function SubPageHeader({
     }
   };
 
+  // 우측 버튼 클릭 동작 (onRightClick이 없으면 기존 onSave 사용)
+  const handleRightClick = onRightClick || onSave;
+
+  // 우측 버튼 표기 텍스트 (rightText가 없으면 onSave가 있을 때 "저장" 표시)
+  const displayText = rightText || (onSave ? "저장" : "");
+
   return (
     <header
       style={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "10px 16px",
+        height: "52px",
+        padding: "0 20px",
         backgroundColor: "#ffffff",
-        borderBottom: "1px solid #f3f4f6",
-        position: "sticky",
-        top: 0,
-        zIndex: 60,
+        borderBottom: "1px solid #eaeaea",
+        flexShrink: 0,
+        width: "100%",
+        boxSizing: "border-box",
+        position: "relative",
+        zIndex: 200,
       }}
     >
       <button
@@ -71,19 +84,22 @@ export function SubPageHeader({
         {title}
       </h1>
 
-      {onSave ? (
+      {displayText ? (
         <button
-          onClick={onSave}
+          type="button"
+          onClick={handleRightClick}
           style={{
             background: "none",
             border: "none",
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: 600,
-            color: "#8f8f8f",
+            color: "#6b7280",
             cursor: "pointer",
+            padding: 0,
+            whiteSpace: "nowrap",
           }}
         >
-          저장
+          {displayText}
         </button>
       ) : (
         <div style={{ width: 36 }} />

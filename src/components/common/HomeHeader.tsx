@@ -17,17 +17,15 @@ export function HomeHeader() {
         boxSizing: "border-box",
       }}
     >
-      <h1
-        style={{
-          color: "#212121",
-          fontSize: "16.2px",
-          fontWeight: 700,
-          lineHeight: "125%",
-          margin: 0,
-          fontFamily: "Pretendard",
-        }}
-      >
-        V_O
+      <h1 style={{ margin: 0, display: "flex", alignItems: "center" }}>
+        <img
+          src="/logo.png"
+          alt="V_O 로고"
+          style={{
+            height: "17px",
+            objectFit: "contain",
+          }}
+        />
       </h1>
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
         <button
