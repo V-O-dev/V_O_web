@@ -2,7 +2,7 @@ import axios from "axios";
 import { useAuthStore } from "../stores/useAuthStore";
 
 export const axiosInstance = axios.create({
-  baseURL: "...", //백엔드 서버 주소
+  baseURL: "https://54.206.52.35", //백엔드 서버 주소
   timeout: 5000,
   headers: {
     "Content-Type": "application/json",

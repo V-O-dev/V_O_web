@@ -1,22 +1,48 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/common/Button';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useGroupStore } from '@/stores/useGroupStore';
+import { uploadVideo, type CameraFacing } from '@/apis/api';
 
 type Phase = 'countdown' | 'recording' | 'result';
+
+// questionId(오늘의 질문)를 어떻게 넘겨받을지는 아직 확인 전이라, 일단 라우팅 state로 받는 걸로 둠.
+// (예: 홈에서 "오늘의 질문" 카드를 눌러 카메라 페이지로 올 때
+//  navigate('/camera', { state: { questionId } }) 로 전달)
+// groupId는 useGroupStore(currentGroupId)에서 가져오되, state로 넘어온 값이 있으면 그걸 우선함.
+interface CameraLocationState {
+  groupId?: number;
+  questionId?: number; // TODO: 오늘의 질문 컨텍스트/store가 확인되면 그쪽에서 받아오기
+  answerTimeLimitMs?: number; // QuestionPage에서 오늘의 질문 조회 시 받아온 답변 제한시간
+}
 
 export default function CameraPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const videoBlobRef = useRef<Blob | null>(null);
+  const recordingStartedAtRef = useRef<number>(0);
+  const videoSettingsRef = useRef<MediaTrackSettings | null>(null);
   const cameraBoxRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = (location.state as CameraLocationState) ?? {};
+
+  const currentGroupIdRaw = useGroupStore(s => s.currentGroupId);
+  const groupId = locationState.groupId ?? (currentGroupIdRaw ? Number(currentGroupIdRaw) : undefined);
+  const { questionId } = locationState;
+  // 질문마다 답변 제한시간이 다를 수 있어서 QuestionPage에서 넘어온 값을 씀 (없으면 10초 기본값)
+  const recordingDurationMs = locationState.answerTimeLimitMs ?? 10000;
+  const recordingTickMs = Math.max(recordingDurationMs / 100, 10);
 
   const [phase, setPhase] = useState<Phase>('countdown');
   const [countdown, setCountdown] = useState(5);
   const [recordingProgress, setRecordingProgress] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [boxSize, setBoxSize] = useState({ width: 0, height: 0 });
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     const startCamera = async () => {
@@ -70,9 +96,9 @@ export default function CameraPage() {
         }
         return prev + 1;
       });
-    }, 100);
+    }, recordingTickMs);
     return () => clearInterval(interval);
-  }, [phase]);
+  }, [phase, recordingTickMs]);
 
   const startRecording = () => {
     if (!streamRef.current) return;
@@ -82,10 +108,13 @@ export default function CameraPage() {
     mediaRecorder.ondataavailable = (e) => chunksRef.current.push(e.data);
     mediaRecorder.onstop = () => {
       const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+      videoBlobRef.current = blob;
       setVideoUrl(URL.createObjectURL(blob));
       setPhase('result');
     };
     mediaRecorder.start();
+    recordingStartedAtRef.current = Date.now();
+    videoSettingsRef.current = streamRef.current.getVideoTracks()[0]?.getSettings() ?? null;
     setRecordingProgress(0);
     setPhase('recording');
   };
@@ -93,6 +122,40 @@ export default function CameraPage() {
   const stopRecording = () => {
     mediaRecorderRef.current?.stop();
     streamRef.current?.getTracks().forEach(track => track.stop());
+  };
+
+  const handleUpload = async () => {
+    if (!videoBlobRef.current) return;
+    if (groupId == null || questionId == null) {
+      // TODO: 실제 그룹/질문 컨텍스트가 준비되면 이 방어 코드는 지워도 됩니다.
+      setUploadError('그룹 또는 질문 정보가 없어요. 처음부터 다시 시도해주세요.');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+    try {
+      const settings = videoSettingsRef.current;
+      const cameraFacing: CameraFacing = settings?.facingMode === 'environment' ? 'BACK' : 'FRONT';
+      const durationMs = recordingStartedAtRef.current
+        ? Date.now() - recordingStartedAtRef.current
+        : recordingProgress * recordingTickMs;
+
+      await uploadVideo(videoBlobRef.current, {
+        groupId,
+        questionId,
+        durationMs,
+        width: settings?.width ?? 0,
+        height: settings?.height ?? 0,
+        cameraFacing,
+        capturedAt: new Date().toISOString(),
+      });
+      navigate('/home');
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : '업로드 중 오류가 발생했어요.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   // 게이지 계산: 실제 박스 크기(boxSize) 기준으로 rect를 그리므로
@@ -251,7 +314,19 @@ export default function CameraPage() {
 
       {/* 업로드 버튼 */}
       {phase === 'result' && (
-        <Button text="업로드 하기" onClick={() => navigate("/home")} />
+        <>
+          {/* Button 컴포넌트가 disabled prop을 지원하지 않으면 이 prop은 지워도 동작에는 문제 없어요 (handleUpload가 중복 호출 방지) */}
+          <Button
+            text={isUploading ? '업로드 중...' : '업로드 하기'}
+            onClick={handleUpload}
+            disabled={isUploading}
+          />
+          {uploadError && (
+            <p style={{ color: '#FF3B30', fontSize: '13px', fontWeight: 600 }}>
+              {uploadError}
+            </p>
+          )}
+        </>
       )}
     </div>
   );
