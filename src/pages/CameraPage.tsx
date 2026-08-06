@@ -9,12 +9,14 @@ export default function CameraPage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const cameraBoxRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   const [phase, setPhase] = useState<Phase>('countdown');
   const [countdown, setCountdown] = useState(5);
-  const [, setRecordingProgress] = useState(0);
+  const [recordingProgress, setRecordingProgress] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [boxSize, setBoxSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const startCamera = async () => {
@@ -28,6 +30,23 @@ export default function CameraPage() {
     return () => {
       streamRef.current?.getTracks().forEach(track => track.stop());
     };
+  }, []);
+
+  // 카메라 박스의 실제 렌더링 크기를 측정 (뷰박스를 픽셀 크기와 동일하게 맞추기 위함)
+  useEffect(() => {
+    const el = cameraBoxRef.current;
+    if (!el) return;
+
+    const updateSize = () => {
+      const rect = el.getBoundingClientRect();
+      setBoxSize({ width: rect.width, height: rect.height });
+    };
+
+    updateSize();
+
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(el);
+    return () => resizeObserver.disconnect();
   }, []);
 
   useEffect(() => {
@@ -67,6 +86,7 @@ export default function CameraPage() {
       setPhase('result');
     };
     mediaRecorder.start();
+    setRecordingProgress(0);
     setPhase('recording');
   };
 
@@ -74,6 +94,16 @@ export default function CameraPage() {
     mediaRecorderRef.current?.stop();
     streamRef.current?.getTracks().forEach(track => track.stop());
   };
+
+  // 게이지 계산: 실제 박스 크기(boxSize) 기준으로 rect를 그리므로
+  // 카메라 화면 비율이 어떻든 테두리와 정확히 일치함
+  const strokeWidth = 8; // 게이지 선 두께
+  const strokeInset = strokeWidth / 2; // 선이 박스 밖으로 잘리지 않도록 두께의 절반만큼 안쪽으로 이동
+  const cornerRadius = 24 - strokeInset; // 기존 borderRadius 24px에 strokeInset 반영
+  const gaugeWidth = Math.max(boxSize.width - strokeInset * 2, 0);
+  const gaugeHeight = Math.max(boxSize.height - strokeInset * 2, 0);
+  const perimeter =
+    2 * (gaugeWidth + gaugeHeight) - 8 * cornerRadius + 2 * Math.PI * cornerRadius;
 
   return (
     <div style={{
@@ -89,14 +119,17 @@ export default function CameraPage() {
     }}>
 
       {/* 카메라 영역 */}
-      <div style={{
-        position: 'relative',
-        width: '92%',
-        height: '80dvh',
-        borderRadius: '24px',
-        overflow: 'hidden',
-        border: phase === 'recording' ? 'none' : '2px solid #7C3AED',
-      }}>
+      <div
+        ref={cameraBoxRef}
+        style={{
+          position: 'relative',
+          width: '92%',
+          height: '80dvh',
+          borderRadius: '24px',
+          overflow: 'hidden',
+          border: phase === 'recording' ? 'none' : '2px solid #7C3AED',
+        }}
+      >
         {/* 카메라 미리보기 */}
         {phase !== 'result' && (
           <video
@@ -165,33 +198,34 @@ export default function CameraPage() {
                 textShadow: 'none',
               }}>촬영 중</span>
             </div>
-            {/* 게이지 */}
-            {/* <svg style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              pointerEvents: 'none',
-            }} viewBox="0 0 312 556">
-              //게이지
-              <rect
-                x="2" y="2"
-                width="308" height="552"
-                rx="22" ry="22"
-                fill="none"
-                stroke="#7C3AED"
-                strokeWidth="3"
-                strokeDasharray={`${(recordingProgress / 100) * (2 * (308 + 552))} 9999`}
-                strokeLinecap="round"
-              />
-            </svg>
-            */}
-            <style>{`
-              @keyframes gauge {
-                from { stroke-dashoffset: 392; }
-                to { stroke-dashoffset: 0; }
-              }
-            `}</style>
+            {/* 게이지 - 카메라 박스의 실제 픽셀 크기를 viewBox로 그대로 사용해서
+                비율/모서리 왜곡 없이 테두리를 따라 정확히 채워지도록 함 */}
+            {boxSize.width > 0 && boxSize.height > 0 && (
+              <svg
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  pointerEvents: 'none',
+                }}
+                viewBox={`0 0 ${boxSize.width} ${boxSize.height}`}
+              >
+                <rect
+                  x={strokeInset}
+                  y={strokeInset}
+                  width={gaugeWidth}
+                  height={gaugeHeight}
+                  rx={cornerRadius}
+                  ry={cornerRadius}
+                  fill="none"
+                  stroke="#7C3AED"
+                  strokeWidth={strokeWidth}
+                  strokeDasharray={`${(recordingProgress / 100) * perimeter} 9999`}
+                  strokeLinecap="round"
+                />
+              </svg>
+            )}
           </>
         )}
 

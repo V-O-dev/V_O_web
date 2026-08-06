@@ -9,15 +9,29 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChan
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { value, onChange, placeholder = '', minWidth = 100, paddingRight = 10, style, ...rest },
+  { value, onChange, placeholder = '', minWidth = 40, paddingRight = 16, style, ...rest },
   ref
 ) {
+  // 🎯 외부 style에서 fontSize가 넘어오면 사용하고, 없으면 기본 32px 사용
+  const parsedFontSize = useMemo(() => {
+    if (style?.fontSize) {
+      return typeof style.fontSize === 'number'
+        ? style.fontSize
+        : parseInt(String(style.fontSize), 10) || 32;
+    }
+    return 32;
+  }, [style?.fontSize]);
+
   const textWidth = useMemo(() => {
+    // 🎯 문자별 너비 배율 조정
     const charWidths: { [key: string]: number } = {
       default: 0.5,
-      '가-힣': 1,
-      'A-Z': 0.7,
-      '0-9': 0.6,
+      'ㄱ-ㅎ': 0.85,  // 🌟 낱자 자음 (밑줄 길이를 더 여유 있게 고정/확장)
+      'ㅏ-ㅣ': 0.75,  // 🌟 낱자 모음
+      '가-힣': 0.72,  // 🌟 완성형 한글 (기존 1.0 -> 0.72로 줄여서 과하게 길어지는 것 방지)
+      'A-Z': 0.65,
+      'a-z': 0.55,
+      '0-9': 0.55,
     };
 
     let totalWidthMultiplier = 0;
@@ -36,10 +50,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     return totalWidthMultiplier;
   }, [value]);
 
-  const fontSize = 32;
-  const computedTextWidth = textWidth * fontSize;
+  const computedTextWidth = textWidth * parsedFontSize;
   const inputWidth = computedTextWidth + paddingRight;
-  const finalInputWidth = Math.max(inputWidth, Number(minWidth));
+  const finalInputWidth = Math.max(inputWidth, Number(minWidth) || 40);
+
+  // 🎯 external style의 width가 계산된 width를 덮어쓰지 않도록 분리
+  const { width, ...restStyle } = style || {};
 
   return (
     <input
@@ -55,15 +71,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         backgroundColor: 'transparent',
         textAlign: 'center',
         outline: 'none',
-        width: `${finalInputWidth}px`,
-        maxWidth: '340px',
         fontFamily: 'Manrope, sans-serif',
-        fontSize: '32px',
+        fontSize: `${parsedFontSize}px`,
         fontWeight: '600',
         color: '#0F0F0F',
-        ...style,
+        ...restStyle,
+        width: `${finalInputWidth}px`, // 🎯 동적 계산 너비를 최우선 반영
+        maxWidth: '340px',
       }}
-      className="transition-colors focus:border-[#7E49E9] placeholder-gray-300"
+      className="transition-all focus:border-[#7E49E9] placeholder-gray-300"
       {...rest}
     />
   );
