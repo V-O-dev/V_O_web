@@ -4,8 +4,11 @@ export function HomeBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isHome = location.pathname === '/';
+  const isHome = location.pathname === '/' || location.pathname === '/home';
   const isCalendar = location.pathname === '/calendar';
+
+  // 현재 페이지에 맞는 아이콘 세트 선택 (홈 화면: _h, 달력 화면: _c)
+  const iconSuffix = isCalendar ? 'c' : 'h';
 
   return (
     <nav
@@ -61,7 +64,7 @@ export function HomeBottomNav() {
             }}
           >
             <img
-              src="/home_button.svg"
+              src={`/home_button_${iconSuffix}.svg`}
               alt="홈"
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
@@ -102,7 +105,7 @@ export function HomeBottomNav() {
             }}
           >
             <img
-              src="/calender_button.svg"
+              src={`/calendar_button_${iconSuffix}.svg`}
               alt="나의 달력"
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
