@@ -36,7 +36,7 @@ export default function GroupInvitePage() {
     });
   };
 
-  // 🎯 완료 버튼 클릭 시 GroupNamePage 경로로 이동
+  // 완료 버튼 클릭 시 이동
   const handleComplete = () => {
     navigate('/group/name', { 
       state: { 
@@ -66,7 +66,7 @@ export default function GroupInvitePage() {
       {/* 2. 중앙 컨텐츠 영역 */}
       <div style={{
         position: 'absolute',
-        top: '73.3px', 
+        top: '64px',
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
@@ -81,20 +81,20 @@ export default function GroupInvitePage() {
           src={heartIcon} 
           alt="하트 데코레이션" 
           style={{ 
-            marginTop: '30px', 
+            marginTop: '12px',
             width: '77.4px', 
             height: '39.6px', 
             objectFit: 'contain' 
           }} 
         />
 
-        {/* 타이틀 */}
+        {/* "내 초대코드" 타이틀 */}
         <h1 style={{
           fontFamily: 'Manrope, sans-serif',
           fontSize: '20px',
           fontWeight: 500,
           color: '#0F0F0F',
-          margin: '15px 0 0 0', 
+          margin: '8px 0 0 0',
           lineHeight: '30px',
           letterSpacing: '0em',
           textAlign: 'center'
@@ -105,8 +105,8 @@ export default function GroupInvitePage() {
         {/* QR 카드 배경 */}
         <div style={{
           marginTop: '20px', 
-          width: '240px',
-          height: '240px',
+          width: '260px',
+          height: '260px',
           backgroundColor: '#F5F2FF', 
           borderRadius: '24px',
           display: 'flex',
@@ -118,8 +118,8 @@ export default function GroupInvitePage() {
           <div style={{
             backgroundColor: '#ffffff',
             borderRadius: '18px',
-            width: '208px',
-            height: '208px',
+            width: '226px',
+            height: '226px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -128,7 +128,7 @@ export default function GroupInvitePage() {
           }}>
             <QRCodeSVG 
               value={`${window.location.origin}/join?code=${inviteCode}`} 
-              size={172} 
+              size={188} 
               fgColor="#000000"
               bgColor="#ffffff"
               level="M"
@@ -138,7 +138,7 @@ export default function GroupInvitePage() {
 
         {/* 초대코드 & 복사/체크 버튼 */}
         <div style={{
-          marginTop: '15px', 
+          marginTop: '22px', 
           display: 'flex',
           alignItems: 'center', 
           justifyContent: 'center',
@@ -214,22 +214,25 @@ export default function GroupInvitePage() {
           </button>
         </div>
 
-        {/* 하단 가이드 박스 */}
+        {/* 🎯 하단 가이드 박스 (초기화면 여백 최적화) */}
         <div style={{
-          marginTop: '16px', 
-          width: '272px', 
-          height: '52px',
+          marginTop: '24px', 
+          width: isCopied ? 'fit-content' : '264px', 
+          height: '56px',
           backgroundColor: '#FFFFFF',
-          borderRadius: '16px', 
-          padding: '0 16px',
+          borderRadius: '20px', 
+          padding: isCopied ? '4px 16px' : '4px 14px', 
           display: 'flex',
           alignItems: 'center',
-          gap: '12px', 
+          justifyContent: 'center',
+          gap: isCopied ? '12px' : '10px', 
           boxSizing: 'border-box',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
+          boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.10)',
+          transition: 'all 0.2s ease'
         }}>
           {isCopied ? (
             <>
+              {/* 복사 완료 아이콘 */}
               <div style={{
                 width: '24px',
                 height: '24px',
@@ -244,42 +247,60 @@ export default function GroupInvitePage() {
                   <path d="M1.5 5L4.8 8.3L11.5 1.7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <span style={{ 
-                fontFamily: 'Manrope, sans-serif',
-                fontWeight: 500,        
-                fontSize: '13px',       
-                lineHeight: '19.5px',   
-                letterSpacing: '-0.1px',
-                color: '#000000',       
-                whiteSpace: 'nowrap' 
+
+              {/* 복사 완료 텍스트 + 초록 점 */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
               }}>
-                초대코드가 복사됐어요
-              </span>
+                <span style={{ 
+                  fontFamily: 'Manrope, sans-serif',
+                  fontWeight: 500,        
+                  fontSize: '13px',       
+                  lineHeight: '19.5px',   
+                  letterSpacing: '-0.1px',
+                  color: '#000000',       
+                  whiteSpace: 'nowrap' 
+                }}>
+                  초대코드가 복사됐어요
+                </span>
+
+                <div style={{
+                  width: '4px',
+                  height: '4px',
+                  backgroundColor: '#10B981',
+                  borderRadius: '50%',
+                  flexShrink: 0
+                }} />
+              </div>
             </>
           ) : (
             <>
+              {/* 🎯 초기화면: 아이콘 30px로 확대 */}
               <img 
                 src={qrGuideIcon} 
                 alt="안내" 
                 style={{ 
-                  width: '24px', 
-                  height: '24px',
+                  width: '30px', 
+                  height: '30px',
                   objectFit: 'contain',
                   flexShrink: 0
                 }} 
               />
+
+              {/* 🎯 초기화면: 폰트 사이즈 및 간격 확장으로 넓게 채움 */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
                 fontFamily: 'Manrope, sans-serif',
-                fontSize: '11px',
-                lineHeight: '15px' 
+                lineHeight: '1.25'
               }}>
-                <span style={{ fontWeight: 600, color: '#0F0F0F', whiteSpace: 'nowrap' }}>
+                <span style={{ fontWeight: 600, fontSize: '12.5px', color: '#0F0F0F', whiteSpace: 'nowrap' }}>
                   QR코드를 스캔하면
                 </span>
-                <span style={{ fontWeight: 400, color: '#989898', whiteSpace: 'nowrap' }}>
+                <span style={{ fontWeight: 400, fontSize: '11.5px', color: '#8E8E93', whiteSpace: 'nowrap', marginTop: '2px' }}>
                   친구가 바로 V_O에 참여할 수 있어요!
                 </span>
               </div>

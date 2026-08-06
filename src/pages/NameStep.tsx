@@ -147,10 +147,11 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
           value={name}
           onChange={(e) => validateName(e.target.value)}
           placeholder=""
+          minWidth={40} // 🎯 빈 값일 때 최소 밑줄 너비 (필요시 조절)
           style={{
-            width: '100%',
+            // 🎯 width: '100%' 제거! (동적 width 계산 반영을 위함)
             fontFamily: 'Manrope, sans-serif',
-            fontSize: '20px',
+            fontSize: '20px', // 인풋 폰트 크기를 20px로 쓰고 싶다면 Input.tsx도 함께 보완
             fontWeight: 500,
             textAlign: 'center',
             backgroundColor: 'transparent',
