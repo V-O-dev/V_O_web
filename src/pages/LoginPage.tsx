@@ -5,10 +5,12 @@ import naverIcon from '../assets/naver_icon.svg';
 import googleIcon from '../assets/google_icon.svg'; 
 
 export default function LoginPage() {
-  // 🎯 백엔드에서 제공한 소셜 로그인 시작 URL
-  const KAKAO_AUTH_URL = "https://54.206.52.35.nip.io/api/v1/auth/dev/login/kakao";
-  const NAVER_AUTH_URL = "https://54.206.52.35.nip.io/api/v1/auth/dev/login/naver";
-  const GOOGLE_AUTH_URL = "https://54.206.52.35.nip.io/api/v1/auth/dev/login/google";
+  // 🎯 백엔드에서 지정한 소셜 로그인 URL 규격 (?redirectUri=... 전달)
+  const BASE_URL = "https://54.206.52.35.nip.io/api/v1/auth/oauth";
+
+  const KAKAO_AUTH_URL = `${BASE_URL}/kakao/login?redirectUri=http://localhost:5173/oauth/kakao`;
+  const NAVER_AUTH_URL = `${BASE_URL}/naver/login?redirectUri=http://localhost:5173/oauth/naver`;
+  const GOOGLE_AUTH_URL = `${BASE_URL}/google/login?redirectUri=http://localhost:5173/oauth/google`;
 
   const handleKakaoLogin = () => {
     window.location.href = KAKAO_AUTH_URL;
@@ -35,7 +37,7 @@ export default function LoginPage() {
       overflow: 'hidden'
     }}>
 
-      {/* 1. 브랜드 로고 (크기: 93.6 x 51) */}
+      {/* 1. 브랜드 로고 */}
       <div style={{
         position: 'absolute',
         top: '190px',

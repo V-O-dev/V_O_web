@@ -4,6 +4,7 @@ import { Header } from '../components/common/Header';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import errorIcon from '../assets/error_icon.svg'; 
+import { useAuthStore } from '../stores/useAuthStore'; // 🎯 스토어 추가
 
 interface NameStepProps {
   onNext?: (name: string) => void;
@@ -12,7 +13,10 @@ interface NameStepProps {
 
 export default function NameStep({ onNext, onBack }: NameStepProps) {
   const navigate = useNavigate();
-  const [name, setName] = useState('');
+  const setSignupNickname = useAuthStore((state) => state.setSignupNickname); // 🎯 스토어 함수
+  const signupNickname = useAuthStore((state) => state.signupProgress.nickname);
+
+  const [name, setName] = useState(signupNickname || '');
   const [errorMsg, setErrorMsg] = useState('');
   const [isValid, setIsValid] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,9 +66,10 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
     setIsValid(true);
   };
 
-  // 계속 버튼 핸들러
   const handleNextSubmit = () => {
     if (!isValid) return; 
+
+    setSignupNickname(name); // 🎯 Zustand signupProgress에 닉네임 저장
 
     if (onNext) {
       onNext(name);
@@ -73,7 +78,6 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
     }
   };
 
-  // 뒤로가기 버튼 핸들러
   const handleBackSubmit = () => {
     if (onBack) {
       onBack();
@@ -98,10 +102,8 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
         overflow: 'hidden',
       }}
     >
-      {/* 1. 헤더 영역 */}
       <Header showBackButton={true} onBackClick={handleBackSubmit} />
 
-      {/* 2. 타이틀 영역 */}
       <div
         style={{
           position: 'absolute',
@@ -128,7 +130,6 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
         </h1>
       </div>
 
-      {/* 3. 인풋 입력 영역 */}
       <div
         style={{
           position: 'absolute',
@@ -147,11 +148,10 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
           value={name}
           onChange={(e) => validateName(e.target.value)}
           placeholder=""
-          minWidth={40} // 🎯 빈 값일 때 최소 밑줄 너비 (필요시 조절)
+          minWidth={40}
           style={{
-            // 🎯 width: '100%' 제거! (동적 width 계산 반영을 위함)
             fontFamily: 'Manrope, sans-serif',
-            fontSize: '20px', // 인풋 폰트 크기를 20px로 쓰고 싶다면 Input.tsx도 함께 보완
+            fontSize: '20px',
             fontWeight: 500,
             textAlign: 'center',
             backgroundColor: 'transparent',
@@ -160,7 +160,6 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
         />
       </div>
 
-      {/* 4. 안내 및 에러 메시지 영역 */}
       <div 
         style={{ 
           position: 'absolute',
@@ -217,7 +216,6 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
         )}
       </div>
 
-      {/* 5. 하단 고정 버튼 영역 */}
       <div
         style={{
           position: 'absolute',
@@ -245,7 +243,6 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
         </div>
       </div>
 
-      {/* 6. 바닥 여백 영역 */}
       <div style={{ position: 'absolute', bottom: 0, height: '94px', width: '100%' }} />
     </div>
   );
