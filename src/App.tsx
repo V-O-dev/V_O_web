@@ -16,6 +16,8 @@ import ProfilePage from "./pages/ProfilePage";
 import GroupPage from "./pages/GroupPage";
 import EditNicknamePage from "./pages/EditNicknamePage";
 import AlertPage from "./pages/AlertPage";
+import FeedPage from "./pages/FeedPage";
+import AllGroupPage from "./pages/AllGroupPage";
 
 // 그룹 생성 플로우 관련 페이지
 import GroupMainPage from "./pages/GroupMainPage";
@@ -41,7 +43,7 @@ function App() {
         {/* 시작 및 로그인 플로우 */}
         <Route path="/" element={<StartPage />} />
         <Route path="/login" element={<LoginPage />} />
-        
+
         {/* 🎯 소셜 로그인 콜백 (카카오/구글/네이버 통합 처리) */}
         <Route path="/oauth/:provider" element={<AuthCallbackPage />} />
 
@@ -57,7 +59,10 @@ function App() {
         <Route path="/group/examples" element={<GroupExamplesPage />} />
         <Route path="/group/complete" element={<GroupThemeCompletePage />} />
         <Route path="/group/time-picker" element={<TimePickerPage />} />
-        <Route path="/group/create-complete" element={<GroupCreateCompletePage />} />
+        <Route
+          path="/group/create-complete"
+          element={<GroupCreateCompletePage />}
+        />
         <Route path="/group/invite" element={<GroupInvitePage />} />
         <Route path="/group/invite-share" element={<GroupInviteSharePage />} />
         <Route path="/group/name" element={<GroupNamePage />} />
@@ -68,6 +73,8 @@ function App() {
         <Route path="/group/:groupId" element={<GroupPage />} />
         <Route path="/edit-nickname/:userId" element={<EditNicknamePage />} />
         <Route path="/alert" element={<AlertPage />} />
+        <Route path="/allGroup" element={<AllGroupPage />} />
+        <Route path="/feed" element={<FeedPage />} />
 
         {/* 촬영 / 달력 / 기타 */}
         <Route path="/splash" element={<SplashPage />} />

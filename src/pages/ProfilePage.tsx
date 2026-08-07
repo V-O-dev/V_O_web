@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ProfilePage.css";
 import { SubPageHeader } from "@/components/common/SubHeader";
 import {
@@ -16,9 +17,12 @@ import exitIcon from "@/assets/profile/exit_icon.svg";
 import removeIcon from "@/assets/profile/remove_icon.svg";
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
+
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -31,10 +35,31 @@ export default function ProfilePage() {
     key: "dailyQuestionNotificationEnabled" | "interactionNotificationEnabled"
   ) => {
     if (!profile) return;
-    setProfile({
-      ...profile,
-      [key]: !profile[key],
-    });
+
+    const currentVal = profile[key];
+
+    // 오늘의 질문 알림이 켜진(true) 상태에서 끌 때만 모달 오픈
+    if (key === "dailyQuestionNotificationEnabled" && currentVal === true) {
+      setShowNotificationModal(true);
+    } else {
+      setProfile({
+        ...profile,
+        [key]: !currentVal,
+      });
+    }
+  };
+
+  // 👈 아래 함수 2개 추가
+  // 모달 '확인' 클릭 시 실제 알림 꺼짐 처리
+  const handleConfirmTurnOff = () => {
+    if (!profile) return;
+    setProfile({ ...profile, dailyQuestionNotificationEnabled: false });
+    setShowNotificationModal(false);
+  };
+
+  // 모달 '취소' 클릭 시 모달만 닫기
+  const handleCancelTurnOff = () => {
+    setShowNotificationModal(false);
   };
 
   const handleSaveProfile = () => {
@@ -84,9 +109,7 @@ export default function ProfilePage() {
           <div className="profile-avatar-container">
             <div className="profile-avatar-main">
               <img
-                src={
-                  profile.profileImageUrl || profileIcon
-                }
+                src={profile.profileImageUrl || profileIcon}
                 alt="프로필"
                 className="profile-avatar-img"
               />
@@ -198,6 +221,29 @@ export default function ProfilePage() {
           </div>
 
           <div className="profile-section">
+            <div className="profile-card">
+              <button
+                type="button"
+                className="profile-row-btn"
+                onClick={() => navigate("/Allgroup")}
+              >
+                <div className="profile-row-left">
+                  <div className="profile-icon-bg bg-purple">
+                    <img
+                      src={profileIcon}
+                      alt="그룹 관리"
+                      className="profile-row-icon-img"
+                    />
+                  </div>
+                  <div className="profile-row-text">
+                    <h4>그룹 관리</h4>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div className="profile-section">
             <div className="profile-card danger-card">
               <button
                 className="profile-row-btn"
@@ -240,6 +286,33 @@ export default function ProfilePage() {
               </button>
             </div>
           </div>
+
+          {showNotificationModal && (
+            <div className="profile-modal-overlay">
+              <div className="profile-modal-content">
+                <h3 className="profile-modal-title">오늘의 질문 알림</h3>
+                <p className="profile-modal-desc">
+                  오늘의 질문 알림이 꺼졌어요.
+                  <br />
+                  언제든 설정에서 다시 켤 수 있어요.
+                </p>
+                <div className="profile-modal-actions">
+                  <button
+                    className="profile-modal-btn btn-cancel"
+                    onClick={handleCancelTurnOff}
+                  >
+                    취소
+                  </button>
+                  <button
+                    className="profile-modal-btn btn-confirm"
+                    onClick={handleConfirmTurnOff}
+                  >
+                    ✓ 확인
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./HomePage.css";
 
 import { HomeHeader } from "../components/common/HomeHeader";
 import { HomeBottomNav } from "../components/common/HomeBottomNav";
@@ -13,14 +12,16 @@ import {
   MOCK_VIDEOS,
 } from "../types/home";
 
+import "./HomePage.css";
+
 import purpleFrame from "@/assets/home/purple_frame.svg";
 import videoButton from "@/assets/home/video_button.svg";
 import character from "@/assets/home/character.svg";
 import lockIcon from "@/assets/home/lock_icon.svg";
 import heartIcon from "@/assets/home/heart_icon.svg";
 import chatIcon from "@/assets/home/chat_icon.svg";
+import playIcon from "@/assets/home/play_icon.svg";
 import homeImg from "@/assets/home/home_img.svg";
-import heartImg from "@/assets/home/heart_img.svg";
 
 function HomeMainContent() {
   const navigate = useNavigate();
@@ -46,12 +47,6 @@ function HomeMainContent() {
 
   const isFeedEmpty = filteredFeeds.length === 0;
 
-  const getGroupIconSrc = (group: PrivateGroupData) => {
-    if (group.groupImageUrl) return group.groupImageUrl;
-    if (group.name === "가족") return homeImg;
-    return heartImg;
-  };
-
   return (
     <div className="home-container">
       <div className="home-category-scroll">
@@ -61,7 +56,7 @@ function HomeMainContent() {
               selectedTabId === 0 ? "tab-active" : ""
             }`}
           >
-            <div className="home-circle home-active-circle">V_O</div>
+            <div className="home-circle">V_O</div>
           </div>
           <span className="home-category-name">전체</span>
         </div>
@@ -82,9 +77,9 @@ function HomeMainContent() {
               >
                 <div className="home-circle home-group-circle">
                   <img
-                    src={getGroupIconSrc(group)}
+                    src={group.groupImageUrl}
                     alt={group.name}
-                    style={{ width: "24px", height: "24px" }}
+                    className="home-group-img"
                     onError={(e) => {
                       e.currentTarget.src = homeImg;
                     }}
@@ -105,11 +100,10 @@ function HomeMainContent() {
               +
             </button>
           </div>
-          <span className="home-add-name">추가</span>
+          <span className="home-category-name">추가</span>
         </div>
       </div>
 
-      {/* 그룹 질문 유도 배너 (특정 그룹 선택 & 미답변 상태 시 노출) */}
       {selectedTabId !== 0 && !isCurrentGroupAnswered && (
         <div className="home-group-question-banner">
           <img
@@ -125,7 +119,7 @@ function HomeMainContent() {
               {currentGroup?.name} 그룹 질문을 확인해주세요
             </p>
             <button
-              className="home-banner-camera-btn" /*영상촬영 페이지 이동 추가하기*/
+              className="home-banner-camera-btn"
               onClick={() => navigate("/splash")}
             >
               <img
@@ -139,13 +133,10 @@ function HomeMainContent() {
         </div>
       )}
 
+      {/* 피드 빈 상태 / 피드 목록 분기 처리 */}
       {isFeedEmpty ? (
         <div className="home-waiting-content">
-          <img
-            src={character}
-            alt="대기 캐릭터"
-            className="home-waiting-img"
-          />
+          <img src={character} alt="대기 캐릭터" className="home-waiting-img" />
           <h2 className="home-main-title">오늘의 질문을 기다리는 중이에요</h2>
         </div>
       ) : (
@@ -157,12 +148,6 @@ function HomeMainContent() {
                   ? "전체 그룹 답변 피드"
                   : `${currentGroup?.name} 그룹 답변 피드`}
               </span>
-
-              {selectedTabId === 0 && (
-                <span className="home-feed-count-badge">
-                  {filteredFeeds.length}개
-                </span>
-              )}
             </div>
 
             {selectedTabId !== 0 && (
@@ -176,10 +161,9 @@ function HomeMainContent() {
           </div>
 
           {filteredFeeds.map((feed) => {
-            // 내가 안 올렸거나 videoUrl이 없으면 영상 블러/잠금 처리
             const isLocked = !isCurrentGroupAnswered;
-
             const displayName = feed.user.customName || feed.user.nickname;
+
             return (
               <div key={feed.id} className="home-feed-card">
                 <div className="home-card-profile-row">
@@ -197,17 +181,17 @@ function HomeMainContent() {
                 </div>
 
                 <div
-                  className="home-card-video-viewport"
+                  className={`home-card-video-viewport ${
+                    !isLocked ? "unlocked" : ""
+                  }`}
                   onClick={() => {
-                    // 잠기지 않은 영상일 때만 클릭 시 상세 페이지로 이동
                     if (!isLocked) {
-                      navigate(`/video/${feed.id}`);
+                      navigate("/feed");
                     }
                   }}
-                  style={{ cursor: isLocked ? "default" : "pointer" }}
                 >
                   {isLocked ? (
-                    <div className="home-video-placeholder-bg">
+                    <div className="home-video-container">
                       <video
                         src={feed.videoUrl || undefined}
                         poster={feed.thumbnailUrl || undefined}
@@ -230,7 +214,7 @@ function HomeMainContent() {
                             className="home-lock-action-btn"
                             onClick={(e) => {
                               e.stopPropagation();
-                              // 답변 작성 로직
+                              navigate("/splash");
                             }}
                           >
                             지금 답변하기 →
@@ -239,24 +223,39 @@ function HomeMainContent() {
                       </div>
                     </div>
                   ) : (
-                    <div className="home-video-active-player">
+                    <div className="home-video-container">
                       <video
                         src={feed.videoUrl!}
                         poster={feed.thumbnailUrl || undefined}
-                        controls
                         className="home-video-element"
                       />
+
+                      <div className="home-play-overlay">
+                        <img
+                          src={playIcon}
+                          alt="재생"
+                          className="home-play-icon"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
 
                 <div className="home-card-reaction-bar">
                   <div className="home-reaction-item">
-                    <img src={heartIcon} alt="좋아요" />
+                    <img
+                      src={heartIcon}
+                      alt="좋아요"
+                      className="home-reaction-icon"
+                    />
                     <span>{feed.likesCount}</span>
                   </div>
                   <div className="home-reaction-item">
-                    <img src={chatIcon} alt="댓글" />
+                    <img
+                      src={chatIcon}
+                      alt="댓글"
+                      className="home-reaction-icon"
+                    />
                     <span>{feed.commentsCount}</span>
                   </div>
                 </div>
