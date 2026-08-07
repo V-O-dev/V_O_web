@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 // 시작 및 인증 관련 페이지
 import StartPage from "./pages/StartPage";
 import LoginPage from "./pages/LoginPage";
-import AuthCallbackPage from "./pages/AuthCallbackPage"; // 🎯 OAuth 콜백 처리 페이지 추가
+import AuthCallbackPage from "./pages/AuthCallbackPage"; // 🎯 OAuth 콜백 처리 페이지
 
 // 회원가입 단계별 스텝 페이지
 import ProfileStep from "./pages/ProfileStep";

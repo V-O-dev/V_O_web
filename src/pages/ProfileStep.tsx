@@ -4,6 +4,7 @@ import { Header } from '../components/common/Header';
 import { Button } from '../components/common/Button'; 
 import defaultProfileImg from '../assets/profile_default.svg'; 
 import cameraIcon from '../assets/camera_icon.svg'; 
+import { useAuthStore } from '../stores/useAuthStore'; // 🎯 스토어 추가
 
 interface ProfileStepProps {
   onNext?: () => void;
@@ -12,7 +13,10 @@ interface ProfileStepProps {
 
 export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
   const navigate = useNavigate();
-  const [profileImage, setProfileImage] = useState<string>(defaultProfileImg);
+  const setSignupProfile = useAuthStore((state) => state.setSignupProfile); // 🎯 스토어 함수 가져오기
+  const signupProfileImage = useAuthStore((state) => state.signupProgress.profileImage);
+
+  const [profileImage, setProfileImage] = useState<string>(signupProfileImage || defaultProfileImg);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleProfileClick = () => {
@@ -25,10 +29,10 @@ export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
       const file = files[0];
       const imageUrl = URL.createObjectURL(file);
       setProfileImage(imageUrl);
+      setSignupProfile(imageUrl); // 🎯 Zustand signupProgress에 이미지 URL 임시 저장
     }
   };
 
-  // 다음 버튼 클릭 핸들러
   const handleNextStep = () => {
     if (onNext) {
       onNext();
@@ -37,7 +41,6 @@ export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
     }
   };
 
-  // 뒤로가기 클릭 핸들러
   const handleBackSubmit = () => {
     if (onBack) {
       onBack();
@@ -62,10 +65,8 @@ export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
         overflow: 'hidden',
       }}
     >
-      {/* 1. 헤더 영역 (CompleteStep과 동일하게 showBackButton 및 onBackClick 적용) */}
       <Header showBackButton={true} onBackClick={handleBackSubmit} />
 
-      {/* 파일 인풋 (숨김) */}
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -74,7 +75,6 @@ export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
         style={{ display: 'none' }} 
       />
 
-      {/* 2. 타이틀 영역 */}
       <div
         style={{
           position: 'absolute',
@@ -101,7 +101,6 @@ export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
         </h1>
       </div>
 
-      {/* 3. 프로필 이미지 / 카메라 아이콘 영역 */}
       <div
         onClick={handleProfileClick}
         style={{
@@ -165,7 +164,6 @@ export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
         </div>
       </div>
 
-      {/* 4. 서브설명 문구 */}
       <div
         style={{
           position: 'absolute',
@@ -192,7 +190,6 @@ export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
         </p>
       </div>
 
-      {/* 5. 하단 고정 버튼 영역 (CompleteStep과 동일한 수치 적용) */}
       <div
         style={{
           position: 'absolute',
@@ -216,7 +213,6 @@ export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
         </div>
       </div>
 
-      {/* 6. 바닥 여백 영역 */}
       <div style={{ position: 'absolute', bottom: 0, height: '94px', width: '100%' }} />
     </div>
   );
