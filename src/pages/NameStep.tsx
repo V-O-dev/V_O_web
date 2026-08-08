@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../components/common/Header';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import errorIcon from '../assets/error_icon.svg'; 
-import { useAuthStore } from '../stores/useAuthStore'; // 🎯 스토어 추가
+import { useAuthStore } from '../stores/useAuthStore';
+import { axiosInstance } from '../apis/axiosInstance'; // axiosInstance 경로 프로젝트 구조 확인
 
 interface NameStepProps {
   onNext?: (name: string) => void;
@@ -13,12 +14,14 @@ interface NameStepProps {
 
 export default function NameStep({ onNext, onBack }: NameStepProps) {
   const navigate = useNavigate();
-  const setSignupNickname = useAuthStore((state) => state.setSignupNickname); // 🎯 스토어 함수
+  const location = useLocation();
+  const setSignupNickname = useAuthStore((state) => state.setSignupNickname);
   const signupNickname = useAuthStore((state) => state.signupProgress.nickname);
 
   const [name, setName] = useState(signupNickname || '');
   const [errorMsg, setErrorMsg] = useState('');
   const [isValid, setIsValid] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -66,15 +69,44 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
     setIsValid(true);
   };
 
-  const handleNextSubmit = () => {
-    if (!isValid) return; 
+  // 🎯 온보딩 프로필 생성 API 호출 핸들러
+  const handleNextSubmit = async () => {
+    if (!isValid || isSubmitting) return;
 
-    setSignupNickname(name); // 🎯 Zustand signupProgress에 닉네임 저장
+    try {
+      setIsSubmitting(true);
+      setSignupNickname(name);
 
-    if (onNext) {
-      onNext(name);
-    } else {
-      navigate('/signup/complete');
+      const formData = new FormData();
+      // 이전 스텝(ProfileStep)에서 전달받은 이미지 파일이 있다면 append
+      const profileFile = location.state?.profileFile;
+      if (profileFile) {
+        formData.append('image', profileFile);
+      }
+
+      // 🎯 POST /api/v1/users/me/profile?nickname=홍길동 (timeout 30초 지정)
+      await axiosInstance.post('/api/v1/users/me/profile', formData, {
+        params: { nickname: name },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 30000, // 30초 타임아웃 지정
+      });
+
+      console.log('온보딩 프로필 생성 성공!');
+
+      if (onNext) {
+        onNext(name);
+      } else {
+        navigate('/signup/complete');
+      }
+    } catch (error: any) {
+      console.error('온보딩 프로필 생성 실패:', error);
+      const serverMsg = error.response?.data?.message || '프로필 생성 중 오류가 발생했습니다.';
+      setErrorMsg(serverMsg);
+      setIsValid(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -228,7 +260,7 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
           justifyContent: 'center',
           alignItems: 'center',
           boxSizing: 'border-box',
-          opacity: isValid ? 1 : 0.5,
+          opacity: isValid && !isSubmitting ? 1 : 0.5,
           transition: 'opacity 0.2s ease',
         }}
       >
@@ -236,7 +268,7 @@ export default function NameStep({ onNext, onBack }: NameStepProps) {
           <Button
             type="button"
             onClick={handleNextSubmit} 
-            disabled={!isValid} 
+            disabled={!isValid || isSubmitting} 
             text="계속"
             style={{ width: '312px', height: '48px' }}
           />

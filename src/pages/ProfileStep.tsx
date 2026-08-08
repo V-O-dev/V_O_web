@@ -4,7 +4,7 @@ import { Header } from '../components/common/Header';
 import { Button } from '../components/common/Button'; 
 import defaultProfileImg from '../assets/profile_default.svg'; 
 import cameraIcon from '../assets/camera_icon.svg'; 
-import { useAuthStore } from '../stores/useAuthStore'; // 🎯 스토어 추가
+import { useAuthStore } from '../stores/useAuthStore';
 
 interface ProfileStepProps {
   onNext?: () => void;
@@ -13,10 +13,11 @@ interface ProfileStepProps {
 
 export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
   const navigate = useNavigate();
-  const setSignupProfile = useAuthStore((state) => state.setSignupProfile); // 🎯 스토어 함수 가져오기
+  const setSignupProfile = useAuthStore((state) => state.setSignupProfile);
   const signupProfileImage = useAuthStore((state) => state.signupProgress.profileImage);
 
   const [profileImage, setProfileImage] = useState<string>(signupProfileImage || defaultProfileImg);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleProfileClick = () => {
@@ -27,17 +28,29 @@ export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
     const files = e.target.files;
     if (files && files[0]) {
       const file = files[0];
+      setSelectedFile(file);
+
       const imageUrl = URL.createObjectURL(file);
       setProfileImage(imageUrl);
-      setSignupProfile(imageUrl); // 🎯 Zustand signupProgress에 이미지 URL 임시 저장
+      
+      // Zustand 스토어에 미리보기 URL 및 File 객체 임시 저장
+      if (typeof setSignupProfile === 'function') {
+        setSignupProfile(imageUrl, file);
+      }
     }
   };
 
+  // 🎯 API 호출 없이 다음 네임스텝으로 이동 (파일 정보 전달)
   const handleNextStep = () => {
     if (onNext) {
       onNext();
     } else {
-      navigate('/signup/name');
+      navigate('/signup/name', {
+        state: {
+          profileFile: selectedFile,
+          profileImageUrl: profileImage
+        }
+      });
     }
   };
 
