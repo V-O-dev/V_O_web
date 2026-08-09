@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./AlertPage.css";
 import { SubPageHeader } from "../components/common/SubHeader";
 
-import { AppNotification, MOCK_NOTIFICATIONS } from "@/types/notification";
+import { AppNotification } from "@/types/notification";
+import { fetchNotifications, markNotificationAsRead } from "@/apis/api";
 
 import profileIcon from "@/assets/home/profile.svg";
 import heartColorIcon from "@/assets/alert/heart_colorIcon.svg";
@@ -10,13 +12,47 @@ import chatColorIcon from "@/assets/alert/chat_colorIcon.svg";
 import videoIcon from "@/assets/alert/video_icon.svg";
 
 const AlertPage: React.FC = () => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
+  // 실제 백엔드 알림 목록 조회
   useEffect(() => {
-    setNotifications(MOCK_NOTIFICATIONS);
+    const loadNotifications = async () => {
+      try {
+        const data = await fetchNotifications();
+        setNotifications(data.notifications || []);
+      } catch (error) {
+        console.error("알림 목록을 불러오는 데 실패했습니다:", error);
+        setNotifications([]); // 실패 시 빈 배열로 안전 처리
+      }
+    };
+
+    loadNotifications();
   }, []);
 
-  // 디테일한 시간 텍스트 변환 및 섹션 타이틀 결정 함수
+  // 알림 클릭 시 읽음 처리 API 호출 + 관련 비디오 피드로 이동
+  const handleNotificationClick = async (item: AppNotification) => {
+    if (!item.isRead) {
+      try {
+        await markNotificationAsRead(item.notificationId);
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.notificationId === item.notificationId
+              ? { ...n, isRead: true }
+              : n
+          )
+        );
+      } catch (error) {
+        console.error("알림 읽음 처리 실패:", error);
+      }
+    }
+
+    if (item.relatedVideoId) {
+      navigate("/feed");
+    }
+  };
+
+  // 날짜 문자열 시간으로 변환 함수
   const getTimeInfo = (isoString: string) => {
     const now = new Date();
     const past = new Date(isoString);
@@ -60,7 +96,7 @@ const AlertPage: React.FC = () => {
     return { section: `${diffYears}년 전`, timeText: `${diffYears}년 전` };
   };
 
-  // 시간대 섹션별로 데이터 그룹화 처리
+  // 시간대 섹션별 알림 데이터 그룹화
   const getGroupedNotifications = () => {
     const groups: { [key: string]: AppNotification[] } = {};
 
@@ -84,18 +120,20 @@ const AlertPage: React.FC = () => {
 
   const renderCard = (item: AppNotification) => {
     const { timeText } = getTimeInfo(item.createdAt);
-    const isReaction = item.notificationType === "REACTION";
+    const isReaction = item.type === "REACTION";
 
     return (
       <div
-        key={item.id}
+        key={item.notificationId}
         className={`noti-card ${item.isRead ? "read" : "unread"}`}
+        onClick={() => handleNotificationClick(item)}
+        style={{ cursor: "pointer" }}
       >
         <div className="noti-avatar-container">
-          <div className={"noti-profile-img-container"}>
+          <div className="noti-profile-img-container">
             <img
               src={profileIcon}
-              alt={item.actor.nickname}
+              alt="프로필"
               className="noti-avatar-img"
               onError={(e) => {
                 e.currentTarget.src = profileIcon;
@@ -113,25 +151,15 @@ const AlertPage: React.FC = () => {
 
         <div className="noti-content-area">
           <div className="noti-text-main">
-            <span className="noti-sender">{item.actor.nickname}</span>
-            {isReaction ? (
-              <span className="noti-action-phrase">
-                님이 내 오늘 미디어 기록에 하트를 보냈습니다
-              </span>
-            ) : (
-              <span className="noti-action-phrase">님이 댓글을 남겼습니다</span>
-            )}
+            <span className="noti-action-phrase">{item.content}</span>
           </div>
 
-          {/* 댓글 알림일 경우에만 본문 문구 노출 */}
-          {!isReaction && <p className="noti-comment-body">'{item.body}'</p>}
-
           <span className="noti-time">
-            {timeText} - {item.group.name}
+            {timeText} - {item.groupName}
           </span>
         </div>
 
-        {item.video && (
+        {item.relatedVideoId && (
           <button className="noti-video-btn">
             <img
               src={videoIcon}
@@ -149,14 +177,16 @@ const AlertPage: React.FC = () => {
       <SubPageHeader title="알림" leftType="back" />
 
       <main className="noti-main-content">
-        {Object.keys(groupedData).map((sectionTitle) => (
-          <section key={sectionTitle} className="noti-section">
-            <h2 className="noti-section-title">{sectionTitle}</h2>
-            <div className="noti-card-group">
-              {groupedData[sectionTitle].map(renderCard)}
-            </div>
-          </section>
-        ))}
+        {Object.keys(groupedData).length === 0
+          ? null
+          : Object.keys(groupedData).map((sectionTitle) => (
+              <section key={sectionTitle} className="noti-section">
+                <h2 className="noti-section-title">{sectionTitle}</h2>
+                <div className="noti-card-group">
+                  {groupedData[sectionTitle].map(renderCard)}
+                </div>
+              </section>
+            ))}
       </main>
     </div>
   );

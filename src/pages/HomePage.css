@@ -1,4 +1,3 @@
-/* 최상위 래퍼 및 모바일 화면 규격 */
 .home-app-wrapper {
   width: 100%;
   height: 100%;
@@ -31,7 +30,6 @@
   box-sizing: border-box;
 }
 
-/* 상단 카테고리 스크롤 영역 */
 .home-category-scroll {
   width: 100%;
   height: 90px;
@@ -57,7 +55,6 @@
   cursor: pointer;
 }
 
-/* 탭 원형 프레임 & 그라데이션 보더 */
 .home-circle-icon-frame {
   width: 50px;
   height: 50px;
@@ -195,7 +192,6 @@
   letter-spacing: -0.01em;
 }
 
-/* 피드 빈 상태 */
 .home-waiting-content {
   width: 100%;
   flex: 1;
@@ -222,7 +218,6 @@
   margin-top: 16px;
 }
 
-/* 피드 스트림 목록 */
 .home-feed-stream {
   width: 100%;
   display: flex;
@@ -247,9 +242,9 @@
 }
 
 .home-feed-section-title {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
-  color: #000000;
+  color: #111013;
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
@@ -270,7 +265,6 @@
   justify-content: center;
 }
 
-/* 피드 카드 아이템 */
 .home-feed-card {
   background-color: #ffffff;
   width: 100%;
@@ -286,26 +280,91 @@
 }
 
 .home-card-profile-row {
-  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.home-profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.home-profile-text-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+
+.home-profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.home-profile-nickname {
+  font-size: 12px;
+  font-weight: 800;
+  color: #111013;
+  line-height: 1;
 }
 
 .home-card-group-tag {
-  position: absolute;
-  top: 5px;
-  left: 82px;
-  font-size: 9px;
-  background-color: #f3e8ff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ede8fd;
   color: #7b3ff2;
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-weight: 700;
+  border-radius: 10px;
+  line-height: 1;
+  padding: 4px 8px;
+  font-size: 8px;
   font-weight: 600;
+  border-radius: 12px;
+  margin: 0;
 }
 
-/* 비디오 영역 (일반 & 잠금) */
+.home-profile-time {
+  font-size: 8px;
+  color: #9491a8;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.home-feed-question-box {
+  width: 100%;
+  background-color: #f5f3ff;
+  border-radius: 14px;
+  padding: 7px 10px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.home-question-q {
+  color: #7b3ff2;
+  font-weight: 800;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.home-question-text {
+  color: #9491a8;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
 .home-card-video-viewport {
   width: 100%;
   height: 145px;
@@ -418,7 +477,6 @@
   display: block;
 }
 
-/* 반응 바 */
 .home-card-reaction-bar {
   display: flex;
   gap: 14px;

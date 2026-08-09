@@ -43,9 +43,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 16px;
-  background: rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(10px);
   z-index: 10;
   box-sizing: border-box;
 }
@@ -54,7 +54,9 @@
   width: 36px;
   height: 36px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: none;
   color: #ffffff;
   font-size: 20px;
