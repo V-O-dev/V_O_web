@@ -5,12 +5,15 @@ import naverIcon from '../assets/naver_icon.svg';
 import googleIcon from '../assets/google_icon.svg'; 
 
 export default function LoginPage() {
-  // 🎯 백엔드에서 지정한 소셜 로그인 URL 규격 (?redirectUri=... 전달)
   const BASE_URL = "https://54.206.52.35.nip.io/api/v1/auth/oauth";
 
-  const KAKAO_AUTH_URL = `${BASE_URL}/kakao/login?redirectUri=http://localhost:5173/oauth/kakao`;
-  const NAVER_AUTH_URL = `${BASE_URL}/naver/login?redirectUri=http://localhost:5173/oauth/naver`;
-  const GOOGLE_AUTH_URL = `${BASE_URL}/google/login?redirectUri=http://localhost:5173/oauth/google`;
+  // 🎯 현재 접속한 도메인(localhost 또는 Vercel 주소)을 자동으로 감지
+  const REDIRECT_BASE = window.location.origin;
+
+  // 로컬/배포 환경에 따라 redirectUri가 동적으로 변경됨
+  const KAKAO_AUTH_URL = `${BASE_URL}/kakao/login?redirectUri=${REDIRECT_BASE}/oauth/kakao`;
+  const NAVER_AUTH_URL = `${BASE_URL}/naver/login?redirectUri=${REDIRECT_BASE}/oauth/naver`;
+  const GOOGLE_AUTH_URL = `${BASE_URL}/google/login?redirectUri=${REDIRECT_BASE}/oauth/google`;
 
   const handleKakaoLogin = () => {
     window.location.href = KAKAO_AUTH_URL;
@@ -51,7 +54,7 @@ export default function LoginPage() {
       }}>
         <img 
           src={mainLogo} 
-          alt="v_O 로고" 
+          alt="V_O 로고" 
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
       </div>

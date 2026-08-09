@@ -1,55 +1,42 @@
-import { useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuthStore } from "../stores/useAuthStore";
 
 export default function AuthCallbackPage() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const isProcessed = useRef(false); // React 18 StrictMode 중복 실행 방지 Flag
+  const navigate = useNavigate();
+  const { login } = useAuthStore();
 
   useEffect(() => {
-    // 이미 처리가 끝났다면 중복 실행 방지
-    if (isProcessed.current) return;
+    // 1. URL 쿼리 스트링에서 토큰 및 신규 유저 여부 추출
+    const accessToken = searchParams.get("accessToken");
+    const refreshToken = searchParams.get("refreshToken");
+    const isNewUser = searchParams.get("isNewUser");
 
-    // 1. URL 쿼리 스트링에서 백엔드가 넘겨준 토큰 파싱
-    const accessToken = searchParams.get('accessToken');
-    const refreshToken = searchParams.get('refreshToken');
+    if (accessToken) {
+      // 2. 로컬 스토리지 및 Zustand 스토어 저장
+      localStorage.setItem("accessToken", accessToken);
+      if (refreshToken) {
+        localStorage.setItem("refreshToken", refreshToken);
+      }
 
-    // 2. 토큰 유효성 검증 및 저장 처리
-    if (accessToken && refreshToken) {
-      isProcessed.current = true;
+      login({ nickname: "", phoneNumber: "" }, accessToken, refreshToken || undefined);
 
-      // LocalStorage에 인증 토큰 저장
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-
-      navigate('/signup', { replace: true });
+      // 3. 신규 유저 여부에 따른 이동 경로 분기
+      if (isNewUser === "true") {
+        navigate("/signup/profile", { replace: true });
+      } else {
+        navigate("/group/create", { replace: true });
+      }
     } else {
-      // 쿼리 파라미터에 토큰이 누락된 예외 경우
-      console.error('로그인 인증 실패: URL 파라미터에 토큰이 존재하지 않습니다.');
-      alert('로그인 처리에 실패했습니다. 다시 시도해 주세요.');
-      navigate('/login', { replace: true });
+      alert("로그인 처리 중 오류가 발생했습니다.");
+      navigate("/login", { replace: true });
     }
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, login]);
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '100%',
-      height: '100vh',
-      backgroundColor: '#FFFFFF',
-      fontFamily: 'Manrope, sans-serif'
-    }}>
-      <p style={{ 
-        fontSize: '16px', 
-        color: '#7B3FF2', 
-        fontWeight: 600,
-        margin: 0 
-      }}>
-        로그인 처리 중입니다...
-      </p>
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+      <p>로그인 처리 중입니다...</p>
     </div>
   );
 }
