@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../components/common/Header';
-import { axiosInstance } from '../apis/axiosInstance'; // 프로젝트 구조에 맞게 경로 확인
+import { CustomToast } from '../components/common/CustomToast';
+import { axiosInstance } from '../apis/axiosInstance'; 
 
 // 에셋 임포트
 import heartIcon from '../assets/heart_icon.svg'; 
@@ -12,16 +13,31 @@ export default function GroupInviteSharePage() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // 🎯 이전 페이지에서 넘어온 초대코드 및 groupId
+  // 이전 페이지에서 넘어온 초대코드 및 groupId
   const inviteCode = location.state?.inviteCode; 
   const groupId = location.state?.groupId;
-  const shareUrl = `${window.location.origin}/join?code=${inviteCode || ''}`;
 
-  // QR 이미지 상태 관리
+  // 🎯 실제 배포된 Vercel 도메인 주소 적용
+  const PRODUCTION_URL = 'https://v-o-web-1fqd.vercel.app';
+  
+  // 🎯 카카오톡, 문자 등에서 바로 클릭 가능한 파란색 하이퍼링크 URL 생성
+  const shareUrl = `${PRODUCTION_URL}/join?code=${inviteCode || ''}`;
+
+  // QR 및 토스트 상태 관리
   const [qrImageUrl, setQrImageUrl] = useState<string>('');
   const [isQrLoading, setIsQrLoading] = useState<boolean>(true);
+  
+  const [toast, setToast] = useState<{ isOpen: boolean; message: string; subMessage?: string }>({
+    isOpen: false,
+    message: '',
+    subMessage: ''
+  });
 
-  // 🎯 페이지 진입/복귀 시 안전하게 QR 이미지 받아오기 (Blob 메모리 관리 보완)
+  const showToast = (message: string, subMessage?: string) => {
+    setToast({ isOpen: true, message, subMessage });
+  };
+
+  // QR 이미지 불러오기
   useEffect(() => {
     let active = true;
     let objectUrl = '';
@@ -34,7 +50,6 @@ export default function GroupInviteSharePage() {
 
       try {
         setIsQrLoading(true);
-        // GET /api/v1/invites/{code}/qr?size=512
         const response = await axiosInstance.get(`/api/v1/invites/${inviteCode}/qr`, {
           params: { size: 512 },
           responseType: 'blob'
@@ -64,22 +79,20 @@ export default function GroupInviteSharePage() {
     };
   }, [inviteCode]);
 
-  // 클립보드 안전 복사 함수 (Document Focus 체크 추가)
+  // 클립보드 복사 함수
   const copyToClipboard = async (text: string): Promise<boolean> => {
-    // 🎯 문서 포커스 여부 및 secureContext 체크
-    if (navigator.clipboard && window.isSecureContext && document.hasFocus()) {
+    if (navigator.clipboard && window.isSecureContext) {
       try {
         await navigator.clipboard.writeText(text);
         return true;
       } catch (err) {
-        console.warn('Clipboard API 실패, Fallback 실행:', err);
+        console.warn('Clipboard API 실패:', err);
       }
     }
 
     try {
       const textArea = document.createElement('textarea');
       textArea.value = text;
-      
       textArea.style.position = 'fixed';
       textArea.style.top = '0';
       textArea.style.left = '-9999px';
@@ -97,37 +110,51 @@ export default function GroupInviteSharePage() {
     }
   };
 
-  // 1. 시스템 공유창 호출
+  // 1. [링크 공유]
   const handleShare = async () => {
     if (!inviteCode) return;
-    
-    if (navigator.share) {
+
+    const shareData = {
+      title: 'v_O 그룹 초대',
+      text: `v_O에서 그룹 초대장이 도착했어요!\n아래 링크를 눌러 들어오세요 🚀\n초대코드: ${inviteCode}\n`,
+      url: shareUrl,
+    };
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
       try {
-        await navigator.share({
-          title: 'v_O 그룹 초대',
-          text: `v_O에서 초대장이 도착했어요! 초대코드: ${inviteCode}`,
-          url: shareUrl,
-        });
-      } catch (err) {
-        console.log('공유 취소 또는 에러:', err);
+        await navigator.share(shareData);
+        return;
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.log('공유 실패');
+        } else {
+          return;
+        }
       }
+    }
+
+    // PC 등 공유창 미지원 환경 지원
+    const success = await copyToClipboard(`${shareData.text}${shareUrl}`);
+    if (success) {
+      showToast('초대 링크 메시지가 복사되었습니다! 🚀', shareUrl);
     } else {
-      await handleCopyLink();
+      showToast('초대코드', inviteCode);
     }
   };
 
-  // 2. 클립보드 링크 복사 (사용자 명시적 클릭 시에만 실행)
+  // 2. [링크 복사하기]
   const handleCopyLink = async () => {
     if (!inviteCode) return;
+
     const success = await copyToClipboard(shareUrl);
     if (success) {
-      alert('초대 링크가 클립보드에 복사되었습니다! 🚀');
+      showToast('초대 링크가 복사되었습니다! 🎉', shareUrl);
     } else {
-      alert(`복사에 실패했습니다. 초대코드를 직접 공유해 주세요: ${inviteCode}`);
+      showToast('복사 실패, 코드로 공유해 보세요', inviteCode);
     }
   };
 
-  // 3. 완료 버튼 클릭 시 이동
+  // 3. 완료 버튼 클릭 시 /group/name 페이지로 이동
   const handleComplete = () => {
     navigate('/group/name', {
       state: {
@@ -271,7 +298,7 @@ export default function GroupInviteSharePage() {
           width: '100%'
         }}>
           
-          {/* 링크 공유 버튼 */}
+          {/* 1) 링크 공유 버튼 */}
           <button 
             type="button"
             onClick={handleShare}
@@ -314,7 +341,7 @@ export default function GroupInviteSharePage() {
             </span>
           </button>
 
-          {/* 링크 복사하기 버튼 */}
+          {/* 2) 링크 복사하기 버튼 */}
           <button 
             type="button"
             onClick={handleCopyLink}
@@ -398,6 +425,14 @@ export default function GroupInviteSharePage() {
           완료
         </button>
       </div>
+
+      {/* 커스텀 토스트 알림 */}
+      <CustomToast 
+        isOpen={toast.isOpen}
+        message={toast.message}
+        subMessage={toast.subMessage}
+        onClose={() => setToast({ ...toast, isOpen: false })}
+      />
 
       {/* 4. 바닥 여백 영역 */}
       <div style={{ position: 'absolute', bottom: 0, height: '94px', width: '100%' }} />

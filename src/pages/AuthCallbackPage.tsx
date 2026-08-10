@@ -26,7 +26,7 @@ export default function AuthCallbackPage() {
       if (isNewUser === "true") {
         navigate("/signup/profile", { replace: true });
       } else {
-        navigate("/group/create", { replace: true });
+        navigate("/home", { replace: true });
       }
     } else {
       alert("로그인 처리 중 오류가 발생했습니다.");

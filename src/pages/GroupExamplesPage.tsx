@@ -13,20 +13,53 @@ interface ExampleItem {
   content: string;
 }
 
-const EXAMPLES_DATA: ExampleItem[] = [
-  { id: 1, title: '질문 예시 1', content: '좋아하는만큼 10초동안 표현하기' },
-  { id: 2, title: '질문 예시 2', content: '서로에게 가장 고마웠던 순간은?' },
-  { id: 3, title: '질문 예시 3', content: '상대방의 첫인상은?' },
-];
+// 🎯 테마별 질문 예시 데이터
+const THEME_EXAMPLES: Record<string, ExampleItem[]> = {
+  FRIEND: [
+    { id: 1, title: '질문 예시 1', content: '10초 안에 본인 장점 3개 말하기!' },
+    { id: 2, title: '질문 예시 2', content: '지금 당장 제일 먹고 싶은 메뉴는?' },
+    { id: 3, title: '질문 예시 3', content: '본인 패션 센스는 10점 만점에 몇 점?' },
+  ],
+  COUPLE: [
+    { id: 1, title: '질문 예시 1', content: '우리 둘이 자주 쓰는 전용 애칭 3개는?' },
+    { id: 2, title: '질문 예시 2', content: '애인이 제일 좋아할 만한 표정 짓기!' },
+    { id: 3, title: '질문 예시 3', content: '최근 같이 먹은 음식 중 제일 맛있었던 메뉴는?' },
+  ],
+  FAMILY: [
+    { id: 1, title: '질문 예시 1', content: "'우리 가족 사랑해'라고 크게 3번 외치기!" },
+    { id: 2, title: '질문 예시 2', content: '가족들 때문에 속상했던 기억이 있나요?' },
+    { id: 3, title: '질문 예시 3', content: '다 같이 가보고 싶은 여행지는 어디인가요?' },
+  ],
+  RANDOM: [
+    { id: 1, title: '질문 예시 1', content: '10초 동안 자기소개를 해본다면?' },
+    { id: 2, title: '질문 예시 2', content: '오늘의 TMI를 10초 동안 표현한다면?' },
+    { id: 3, title: '질문 예시 3', content: '올해가 지나기 전에 이루고 싶은 목표는?' },
+  ],
+};
 
 export default function GroupExamplesPage() {
   const navigate = useNavigate();
   const location = useLocation(); 
 
-  // 기본값을 빈 배열([])로 세팅하여 초기 진입 시 모두 닫힌 상태
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
 
+  // 1. 이전 스텝에서 전달된 값 확인
+  const rawTheme = location.state?.themeCode || location.state?.themeLabel || location.state?.theme || '';
+
+  // 2. 한글 라벨이나 대소문자 혼용이 들어와도 정확히 FRIEND / COUPLE / FAMILY / RANDOM으로 매핑
+  const getThemeCode = (val: string): string => {
+    const str = String(val).toUpperCase();
+    if (str.includes('COUPLE') || str.includes('연인') || str.includes('애인') || str.includes('커플')) return 'COUPLE';
+    if (str.includes('FAMILY') || str.includes('가족')) return 'FAMILY';
+    if (str.includes('RANDOM') || str.includes('랜덤')) return 'RANDOM';
+    return 'FRIEND'; // 기본값
+  };
+
+  const currentThemeCode = getThemeCode(rawTheme);
   const themeLabel = location.state?.themeLabel || '선택한';
+
+  // 3. 해당 테마 질문 데이터 선택
+  const examplesData = THEME_EXAMPLES[currentThemeCode];
 
   const toggleExpand = (id: number) => {
     if (expandedIds.includes(id)) {
@@ -37,7 +70,13 @@ export default function GroupExamplesPage() {
   };
 
   const handleSelectTheme = () => {
-    navigate('/group/complete', { state: { themeLabel: themeLabel } });
+    navigate('/group/complete', { 
+      state: { 
+        ...location.state,
+        themeCode: currentThemeCode,
+        themeLabel 
+      } 
+    });
   };
 
   return (
@@ -57,7 +96,7 @@ export default function GroupExamplesPage() {
       {/* 1. 헤더 영역 */}
       <Header />
 
-      {/* 2. 타이틀 영역 (top: 135.3px -> 95.3px) */}
+      {/* 2. 타이틀 영역 */}
       <div style={{ 
         position: 'absolute',
         top: '95.3px', 
@@ -79,7 +118,7 @@ export default function GroupExamplesPage() {
         </h1>
       </div>
 
-      {/* 3. 질문 예시 리스트 영역 (top: 189.3px -> 149.3px) */}
+      {/* 3. 질문 예시 리스트 영역 */}
       <div style={{
         position: 'absolute',
         top: '149.3px',
@@ -90,7 +129,7 @@ export default function GroupExamplesPage() {
         gap: '10px', 
         boxSizing: 'border-box'
       }}>
-        {EXAMPLES_DATA.map((item) => {
+        {examplesData.map((item) => {
           const isExpanded = expandedIds.includes(item.id);
           return (
             <div 
@@ -177,7 +216,7 @@ export default function GroupExamplesPage() {
         })}
       </div>
 
-      {/* 4. 하단 버튼 영역 (위치 고정) */}
+      {/* 4. 하단 버튼 영역 */}
       <div style={{
         position: 'absolute',
         bottom: '94px', 
