@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../components/common/Header';
-import { Input } from '../components/common/Input';
+import { axiosInstance } from '../apis/axiosInstance';
 
 // 에셋 임포트
 import addPhotoIcon from '../assets/add_photo_icon.svg';
@@ -17,38 +17,105 @@ import quickSparkles from '../assets/quick_sparkles.png';
 
 export default function GroupNamePage() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [groupName, setGroupName] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // 포커스 상태 관리
+  const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
 
-  // 특수문자 검증
-  const hasSpecialChar = /[^a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣ\s]/.test(groupName);
+  // 🎯 백엔드 유효성 검사 규칙과 동일하게 적용 (완성형 한글, 영문, 숫자, 공백만 허용 / 단독 자음·모음 거부)
+  const isInvalidName = /[^a-zA-Z0-9가-힣\s]/.test(groupName);
   const isLengthError = groupName.length > 15;
-  const isError = hasSpecialChar || isLengthError;
+  const isError = isInvalidName || isLengthError;
 
-  const isButtonEnabled = groupName.trim().length > 0 && !isError;
+  const isButtonEnabled = groupName.trim().length > 0 && !isError && !isSubmitting;
 
   const handleClear = () => {
     setGroupName('');
+    inputRef.current?.focus();
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const imageUrl = URL.createObjectURL(file);
-      setSelectedImage(imageUrl);
+      setImageFile(file);
+      setSelectedImage(URL.createObjectURL(file));
     }
   };
 
-  const handleNext = () => {
-    if (!isButtonEnabled) return;
-    navigate('/home', { state: { groupName, groupImage: selectedImage } });
+  const handleQuickSelect = (iconUrl: string) => {
+    setSelectedImage(iconUrl);
+    setImageFile(null);
   };
 
-  // 디폴트 밑줄 길이를 X버튼 바로 앞(165px)까지 설정
-  const dynamicMinWidth = (groupName.length > 0 || isFocused) ? 10 : 165;
+  // 🎯 [계속] 클릭 시 그룹 생성 API 전송 후 /home으로 직접 이동
+  const handleNext = async () => {
+    if (!isButtonEnabled) return;
+
+    try {
+      setIsSubmitting(true);
+
+      const themeCode = location.state?.themeCode || location.state?.groupThemeCode || location.state?.code || 'FAMILY';
+      let startTime = location.state?.notificationStartTime || location.state?.startTime || '20:00';
+      let endTime = location.state?.notificationEndTime || location.state?.endTime || '21:00';
+
+      const cleanGroupName = groupName.trim();
+
+      const formData = new FormData();
+      formData.append('groupName', cleanGroupName);
+      formData.append('themeCode', themeCode);
+      formData.append('notificationStartTime', startTime);
+      formData.append('notificationEndTime', endTime);
+
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      const token = localStorage.getItem('accessToken');
+
+      const response = await axiosInstance.post('/api/v1/groups', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+      });
+
+      const resData = response.data?.data;
+      const createdGroupId = resData?.groupId || resData?.group?.groupId;
+
+      console.log('그룹 생성 성공! groupId:', createdGroupId);
+
+      // 🎯 성공 즉시 /home 경로로 직접 이동
+      navigate('/home', {
+        state: {
+          ...location.state,
+          groupId: createdGroupId,
+          groupName: cleanGroupName,
+          groupImage: selectedImage,
+        }
+      });
+
+    } catch (error: any) {
+      console.error('그룹 생성 실패 백엔드 응답 전체:', error.response?.data);
+      const serverData = error.response?.data;
+      let alertMsg = '그룹 생성 중 오류가 발생했습니다.';
+
+      if (serverData?.errors && Array.isArray(serverData.errors) && serverData.errors.length > 0) {
+        const firstErr = serverData.errors[0];
+        alertMsg = `[필드 오류: ${firstErr.field || '알수없음'}]\n원인: ${firstErr.reason || firstErr.message}`;
+      } else if (serverData?.message) {
+        alertMsg = serverData.message;
+      }
+
+      alert(`그룹 생성 실패:\n${alertMsg}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div style={{
@@ -107,7 +174,7 @@ export default function GroupNamePage() {
           언제든지 바꿀 수 있어요
         </p>
 
-        {/* 3. 그룹 설정 카드 (310px x 140px) */}
+        {/* 3. 그룹 설정 카드 */}
         <div style={{
           marginTop: '28px',
           width: '310px',
@@ -169,7 +236,6 @@ export default function GroupNamePage() {
                 )}
               </div>
 
-              {/* 카메라 배지 아이콘 */}
               <img 
                 src={cameraBadgeIcon} 
                 alt="카메라" 
@@ -186,7 +252,7 @@ export default function GroupNamePage() {
             </label>
 
             {/* 입력 폼 영역 */}
-            <div style={{ marginLeft: '14px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ marginLeft: '14px', flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               
               <span style={{
                 fontFamily: 'Manrope, sans-serif',
@@ -202,37 +268,49 @@ export default function GroupNamePage() {
                 그룹 이름
               </span>
 
-              {/* 입력창 + 우측 버튼 레이아웃 */}
+              {/* 입력창 + 우측 X버튼/카운터 레이아웃 */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                width: '100%'
+                width: '100%',
+                marginTop: '4px',
+                gap: '8px'
               }}>
-                <div style={{ 
-                  position: 'relative', 
-                  maxWidth: '165px',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  <Input
+                <div 
+                  onClick={() => inputRef.current?.focus()}
+                  style={{ 
+                    position: 'relative', 
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'text',
+                    borderBottom: '1.5px solid #000000',
+                    paddingBottom: '2px',
+                    minWidth: 0
+                  }}
+                >
+                  <input
+                    ref={inputRef}
                     type="text"
                     value={groupName}
                     onChange={(e) => setGroupName(e.target.value)}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     placeholder={isFocused || groupName ? "" : "이름을 입력해주세요"}
-                    minWidth={dynamicMinWidth}
                     style={{
                       fontFamily: 'Manrope, sans-serif',
-                      fontSize: '16px',
+                      fontSize: '15px',
                       fontWeight: '600',
                       color: '#260C36',
                       textAlign: 'left',
-                      paddingBottom: '4px',
-                      borderBottom: '1.5px solid #000000',
-                      caretColor: '#7B3FF2'
+                      border: 'none',
+                      outline: 'none',
+                      caretColor: '#7B3FF2',
+                      width: '100%',
+                      padding: 0,
+                      backgroundColor: 'transparent',
+                      boxSizing: 'border-box'
                     }}
                   />
                 </div>
@@ -244,7 +322,6 @@ export default function GroupNamePage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '2px',
-                  marginLeft: '4px',
                   flexShrink: 0
                 }}>
                   <button 
@@ -302,7 +379,7 @@ export default function GroupNamePage() {
                 fontSize: '12px',
                 color: '#FF3B30'
               }}>
-                {hasSpecialChar ? '특수문자는 사용할 수 없어요' : '15자 이하로 입력해주세요'}
+                {isInvalidName ? '특수문자 및 자음/모음은 사용할 수 없어요' : '15자 이하로 입력해주세요'}
               </span>
             </div>
           )}
@@ -323,7 +400,6 @@ export default function GroupNamePage() {
           빠른 선택
         </span>
 
-        {/* 🎯 이모지 크기 및 scale 수치는 그대로 고정하고, 선택 실선 상자만 2px 밖으로 확장 */}
         <div style={{
           marginTop: '10px',
           display: 'flex',
@@ -340,7 +416,7 @@ export default function GroupNamePage() {
               <button
                 key={item.key}
                 type="button"
-                onClick={() => setSelectedImage(item.icon)}
+                onClick={() => handleQuickSelect(item.icon)}
                 style={{
                   width: '56px',
                   height: '56px',
@@ -355,7 +431,6 @@ export default function GroupNamePage() {
                   boxSizing: 'border-box',
                   overflow: 'hidden',
                   flexShrink: 0,
-                  // 🎯 이미지 변경 없이 실선 테두리 규격만 바깥으로 2px 확장
                   outline: isSelected ? '2px solid #7B3FF2' : 'none',
                   outlineOffset: '2px',
                   transition: 'outline 0.15s ease'

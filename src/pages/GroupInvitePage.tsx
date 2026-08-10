@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { QRCodeSVG } from 'qrcode.react'; 
 import { Header } from '../components/common/Header';
 import { Button } from '../components/common/Button';
+import { axiosInstance } from '../apis/axiosInstance';
 
 // 에셋 임포트
 import heartIcon from '../assets/heart_icon.svg'; 
@@ -12,12 +12,68 @@ import qrGuideIcon from '../assets/qr_guide_icon.svg';
 export default function GroupInvitePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const inviteCode = "NUFSOU9"; 
 
-  // 복사 상태 토글 State
-  const [isCopied, setIsCopied] = useState(false);
+  // 이전 스텝에서 넘어온 groupId 및 inviteCode
+  const groupId = location.state?.groupId;
+  const initialInviteCode = location.state?.inviteCode;
+
+  const [inviteCode, setInviteCode] = useState<string>(initialInviteCode || '');
+  const [qrImageUrl, setQrImageUrl] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    let objectUrl = '';
+
+    const fetchInviteAndQr = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMsg(null);
+
+        let activeCode = inviteCode;
+
+        // 🎯 1. 만약 넘겨받은 inviteCode가 없지만 groupId가 있다면 직접 발급 API 호출!
+        if (!activeCode && groupId) {
+          const codeRes = await axiosInstance.post(`/api/v1/groups/${groupId}/invite-code`);
+          // 스웨거 응답 구조에 맞게 추출 (result / data)
+          activeCode = codeRes.data.data?.code || codeRes.data.result?.code || codeRes.data.code;
+          setInviteCode(activeCode);
+        }
+
+        // 🎯 2. 확보된 진짜 inviteCode로 QR 이미지 조회 (Blob)
+        if (activeCode) {
+          const qrRes = await axiosInstance.get(`/api/v1/invites/${activeCode}/qr`, {
+            params: { size: 512 },
+            responseType: 'blob'
+          });
+
+          const blob = new Blob([qrRes.data], { type: 'image/png' });
+          objectUrl = URL.createObjectURL(blob);
+          setQrImageUrl(objectUrl);
+        } else {
+          // groupId도 없고 inviteCode도 없는 경우 fallback
+          setErrorMsg("유효한 그룹 정보가 없습니다.");
+        }
+      } catch (err: any) {
+        console.error('초대 코드 발급 또는 QR 조회 실패:', err);
+        setErrorMsg(err.response?.status === 404 ? '존재하지 않는 코드입니다.' : '초대 정보를 불러오지 못했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInviteAndQr();
+
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [groupId]);
 
   const handleCopyCode = async () => {
+    if (!inviteCode) return;
     try {
       await navigator.clipboard.writeText(inviteCode);
       setIsCopied(true);
@@ -26,17 +82,16 @@ export default function GroupInvitePage() {
     }
   };
 
-  // 친구 초대하기 클릭 시 이동
   const handleShare = () => {
     navigate('/group/invite-share', { 
       state: { 
         ...location.state, 
-        inviteCode 
+        inviteCode,
+        qrImageUrl 
       } 
     });
   };
 
-  // 완료 버튼 클릭 시 이동
   const handleComplete = () => {
     navigate('/group/name', { 
       state: { 
@@ -53,7 +108,7 @@ export default function GroupInvitePage() {
       backgroundColor: '#ffffff',
       width: '100%',
       maxWidth: '360px', 
-      height: '800px',   
+      height: '800px',    
       margin: '0 auto',  
       boxSizing: 'border-box',
       position: 'relative', 
@@ -102,7 +157,7 @@ export default function GroupInvitePage() {
           내 초대코드
         </h1>
 
-        {/* QR 카드 배경 */}
+        {/* QR 카드 영역 */}
         <div style={{
           marginTop: '20px', 
           width: '260px',
@@ -124,19 +179,28 @@ export default function GroupInvitePage() {
             alignItems: 'center',
             justifyContent: 'center',
             boxSizing: 'border-box',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)'
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)',
+            overflow: 'hidden'
           }}>
-            <QRCodeSVG 
-              value={`${window.location.origin}/join?code=${inviteCode}`} 
-              size={188} 
-              fgColor="#000000"
-              bgColor="#ffffff"
-              level="M"
-            />
+            {isLoading ? (
+              <span style={{ fontSize: '13px', color: '#888' }}>초대 코드 생성 중...</span>
+            ) : qrImageUrl ? (
+              <img 
+                src={qrImageUrl} 
+                alt="초대 QR 코드" 
+                style={{
+                  width: '188px',
+                  height: '188px',
+                  objectFit: 'contain'
+                }}
+              />
+            ) : (
+              <span style={{ fontSize: '12px', color: '#ff4d4f' }}>{errorMsg || 'QR 로딩 실패'}</span>
+            )}
           </div>
         </div>
 
-        {/* 초대코드 & 복사/체크 버튼 */}
+        {/* 초대코드 텍스트 & 복사 버튼 */}
         <div style={{
           marginTop: '22px', 
           display: 'flex',
@@ -159,7 +223,7 @@ export default function GroupInvitePage() {
               letterSpacing: '0.05em',
               userSelect: 'all'
             }}>
-              {inviteCode}
+              {inviteCode || "------"}
             </span>
             <div style={{
               width: '100%',
@@ -171,11 +235,13 @@ export default function GroupInvitePage() {
           
           {/* 복사 버튼 */}
           <button 
+            type="button"
             onClick={handleCopyCode}
+            disabled={!inviteCode}
             style={{
               background: 'transparent',
               border: 'none',
-              cursor: 'pointer',
+              cursor: inviteCode ? 'pointer' : 'default',
               padding: 0,
               width: '34px',
               height: '34px',
@@ -214,7 +280,7 @@ export default function GroupInvitePage() {
           </button>
         </div>
 
-        {/* 🎯 하단 가이드 박스 (초기화면 여백 최적화) */}
+        {/* 하단 가이드 박스 */}
         <div style={{
           marginTop: '24px', 
           width: isCopied ? 'fit-content' : '264px', 
@@ -232,7 +298,6 @@ export default function GroupInvitePage() {
         }}>
           {isCopied ? (
             <>
-              {/* 복사 완료 아이콘 */}
               <div style={{
                 width: '24px',
                 height: '24px',
@@ -248,7 +313,6 @@ export default function GroupInvitePage() {
                 </svg>
               </div>
 
-              {/* 복사 완료 텍스트 + 초록 점 */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -277,7 +341,6 @@ export default function GroupInvitePage() {
             </>
           ) : (
             <>
-              {/* 🎯 초기화면: 아이콘 30px로 확대 */}
               <img 
                 src={qrGuideIcon} 
                 alt="안내" 
@@ -289,7 +352,6 @@ export default function GroupInvitePage() {
                 }} 
               />
 
-              {/* 🎯 초기화면: 폰트 사이즈 및 간격 확장으로 넓게 채움 */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
