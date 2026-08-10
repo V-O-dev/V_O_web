@@ -133,7 +133,7 @@
 
 .profile-card.danger-card {
   border: 1px solid #fee2e2;
-  background-color: #fffafb;
+  background-color: #fef2f2;
 }
 
 .profile-card.danger-card .profile-row-text p {
@@ -190,9 +190,9 @@
 }
 
 .profile-row-text h4 {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
-  color: #111827;
+  color: #111013;
   margin: 0;
 }
 
@@ -201,8 +201,8 @@
 }
 
 .profile-row-text p {
-  font-size: 11px;
-  color: #9ca3af;
+  font-size: 10px;
+  color: #9491a8;
   margin: 2px 0 0 0;
 }
 
@@ -323,14 +323,14 @@ input:checked + .profile-slider:before {
 }
 
 .profile-modal-title {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   color: #111827;
   margin: 0 0 12px 0;
 }
 
 .profile-modal-desc {
-  font-size: 13px;
+  font-size: 12px;
   color: #9ca3af;
   line-height: 1.4;
   margin: 0 0 24px 0;
@@ -346,7 +346,7 @@ input:checked + .profile-slider:before {
   flex: 1;
   height: 44px;
   border-radius: 22px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   border: none;
@@ -354,11 +354,21 @@ input:checked + .profile-slider:before {
 
 .btn-cancel {
   background-color: #f3f4f6;
-  color: #6b7280;
+  color: #9491a8;
 }
 
 .btn-confirm {
   background-color: #9333ea;
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+}
+
+.profile-modal-btn.btn-red-confirm {
+  background-color: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(255, 92, 92, 0.3);
+}
+
+.profile-modal-btn.btn-red-confirm:active {
+  background-color: #f87171;
 }
