@@ -1,35 +1,13 @@
-import profileIcon from "@/assets/home/profile.svg";
-
-export interface UserProfile {
-  user: number;
-  nickname: string;
-  profileImageUrl?: string | null;
-  profileImageObjectKey?: string | null;
-  onboardingCompletedAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface UserProfileData {
-  id: number;
+  userId?: number;
   nickname: string;
   profileImageUrl: string | null;
-  profileImageObjectKey?: string | null;
-  dailyQuestionNotificationEnabled: boolean;
-  interactionNotificationEnabled: boolean;
+  provider?: string;
+  questionNotification: boolean;
+  interactionNotification: boolean;
 }
 
-export interface UpdateUserProfilePayload {
-  nickname: string;
-  dailyQuestionNotificationEnabled: boolean;
-  interactionNotificationEnabled: boolean;
+export interface NotificationSettingsPayload {
+  questionNotification: boolean;
+  interactionNotification: boolean;
 }
-
-export const MOCK_USER_PROFILE: UserProfileData = {
-  id: 1,
-  nickname: "홍길동",
-  profileImageUrl: profileIcon,
-  profileImageObjectKey: null,
-  dailyQuestionNotificationEnabled: true,
-  interactionNotificationEnabled: false,
-};

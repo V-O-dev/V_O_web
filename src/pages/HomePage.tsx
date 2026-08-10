@@ -3,14 +3,9 @@ import { useNavigate } from "react-router-dom";
 
 import { HomeHeader } from "../components/common/HomeHeader";
 import { HomeBottomNav } from "../components/common/HomeBottomNav";
-import { UserProfileInfo } from "../components/common/Profile";
 
-import {
-  PrivateGroupData,
-  VideoFeedItem,
-  MOCK_GROUPS,
-  MOCK_VIDEOS,
-} from "../types/home";
+import { PrivateGroupData, VideoFeedItem } from "../types/home";
+import { fetchMyGroups, fetchGroupFeed, fetchDailyQuestion } from "../apis/api";
 
 import "./HomePage.css";
 
@@ -22,30 +17,121 @@ import heartIcon from "@/assets/home/heart_icon.svg";
 import chatIcon from "@/assets/home/chat_icon.svg";
 import playIcon from "@/assets/home/play_icon.svg";
 import homeImg from "@/assets/home/home_img.svg";
+import profileIcon from "@/assets/home/profile.svg";
 
 function HomeMainContent() {
   const navigate = useNavigate();
 
   const [selectedTabId, setSelectedTabId] = useState<number>(0);
-  const [feeds, setFeeds] = useState<VideoFeedItem[]>([]);
   const [groups, setGroups] = useState<PrivateGroupData[]>([]);
 
+  const [feeds, setFeeds] = useState<VideoFeedItem[]>([]);
+  const [isUnlocked, setIsUnlocked] = useState<boolean>(true);
+  const [viewerStatus, setViewerStatus] = useState<string>("UPLOADED");
+  const [dailyQuestion, setDailyQuestion] = useState<any>(null);
+
+  // 초기 내 그룹 목록 조회
   useEffect(() => {
-    setGroups(MOCK_GROUPS);
-    setFeeds(MOCK_VIDEOS);
+    const getGroups = async () => {
+      try {
+        const data = await fetchMyGroups();
+        setGroups(data);
+      } catch (error) {
+        console.error("그룹 목록 불러오기 실패:", error);
+      }
+    };
+    getGroups();
   }, []);
 
-  // 선택 탭 기반 피드 필터링
-  const filteredFeeds =
-    selectedTabId === 0
-      ? feeds
-      : feeds.filter((feed) => feed.group.id === selectedTabId);
+  // selectedTabId 변경 시 피드 및 오늘의 질문 함께 조회
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        if (selectedTabId === 0) {
+          // 전체 탭
+          if (groups.length > 0) {
+            const allFeedResults = await Promise.all(
+              groups.map((g) =>
+                fetchGroupFeed(g.groupId).catch((err) => ({
+                  items: err?.response?.data?.items || [],
+                  unlocked: true,
+                  viewerAnswerStatus: "UPLOADED",
+                }))
+              )
+            );
 
-  // 현재 선택된 그룹 객체 및 답변 작성 여부 감지
-  const currentGroup = groups.find((g) => g.id === selectedTabId);
-  const isCurrentGroupAnswered = currentGroup?.isAnsweredToday ?? true;
+            const combinedItems: VideoFeedItem[] = [];
+            allFeedResults.forEach((res, idx) => {
+              const gName = groups[idx]?.name || "그룹";
+              (res.items || []).forEach((item: any) => {
+                combinedItems.push({
+                  ...item,
+                  groupName: gName,
+                });
+              });
+            });
 
-  const isFeedEmpty = filteredFeeds.length === 0;
+            setFeeds(combinedItems);
+            setIsUnlocked(true);
+            setViewerStatus("UPLOADED");
+            setDailyQuestion(null);
+          }
+        } else {
+          // 특정 그룹 탭
+          const [feedData, questionData] = await Promise.all([
+            fetchGroupFeed(selectedTabId).catch((err) => ({
+              // API 에러 시에도 응답 데이터 안에 items가 있다면 보존
+              items: err?.response?.data?.items || [],
+              unlocked: false,
+              viewerAnswerStatus: "NOT_UPLOADED",
+            })),
+            fetchDailyQuestion(selectedTabId).catch(() => null),
+          ]);
+
+          const currentGName =
+            groups.find((g) => g.groupId === selectedTabId)?.name || "그룹";
+          const itemsWithGName = (feedData.items || []).map((item: any) => ({
+            ...item,
+            groupName: currentGName,
+          }));
+
+          setFeeds(itemsWithGName);
+          setIsUnlocked(feedData.unlocked ?? false);
+          setViewerStatus(feedData.viewerAnswerStatus ?? "NOT_UPLOADED");
+          setDailyQuestion(questionData);
+        }
+      } catch (error) {
+        console.error("데이터 불러오기 실패:", error);
+      }
+    };
+
+    getData();
+  }, [selectedTabId, groups]);
+
+  // 현재 선택된 그룹 데이터 객체 찾기
+  const currentGroup = groups.find((g) => g.groupId === selectedTabId);
+
+  // 답변 완료 여부
+  const isCurrentGroupAnswered = isUnlocked && viewerStatus !== "NOT_UPLOADED";
+
+  // 보라색 상단 카메라 배너 노출 조건: 특정 그룹 탭 + 내가 아직 답변 안함
+  const showQuestionBanner = selectedTabId !== 0 && !isCurrentGroupAnswered;
+
+  // 대기 화면 노출 조건: 특정 그룹 탭이면서 질문도 없고 피드도 아예 단 1개도 없는 진짜 빈 상태일 때만!
+  const showWaitingContent =
+    selectedTabId !== 0 && dailyQuestion === null && feeds.length === 0;
+
+  const formatTimeAgo = (isoString?: string) => {
+    if (!isoString) return "방금 전";
+    const now = new Date();
+    const past = new Date(isoString);
+    const diffMins = Math.floor((now.getTime() - past.getTime()) / (1000 * 60));
+    if (diffMins < 1) return "방금 전";
+    if (diffMins < 60) return `${diffMins}분 전`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}시간 전`;
+    return `${Math.floor(diffHours / 24)}일 전`;
+  };
 
   return (
     <div className="home-container">
@@ -62,13 +148,13 @@ function HomeMainContent() {
         </div>
 
         {groups.map((group) => {
-          const isCurrent = selectedTabId === group.id;
+          const isCurrent = selectedTabId === group.groupId;
 
           return (
             <div
-              key={group.id}
+              key={group.groupId}
               className="home-category-item"
-              onClick={() => setSelectedTabId(group.id)}
+              onClick={() => setSelectedTabId(group.groupId)}
             >
               <div
                 className={`home-circle-icon-frame ${
@@ -77,7 +163,7 @@ function HomeMainContent() {
               >
                 <div className="home-circle home-group-circle">
                   <img
-                    src={group.groupImageUrl}
+                    src={group.imageUrl}
                     alt={group.name}
                     className="home-group-img"
                     onError={(e) => {
@@ -104,7 +190,8 @@ function HomeMainContent() {
         </div>
       </div>
 
-      {selectedTabId !== 0 && !isCurrentGroupAnswered && (
+      {/* 보라 프레임(답변을 아직 안 올렸을 경우) */}
+      {showQuestionBanner && (
         <div className="home-group-question-banner">
           <img
             src={purpleFrame}
@@ -133,13 +220,14 @@ function HomeMainContent() {
         </div>
       )}
 
-      {/* 피드 빈 상태 / 피드 목록 분기 처리 */}
-      {isFeedEmpty ? (
+      {showWaitingContent ? (
+        // 질문이 아직 없는 경우
         <div className="home-waiting-content">
           <img src={character} alt="대기 캐릭터" className="home-waiting-img" />
           <h2 className="home-main-title">오늘의 질문을 기다리는 중이에요</h2>
         </div>
       ) : (
+        // 질문이 존재해서 답변 피드 목록이 있는 경우
         <div className="home-feed-stream">
           <div className="home-feed-header-line">
             <div className="home-feed-header-left">
@@ -160,25 +248,52 @@ function HomeMainContent() {
             )}
           </div>
 
-          {filteredFeeds.map((feed) => {
+          {feeds.map((feed) => {
             const isLocked = !isCurrentGroupAnswered;
-            const displayName = feed.user.customName || feed.user.nickname;
+            const displayName = feed.nickname;
+
+            // 피드 자체에 질문이 들어있거나 오늘 배정된 질문 텍스트 가져오기
+            const questionText =
+              feed.questionContent ||
+              dailyQuestion?.content ||
+              dailyQuestion?.questionContent;
 
             return (
-              <div key={feed.id} className="home-feed-card">
-                <div className="home-card-profile-row">
-                  <div
-                    onClick={() => navigate(`/edit-nickname/${feed.user.id}`)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <UserProfileInfo
-                      profileImageUrl={feed.user.profileImageUrl}
-                      nickname={displayName}
-                      subText={feed.createdAt}
-                    />
+              <div key={feed.videoId} className="home-feed-card">
+                <div
+                  className="home-card-profile-row"
+                  onClick={() => navigate(`/edit-nickname/${feed.userId}`)}
+                >
+                  <img
+                    src={feed.profileImageUrl || profileIcon}
+                    alt={displayName}
+                    className="home-profile-img"
+                    onError={(e) => {
+                      e.currentTarget.src = profileIcon;
+                    }}
+                  />
+
+                  <div className="home-profile-text-box">
+                    <div className="home-profile-name-row">
+                      <span className="home-profile-nickname">
+                        {displayName}
+                      </span>
+                      <span className="home-card-group-tag">
+                        {feed.groupName || currentGroup?.name || "그룹"}
+                      </span>
+                    </div>
+                    <span className="home-profile-time">
+                      {formatTimeAgo(feed.uploadedAt || feed.capturedAt)}
+                    </span>
                   </div>
-                  <span className="home-card-group-tag">{feed.group.name}</span>
                 </div>
+
+                {isCurrentGroupAnswered && questionText && (
+                  <div className="home-feed-question-box">
+                    <span className="home-question-q">Q</span>
+                    <span className="home-question-text">{questionText}</span>
+                  </div>
+                )}
 
                 <div
                   className={`home-card-video-viewport ${
@@ -186,7 +301,18 @@ function HomeMainContent() {
                   }`}
                   onClick={() => {
                     if (!isLocked) {
-                      navigate("/feed");
+                      navigate("/feed", {
+                        state: {
+                          videoId: feed.videoId,
+                          feedItem: {
+                            ...feed,
+                            groupName:
+                              feed.groupName ||
+                              currentGroup?.name ||
+                              "우리 그룹",
+                          },
+                        },
+                      });
                     }
                   }}
                 >
@@ -197,7 +323,6 @@ function HomeMainContent() {
                         poster={feed.thumbnailUrl || undefined}
                         className="home-video-blur-element"
                       />
-
                       <div className="home-video-lock-overlay">
                         <div className="home-lock-box">
                           <div className="home-lock-icon-wrapper">
@@ -207,9 +332,7 @@ function HomeMainContent() {
                               className="home-lock-icon"
                             />
                           </div>
-
                           <p className="home-lock-text">영상이 잠겨 있어요</p>
-
                           <button
                             className="home-lock-action-btn"
                             onClick={(e) => {
@@ -225,11 +348,10 @@ function HomeMainContent() {
                   ) : (
                     <div className="home-video-container">
                       <video
-                        src={feed.videoUrl!}
+                        src={feed.videoUrl}
                         poster={feed.thumbnailUrl || undefined}
                         className="home-video-element"
                       />
-
                       <div className="home-play-overlay">
                         <img
                           src={playIcon}
@@ -248,7 +370,7 @@ function HomeMainContent() {
                       alt="좋아요"
                       className="home-reaction-icon"
                     />
-                    <span>{feed.likesCount}</span>
+                    <span>{feed.reactionCount}</span>
                   </div>
                   <div className="home-reaction-item">
                     <img
@@ -256,7 +378,7 @@ function HomeMainContent() {
                       alt="댓글"
                       className="home-reaction-icon"
                     />
-                    <span>{feed.commentsCount}</span>
+                    <span>{feed.commentCount}</span>
                   </div>
                 </div>
               </div>

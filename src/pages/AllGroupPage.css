@@ -48,7 +48,6 @@
   border-bottom: none;
 }
 
-/* 그룹 대표 이미지 */
 .group-image-wrapper {
   width: 48px;
   height: 48px;
@@ -65,7 +64,6 @@
   object-fit: cover;
 }
 
-/* 정보 박스 */
 .group-info {
   flex: 1;
   display: flex;
@@ -80,22 +78,20 @@
 }
 
 .group-name {
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 700;
-  color: #111827;
+  color: #000000;
 }
 
-/* 카테고리 태그 배지 */
 .group-badge {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   padding: 2px 8px;
-  border-radius: 10px;
-  background-color: #f3e8ff;
-  color: #a855f7;
+  border-radius: 30px;
+  background-color: #ede8fd;
+  color: #7b3ff2;
 }
 
-/* 멤버 프로필 중첩(Stack) 영역 */
 .group-members-row {
   display: flex;
   align-items: center;
@@ -112,7 +108,7 @@
   height: 18px;
   border-radius: 50%;
   border: 1.5px solid #ffffff;
-  margin-left: -5px; /* 아바타끼리 약간 겹치게 처리 */
+  margin-left: -5px;
   object-fit: cover;
   background-color: #e5e7eb;
 }
@@ -122,13 +118,13 @@
 }
 
 .group-member-count {
-  font-size: 12px;
-  color: #9ca3af;
+  font-size: 10px;
+  color: #9491a8;
   margin-left: 2px;
 }
 
 .group-arrow {
-  color: #9ca3af;
+  color: #9491a8;
   font-size: 18px;
   margin-left: 8px;
 }

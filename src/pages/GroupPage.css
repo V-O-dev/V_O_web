@@ -60,7 +60,7 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background-color: #f3e8ff;
+  background-color: #ffffff;
   border: 2px solid #ffffff;
   display: flex;
   align-items: center;
@@ -94,7 +94,7 @@
   border: none;
   width: 24px;
   height: 24px;
-  border-radius: 50%;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,8 +128,8 @@
 }
 
 .group-section-title {
-  font-size: 13px;
-  color: #6b7280;
+  font-size: 11px;
+  color: #9491a8;
   font-weight: bold;
 }
 
@@ -152,11 +152,11 @@
 
 .group-card.danger-card {
   border: 1px solid #fee2e2;
-  background-color: #fffafb;
+  background-color: #fef2f2;
 }
 
 .danger-card .group-row-text p {
-  color: rgba(239, 68, 68, 0.6) !important;
+  color: #ef4444;
 }
 
 .group-member-row {
@@ -230,7 +230,7 @@
 .group-invite-plus-circle {
   width: 34px;
   height: 34px;
-  border-radius: 50%;
+  border-radius: 13px;
   border: 1px dashed #8b5cf6;
   color: #8b5cf6;
   display: flex;
@@ -241,15 +241,15 @@
 }
 
 .group-invite-text h4 {
-  font-size: 14px;
-  color: #4c1d95;
+  font-size: 12px;
+  color: #7b3ff2;
   margin: 0;
   font-weight: bold;
 }
 
 .group-invite-text p {
-  font-size: 11px;
-  color: #9ca3af;
+  font-size: 10px;
+  color: #9491a8;
   margin: 2px 0 0 0;
 }
 
@@ -290,7 +290,7 @@
 }
 
 .group-row-text h4.text-danger {
-  color: #dc2626;
+  color: #ef4444;
   font-size: 14px;
   margin: 0;
   font-weight: bold;
@@ -386,7 +386,7 @@
 }
 
 .group-modal-desc {
-  font-size: 13px;
+  font-size: 12px;
   color: #6b7280;
   line-height: 1.5;
   margin: 0 0 24px 0;
@@ -408,9 +408,9 @@
   border: none;
   color: #4b5563;
   padding: 12px 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
-  border-radius: 14px;
+  border-radius: 17px;
   cursor: pointer;
 }
 
@@ -419,23 +419,23 @@
   border: none;
   color: #ffffff;
   padding: 12px 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
-  border-radius: 14px;
+  border-radius: 17px;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .btn-yellow {
-  background-color: #f59e0b;
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
 }
 .btn-yellow:hover {
-  background-color: #d97706;
+  background-color: #f59e0b;
 }
 
 .btn-red {
-  background-color: #f43f5e;
+  background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
 }
 .btn-red:hover {
-  background-color: #e11d48;
+  background-color: #ef4444;
 }

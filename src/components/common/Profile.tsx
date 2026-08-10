@@ -18,49 +18,58 @@ export function UserProfileInfo({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 12,
+        justifyContent: "space-between",
+        width: "100%",
       }}
     >
-      <img
-        src={profileImageUrl || defaultImage}
-        alt={nickname}
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: 12,
-          objectFit: "cover",
-        }}
-        onError={(e) => {
-          e.currentTarget.src = defaultImage;
-        }}
-      />
       <div
         style={{
           display: "flex",
-          flexDirection: "column",
-          gap: 2,
+          alignItems: "center",
+          gap: "12px",
         }}
       >
-        <span
+        <img
+          src={profileImageUrl || defaultImage}
+          alt={nickname}
           style={{
-            fontSize: 12,
-            fontWeight: 800,
-            color: "#11013",
+            width: "36px",
+            height: "36px",
+            borderRadius: "12px",
+            objectFit: "cover",
+          }}
+          onError={(e) => {
+            e.currentTarget.src = defaultImage;
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px",
           }}
         >
-          {nickname}
-        </span>
-        {subText && (
           <span
             style={{
-              fontSize: 8,
-              color: "#9491a8",
-              fontWeight: 500,
+              fontSize: "14px",
+              fontWeight: 800,
+              color: "#111827",
             }}
           >
-            {subText}
+            {nickname}
           </span>
-        )}
+          {subText && (
+            <span
+              style={{
+                fontSize: "11px",
+                color: "#9491a8",
+                fontWeight: 500,
+              }}
+            >
+              {subText}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
