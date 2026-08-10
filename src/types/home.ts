@@ -1,6 +1,3 @@
-import homeImg from "@/assets/home/home_img.svg";
-import heartImg from "@/assets/home/heart_img.svg";
-
 export interface GroupTheme {
   id: number;
   code?: string;
@@ -8,11 +5,12 @@ export interface GroupTheme {
 }
 
 export interface PrivateGroupData {
-  id: number;
+  groupId: number;
   name: string;
-  groupImageUrl: string;
-  ownerUserId?: number;
-  theme?: GroupTheme;
+  imageUrl: string;
+  themeCode?: string;
+  memberCount?: number;
+  role?: string;
   isAnsweredToday?: boolean;
 }
 
@@ -24,64 +22,26 @@ export interface FeedUserSummary {
 }
 
 export interface VideoFeedItem {
-  id: number;
-  videoUrl: string | null;
-  thumbnailUrl: string | null;
-  createdAt: string;
-  user: FeedUserSummary;
-  group: PrivateGroupData;
-  likesCount: number;
-  commentsCount: number;
+  videoId: number;
+  userId: number;
+  nickname: string;
+  profileImageUrl: string | null;
+  questionId: number;
+  questionContent: string;
+  videoUrl: string;
+  thumbnailUrl: string;
+  durationMs: number;
+  reactionCount: number;
+  reactedByMe: boolean;
+  commentCount: number;
+  capturedAt: string;
+  uploadedAt: string;
+  groupName?: string;
 }
 
-export const MOCK_GROUPS: PrivateGroupData[] = [
-  {
-    id: 1,
-    name: "가족",
-    groupImageUrl: homeImg,
-    ownerUserId: 101,
-    theme: { id: 10, name: "가족테마" },
-    isAnsweredToday: false,
-  },
-  {
-    id: 2,
-    name: "연인",
-    groupImageUrl: heartImg,
-    ownerUserId: 101,
-    theme: { id: 11, name: "연인테마" },
-    isAnsweredToday: true,
-  },
-];
-
-export const MOCK_VIDEOS: VideoFeedItem[] = [
-  {
-    id: 501,
-    videoUrl: null,
-    thumbnailUrl: null,
-    createdAt: "2시간 전",
-    user: {
-      id: 201,
-      nickname: "홍길동",
-      customName: "엄마",
-      profileImageUrl: "/src/assets/profile2.png",
-    },
-    group: MOCK_GROUPS[0],
-    likesCount: 3,
-    commentsCount: 1,
-  },
-  {
-    id: 502,
-    videoUrl: "/src/assets/video2.mp4",
-    thumbnailUrl: null,
-    createdAt: "2시간 전",
-    user: {
-      id: 202,
-      nickname: "김철수",
-      customName: "아빠",
-      profileImageUrl: "/src/assets/profile2.png",
-    },
-    group: MOCK_GROUPS[0],
-    likesCount: 5,
-    commentsCount: 2,
-  },
-];
+export interface GroupFeedResponse {
+  unlocked: boolean;
+  serviceDate: string;
+  viewerAnswerStatus: string;
+  items: VideoFeedItem[];
+}
