@@ -27,7 +27,7 @@ export default function GroupNamePage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
 
-  // 🎯 백엔드 유효성 검사 규칙과 동일하게 적용 (완성형 한글, 영문, 숫자, 공백만 허용 / 단독 자음·모음 거부)
+  // 완성형 한글, 영문, 숫자, 공백만 허용
   const isInvalidName = /[^a-zA-Z0-9가-힣\s]/.test(groupName);
   const isLengthError = groupName.length > 15;
   const isError = isInvalidName || isLengthError;
@@ -52,57 +52,81 @@ export default function GroupNamePage() {
     setImageFile(null);
   };
 
-  // 🎯 [계속] 클릭 시 그룹 생성 API 전송 후 /home으로 직접 이동
+  // 🎯 [핵심 수정] 이전 페이지에서 만들어진 groupId가 있으면 PUT/PATCH(수정), 없으면 POST(생성)
   const handleNext = async () => {
     if (!isButtonEnabled) return;
 
     try {
       setIsSubmitting(true);
 
-      const themeCode = location.state?.themeCode || location.state?.groupThemeCode || location.state?.code || 'FAMILY';
-      let startTime = location.state?.notificationStartTime || location.state?.startTime || '20:00';
-      let endTime = location.state?.notificationEndTime || location.state?.endTime || '21:00';
-
       const cleanGroupName = groupName.trim();
+      const token = localStorage.getItem('accessToken');
+      const existingGroupId = location.state?.groupId; // TimePicker 등 이전 스텝에서 생성된 groupId
 
       const formData = new FormData();
       formData.append('groupName', cleanGroupName);
-      formData.append('themeCode', themeCode);
-      formData.append('notificationStartTime', startTime);
-      formData.append('notificationEndTime', endTime);
 
       if (imageFile) {
         formData.append('image', imageFile);
       }
 
-      const token = localStorage.getItem('accessToken');
+      let finalGroupId = existingGroupId;
 
-      const response = await axiosInstance.post('/api/v1/groups', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-      });
+      // 1. 이전 단계에서 이미 생성된 groupId가 있는 경우 -> 수정(PUT / PATCH)으로 그룹명 업에이트 (2개 생성 방지)
+      if (existingGroupId) {
+        try {
+          await axiosInstance.put(`/api/v1/groups/${existingGroupId}`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+          });
+        } catch (putErr) {
+          // 백엔드 API 규격이 PATCH일 경우 Fallback 처리
+          await axiosInstance.patch(`/api/v1/groups/${existingGroupId}`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+          });
+        }
+      } else {
+        // 2. 만약 이전 단계에서 생성된 groupId가 없는 경우에만 새로 POST 호출
+        const themeCode = location.state?.themeCode || location.state?.groupThemeCode || location.state?.code || 'FAMILY';
+        let startTime = location.state?.notificationStartTime || location.state?.startTime || '20:00';
+        let endTime = location.state?.notificationEndTime || location.state?.endTime || '21:00';
 
-      const resData = response.data?.data;
-      const createdGroupId = resData?.groupId || resData?.group?.groupId;
+        formData.append('themeCode', themeCode);
+        formData.append('notificationStartTime', startTime);
+        formData.append('notificationEndTime', endTime);
 
-      console.log('그룹 생성 성공! groupId:', createdGroupId);
+        const response = await axiosInstance.post('/api/v1/groups', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+        });
 
-      // 🎯 성공 즉시 /home 경로로 직접 이동
+        const resData = response.data?.data;
+        finalGroupId = resData?.groupId || resData?.group?.groupId;
+      }
+
+      console.log('그룹 설정 완료! groupId:', finalGroupId);
+
+      // 🎯 성공 시 바로 /home으로 이동
       navigate('/home', {
         state: {
           ...location.state,
-          groupId: createdGroupId,
+          groupId: finalGroupId,
           groupName: cleanGroupName,
           groupImage: selectedImage,
         }
       });
 
     } catch (error: any) {
-      console.error('그룹 생성 실패 백엔드 응답 전체:', error.response?.data);
+      console.error('그룹 처리 실패 백엔드 응답 전체:', error.response?.data);
       const serverData = error.response?.data;
-      let alertMsg = '그룹 생성 중 오류가 발생했습니다.';
+      let alertMsg = '그룹 설정 중 오류가 발생했습니다.';
 
       if (serverData?.errors && Array.isArray(serverData.errors) && serverData.errors.length > 0) {
         const firstErr = serverData.errors[0];
@@ -111,7 +135,7 @@ export default function GroupNamePage() {
         alertMsg = serverData.message;
       }
 
-      alert(`그룹 생성 실패:\n${alertMsg}`);
+      alert(`그룹 설정 실패:\n${alertMsg}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -490,7 +514,7 @@ export default function GroupNamePage() {
             transition: 'all 0.15s ease'
           }}
         >
-          계속
+          {isSubmitting ? '처리 중...' : '계속'}
         </button>
       </div>
 
