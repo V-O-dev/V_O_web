@@ -11,7 +11,7 @@ interface CompleteStepProps {
 export default function CompleteStep({ onStart, onBack }: CompleteStepProps) {
   const navigate = useNavigate();
 
-  // 버튼 클릭 시 이동 핸들러
+  // 버튼 클릭 시 그룹 생성/메인 페이지로 이동
   const handleStartSubmit = () => {
     if (onStart) {
       onStart();
@@ -44,7 +44,7 @@ export default function CompleteStep({ onStart, onBack }: CompleteStepProps) {
       overflow: 'hidden'
     }}>
       
-      {/* 1. 헤더 영역 (공통 컴포넌트) */}
+      {/* 1. 헤더 영역 */}
       <Header showBackButton={true} onBackClick={handleBackSubmit} />
 
       {/* 2. 가입 완료 뱃지 영역 */}
@@ -71,7 +71,7 @@ export default function CompleteStep({ onStart, onBack }: CompleteStepProps) {
         />
       </div>
 
-      {/* 3. 환영 메시지 (대타이틀) */}
+      {/* 3. 환영 메시지 */}
       <div style={{ 
         position: 'absolute',
         top: '339px', 
