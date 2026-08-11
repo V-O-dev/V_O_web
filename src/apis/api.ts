@@ -176,9 +176,7 @@ export async function resolveVideoUrl(videoId: number): Promise<string | null> {
   }
 }
 
-/**
- * 현재 로그인한 사용자가 속한 그룹 목록을 조회합니다. (GET /api/v1/groups)
- */
+// 현재 로그인한 사용자가 속한 그룹 목록을 조회 (GET /api/v1/groups)
 export async function fetchMyGroups(): Promise<PrivateGroupData[]> {
   const res = await axiosInstance.get<ApiEnvelope<PrivateGroupData[]>>(
     "/api/v1/groups"
@@ -186,9 +184,7 @@ export async function fetchMyGroups(): Promise<PrivateGroupData[]> {
   return unwrap(res.data);
 }
 
-/**
- * 특정 그룹의 영상 피드 목록을 조회합니다. (GET /api/v1/groups/{groupId}/feed)
- */
+// 특정 그룹의 영상 피드 목록을 조회 (GET /api/v1/groups/{groupId}/feed)
 export async function fetchGroupFeed(
   groupId: number
 ): Promise<GroupFeedResponse> {
@@ -432,3 +428,16 @@ export async function deleteVideoComment(commentId: number): Promise<void> {
   );
   unwrap(res.data);
 }
+
+// 멤버 호칭 변경
+export const updateMemberAlias = async (
+  groupId: number,
+  memberId: number,
+  alias: string
+) => {
+  const response = await axiosInstance.put(
+    `/api/v1/groups/${groupId}/members/${memberId}/alias`,
+    { alias }
+  );
+  return response.data.data;
+};
