@@ -18,6 +18,9 @@ export default function QuestionPage() {
   const navigate = useNavigate();
   const currentGroupId = useGroupStore((state) => state.currentGroupId) ?? 12; // TODO: 로그인/그룹 연동되면 이 fallback 제거
 
+  // 시작하기를 누른 이후(chat, camera)에는 뒤로가기/홈 버튼만 숨김 (헤더 바 자체는 유지)
+  const showHeaderButtons = phase === 'question' || phase === 'ready';
+
   useEffect(() => {
     if (phase === 'chat') {
       // 1초 페이드인
@@ -33,7 +36,7 @@ export default function QuestionPage() {
   useEffect(() => {
     if (phase === 'camera') {
       setShowReadyButton(false);
-      const timer = setTimeout(() => setShowReadyButton(true), 3000);
+      const timer = setTimeout(() => setShowReadyButton(true), 2000);
       return () => clearTimeout(timer);
     }
     setShowReadyButton(false);
@@ -91,7 +94,7 @@ export default function QuestionPage() {
       position: 'relative',
       padding: '0 24px',
     }}>
-      {/* 상단 헤더 */}
+      {/* 상단 헤더 (바는 항상 표시, 뒤로가기/홈 버튼은 question·ready 단계에서만 표시) */}
       <div style={{
         position: 'absolute',
         top: 0,
@@ -103,31 +106,37 @@ export default function QuestionPage() {
         padding: '0 16px',
         borderBottom: '1px solid #ddd3d3',
       }}>
-        <button
-          type="button"
-          onClick={() => {
-            if (phase === 'question') navigate(-1);
-            else if (phase === 'ready') setPhase('question');
-            else if (phase === 'chat') setPhase('ready');
-            else if (phase === 'camera') setPhase('ready');
-          }}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px' }}
-        >
-          {'<'}
-        </button>
+        {showHeaderButtons ? (
+          <button
+            type="button"
+            onClick={() => {
+              if (phase === 'question') navigate(-1);
+              else if (phase === 'ready') setPhase('question');
+            }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px' }}
+          >
+            {'<'}
+          </button>
+        ) : (
+          <div style={{ width: '20px' }} />
+        )}
         <span style={{
           margin: '0 auto',
           fontSize: '16px',
           fontWeight: 700,
           color: '#000000'
         }}>촬영 하기</span>
-        <button
-          type="button"
-          onClick={() => navigate('/home')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
-        >
-          <img src="/Home.svg" alt="home" style={{ width: '20px', height: '20px' }} />
-        </button>
+        {showHeaderButtons ? (
+          <button
+            type="button"
+            onClick={() => navigate('/home')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+          >
+            <img src="/Home.svg" alt="home" style={{ width: '20px', height: '20px' }} />
+          </button>
+        ) : (
+          <div style={{ width: '20px' }} />
+        )}
       </div>
 
       {/* 오늘의 질문은? */}
