@@ -36,6 +36,7 @@ import SplashPage from "./pages/SplashPage";
 import QuestionPage from "./pages/QuestionPage";
 import CameraPage from "./pages/CameraPage";
 import CalendarPage from "./pages/CalendarPage";
+import GroupInviteSimplePage from "./pages/GroupInviteSimplePage";
 
 function App() {
   return (
@@ -68,6 +69,7 @@ function App() {
         <Route path="/group/invite-share" element={<GroupInviteSharePage />} />
         <Route path="/group/name" element={<GroupNamePage />} />
         <Route path="/join" element={<JoinGroupPage />} /> {/* 🎯 초대 링크 수신 경로 */}
+        <Route path="/group/:groupId/invite" element={<GroupInviteSimplePage />} />
 
         {/* 메인 피드 및 서비스 페이지 */}
         <Route path="/home" element={<HomePage />} />

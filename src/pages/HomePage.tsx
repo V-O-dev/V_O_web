@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { HomeHeader } from "../components/common/HomeHeader";
 import { HomeBottomNav } from "../components/common/HomeBottomNav";
+import { useGroupStore } from "@/stores/useGroupStore";
 
 import { PrivateGroupData, VideoFeedItem } from "../types/home";
 import { fetchMyGroups, fetchGroupFeed, fetchDailyQuestion } from "../apis/api";
@@ -30,6 +31,8 @@ function HomeMainContent() {
   const [viewerStatus, setViewerStatus] = useState<string>("UPLOADED");
   const [dailyQuestion, setDailyQuestion] = useState<any>(null);
 
+  const setCurrentGroupId = useGroupStore((state) => state.setCurrentGroupId);
+
   // 초기 내 그룹 목록 조회
   useEffect(() => {
     const getGroups = async () => {
@@ -42,6 +45,14 @@ function HomeMainContent() {
     };
     getGroups();
   }, []);
+
+  // 선택된 그룹 탭을 전역 store(currentGroupId)에도 동기화
+  // -> QuestionPage 등 다른 화면에서 groupId를 참조할 때 이 값을 사용함
+  useEffect(() => {
+    if (selectedTabId !== 0) {
+      setCurrentGroupId(String(selectedTabId));
+    }
+  }, [selectedTabId, setCurrentGroupId]);
 
   // selectedTabId 변경 시 피드 및 오늘의 질문 함께 조회
   useEffect(() => {
@@ -124,7 +135,12 @@ function HomeMainContent() {
   const formatTimeAgo = (isoString?: string) => {
     if (!isoString) return "방금 전";
     const now = new Date();
-    const past = new Date(isoString);
+    // 서버가 주는 timestamp에 타임존 정보(Z, +09:00 등)가 없으면
+    // JS가 이걸 "로컬 시간대 기준"이라고 잘못 해석해버려서 9시간(KST 오프셋)만큼
+    // 어긋나는 문제가 있었음. 타임존 표시가 없으면 UTC라고 명시해줌.
+    const hasTimezone = /Z$|[+-]\d{2}:?\d{2}$/.test(isoString);
+    const normalizedIsoString = hasTimezone ? isoString : `${isoString}Z`;
+    const past = new Date(normalizedIsoString);
     const diffMins = Math.floor((now.getTime() - past.getTime()) / (1000 * 60));
     if (diffMins < 1) return "방금 전";
     if (diffMins < 60) return `${diffMins}분 전`;

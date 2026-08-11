@@ -3,12 +3,23 @@ import { HomeHeader } from '@/components/common/HomeHeader';
 import { HomeBottomNav } from '@/components/common/HomeBottomNav';
 import { ArrowButton } from '@/components/common/ArrowButton';
 import { useGroupStore } from '@/stores/useGroupStore';
+import videoButton from '@/assets/home/video_button.svg';
+import logoWhite from '@/assets/logo_white.svg';
 import {
   fetchCalendarRecordDates,
   fetchDailyArchives,
   resolveVideoUrl,
   type DailyArchiveRecord,
 } from '@/apis/api';
+
+// 전체화면으로 재생 중인 기록 정보
+type PlayingRecord = {
+  record: DailyArchiveRecord;
+  videoUrl: string;
+  year: number;
+  month: number; // 0-indexed
+  selectedDate: string;
+};
 
 export default function CalendarPage() {
   const today = new Date();
@@ -30,6 +41,9 @@ export default function CalendarPage() {
   const [selectedRecords, setSelectedRecords] = useState<DailyArchiveRecord[] | null>(null);
   const [isDayLoading, setIsDayLoading] = useState(false);
   const [dayError, setDayError] = useState<string | null>(null);
+
+  // 현재 전체화면으로 재생 중인 기록 (없으면 null)
+  const [playingRecord, setPlayingRecord] = useState<PlayingRecord | null>(null);
 
   // 연/월이 바뀔 때마다 이번 달 기록 날짜(dot) 조회
   useEffect(() => {
@@ -233,7 +247,14 @@ export default function CalendarPage() {
 
             {!isDayLoading && !dayError && selectedRecords && selectedRecords.length > 0 && (
               selectedRecords.map(record => (
-                <RecordCard key={record.archiveId} record={record} year={year} month={month} selectedDate={selectedDate} />
+                <RecordCard
+                  key={record.archiveId}
+                  record={record}
+                  year={year}
+                  month={month}
+                  selectedDate={selectedDate}
+                  onPlay={(videoUrl) => setPlayingRecord({ record, videoUrl, year, month, selectedDate })}
+                />
               ))
             )}
 
@@ -269,6 +290,126 @@ export default function CalendarPage() {
       </div>
 
       <HomeBottomNav />
+
+      {/* 전체화면 비디오 플레이어 오버레이 */}
+      {playingRecord && (
+        <VideoPlayerOverlay
+          playingRecord={playingRecord}
+          onClose={() => setPlayingRecord(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function VideoPlayerOverlay({
+  playingRecord,
+  onClose,
+}: {
+  playingRecord: PlayingRecord;
+  onClose: () => void;
+}) {
+  const { record, videoUrl, year, month, selectedDate } = playingRecord;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: '#000000',
+      zIndex: 100,
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      {/* 상단바 */}
+      <div style={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px 16px',
+        flexShrink: 0,
+      }}>
+        <span style={{
+          background: 'rgba(123, 63, 242, 0.267)',
+          color: '#A78BFA',
+          fontSize: '12px',
+          fontWeight: 600,
+          padding: '4px 12px',
+          borderRadius: '20px',
+        }}>
+          {record.groupName}
+        </span>
+
+        <img
+          src={logoWhite}
+          alt="V_O 로고"
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            height: '17px',
+            objectFit: 'contain',
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'white',
+            fontSize: '22px',
+            lineHeight: 1,
+            cursor: 'pointer',
+            padding: '4px',
+          }}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* 비디오 */}
+      <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
+        <video
+          src={videoUrl}
+          controls
+          autoPlay
+          playsInline
+          style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000000' }}
+        />
+
+        {/* 하단 질문/날짜 오버레이 */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: '24px 16px 16px',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0))',
+          pointerEvents: 'none',
+        }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: '#A78BFA',
+            background: 'rgba(123, 63, 242, 0.267)',
+            padding: '4px 12px',
+            borderRadius: '20px',
+            marginBottom: '6px',
+          }}>
+            <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#A78BFA' }} />
+            {year}년 {month + 1}월 {Number(selectedDate.split('-')[2])}일의 기록
+          </span>
+          <p style={{ fontSize: '17px', fontWeight: 700, color: 'white', margin: 0 }}>
+            "{record.questionContent}"
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -278,13 +419,14 @@ function RecordCard({
   year,
   month,
   selectedDate,
+  onPlay,
 }: {
   record: DailyArchiveRecord;
   year: number;
   month: number;
   selectedDate: string;
+  onPlay: (videoUrl: string) => void;
 }) {
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isResolving, setIsResolving] = useState(false);
   const [playFailed, setPlayFailed] = useState(false);
 
@@ -294,7 +436,7 @@ function RecordCard({
     const url = await resolveVideoUrl(record.videoId);
     setIsResolving(false);
     if (url) {
-      setVideoUrl(url);
+      onPlay(url);
     } else {
       setPlayFailed(true);
     }
@@ -308,73 +450,85 @@ function RecordCard({
       boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
       border: '1px solid #f0f0f0',
     }}>
-      <p style={{ fontSize: '15px', fontWeight: 800, color: '#666262', marginBottom: '4px' }}>
+      <p style={{ fontSize: '15px', fontWeight: 700, color: '#666262', marginBottom: '4px' }}>
         {year}년 {month + 1}월 {Number(selectedDate.split('-')[2])}일의 기록
       </p>
-      <p style={{ fontSize: '18px', fontWeight: 900, marginBottom: '16px' }}>
+      <p style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>
         '{record.questionContent}'
       </p>
 
       <div style={{
         position: 'relative',
-        background: 'var(--color-5)',
+        background: 'linear-gradient(135deg, #7B3FF2 0%, #9B62F5 100%)',
         borderRadius: '16px',
-        height: '180px',
+        width: '276px',
+        height: '150px',
         overflow: 'hidden',
       }}>
-        <span style={{
+        {/* 장식용 원 두 개 (큰 원 8%, 작은 원 5% - 부드럽게 퍼지도록 radial-gradient 처리) */}
+        <div style={{
           position: 'absolute',
-          top: '12px',
-          left: '12px',
-          zIndex: 1,
-          background: 'white',
-          borderRadius: '20px',
-          padding: '4px 12px',
-          fontSize: '13px',
-          fontWeight: 600,
-          color: 'var(--color-5)',
-        }}>
-          {record.groupName}
-        </span>
+          top: '-50px',
+          right: '-40px',
+          width: '200px',
+          height: '200px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 72%)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute',
+          top: '10px',
+          right: '30px',
+          width: '90px',
+          height: '90px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 72%)',
+          pointerEvents: 'none',
+        }} />
 
-        {videoUrl ? (
-          <video
-            src={videoUrl}
-            controls
-            autoPlay
-            playsInline
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        <button
+          type="button"
+          onClick={handlePlay}
+          disabled={isResolving}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            cursor: isResolving ? 'default' : 'pointer',
+            background: record.thumbnailUrl
+              ? `url(${record.thumbnailUrl}) center/cover no-repeat`
+              : 'transparent',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1px',
+          }}
+        >
+          <span style={{
+            zIndex: 1,
+            background: '#EDE9FE',
+            borderRadius: '20px',
+            padding: '2px 14px',
+            fontSize: '13px',
+            fontWeight: 800,
+            color: '#000000',
+          }}>
+            {record.groupName}
+          </span>
+
+          <img
+            src={videoButton}
+            alt={isResolving ? '불러오는 중' : '재생'}
+            style={{ width: '80px', height: '80px', opacity: isResolving ? 0.6 : 1 }}
           />
-        ) : (
-          <button
-            type="button"
-            onClick={handlePlay}
-            disabled={isResolving}
-            style={{
-              width: '100%',
-              height: '100%',
-              border: 'none',
-              cursor: isResolving ? 'default' : 'pointer',
-              background: record.thumbnailUrl
-                ? `url(${record.thumbnailUrl}) center/cover no-repeat`
-                : 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-            }}
-          >
-            <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'white', fontSize: '16px' }}>{isResolving ? '...' : '▶'}</span>
-            </div>
-            {playFailed && (
-              <span style={{ color: 'white', fontSize: '12px', background: 'rgba(0,0,0,0.5)', padding: '2px 8px', borderRadius: '10px' }}>
-                영상을 불러오지 못했어요
-              </span>
-            )}
-          </button>
-        )}
+          {playFailed && (
+            <span style={{ color: 'white', fontSize: '12px', background: 'rgba(0,0,0,0.5)', padding: '2px 8px', borderRadius: '10px' }}>
+              영상을 불러오지 못했어요
+            </span>
+          )}
+        </button>
       </div>
     </div>
   );
