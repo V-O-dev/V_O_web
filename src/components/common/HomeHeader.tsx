@@ -1,7 +1,25 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { fetchMyProfile } from "@/apis/api";
 
 export function HomeHeader() {
   const navigate = useNavigate();
+  const [profileImage, setProfileImage] = useState<string>("/profile.svg");
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const data = await fetchMyProfile();
+        if (data?.profileImageUrl) {
+          setProfileImage(data.profileImageUrl);
+        }
+      } catch (error) {
+        console.error("헤더 프로필 이미지 조회 실패:", error);
+      }
+    };
+    loadProfile();
+  }, []);
+
   return (
     <header
       style={{
@@ -27,7 +45,7 @@ export function HomeHeader() {
           }}
         />
       </h1>
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <button
           type="button"
           onClick={() => navigate("/alert")}
@@ -55,8 +73,8 @@ export function HomeHeader() {
           type="button"
           onClick={() => navigate("/profile")}
           style={{
-            width: "26px",
-            height: "26px",
+            width: "30px",
+            height: "30px",
             borderRadius: "50%",
             overflow: "hidden",
             border: "none",
@@ -69,7 +87,7 @@ export function HomeHeader() {
           }}
         >
           <img
-            src="/profile.svg"
+            src={profileImage}
             alt="프로필"
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />

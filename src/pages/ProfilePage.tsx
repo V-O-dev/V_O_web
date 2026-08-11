@@ -55,10 +55,10 @@ export default function ProfilePage() {
       await updateNickname(nameInput);
       setProfile({ ...profile, nickname: nameInput });
       setIsEditingName(false);
-      alert("프로필이 성공적으로 수정되었습니다.");
+      console.log("프로필이 성공적으로 수정되었습니다.");
     } catch (error) {
       console.error("닉네임 수정 실패:", error);
-      alert("닉네임 수정 중 오류가 발생했습니다.");
+      console.log("닉네임 수정 중 오류가 발생했습니다.");
     }
   };
 
@@ -121,10 +121,10 @@ export default function ProfilePage() {
         ...profile,
         profileImageUrl: res.profileImageUrl,
       });
-      alert("프로필 이미지가 변경되었습니다.");
+      console.log("프로필 이미지가 변경되었습니다.");
     } catch (error) {
       console.error("프로필 이미지 변경 실패:", error);
-      alert("이미지 업로드에 실패했습니다.");
+      console.log("이미지 업로드에 실패했습니다.");
     }
   };
 
@@ -160,7 +160,7 @@ export default function ProfilePage() {
   };
 
   if (!profile) {
-    return <div className="profile-loading">프로필을 불러오는 중입니다...</div>;
+    return null;
   }
 
   return (

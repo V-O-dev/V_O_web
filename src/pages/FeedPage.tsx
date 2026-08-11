@@ -21,12 +21,14 @@ import {
   createVideoComment,
   updateVideoComment,
   deleteVideoComment,
+  fetchMyProfile,
 } from "@/apis/api";
 
 export default function FeedPage() {
   const navigate = useNavigate();
   const { videoId: paramVideoId } = useParams<{ videoId: string }>();
   const location = useLocation();
+  const [myProfileImg, setMyProfileImg] = useState<string | null>(null);
 
   // 이전 페이지(홈 피드 등)에서 넘어온 feedItem 객체가 있다면 활용
   const passedFeed = (
@@ -121,6 +123,21 @@ export default function FeedPage() {
   useEffect(() => {
     loadFeedContent();
   }, [videoId]);
+
+  useEffect(() => {
+    const getMyInfo = async () => {
+      try {
+        const myData = await fetchMyProfile();
+        if (myData?.profileImageUrl) {
+          setMyProfileImg(myData.profileImageUrl);
+        }
+      } catch (error) {
+        console.error("내 프로필 정보 불러오기 실패:", error);
+      }
+    };
+
+    getMyInfo();
+  }, []);
 
   const handleToggleLike = async () => {
     if (!videoId) return;
@@ -361,9 +378,12 @@ export default function FeedPage() {
 
             <div className="comment-input-wrapper">
               <img
-                src={defaultProfile}
+                src={myProfileImg || defaultProfile}
                 alt="내 프로필"
                 className="input-avatar"
+                onError={(e) => {
+                  e.currentTarget.src = defaultProfile;
+                }}
               />
               <div className="input-box">
                 <input

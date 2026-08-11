@@ -8,6 +8,9 @@ export interface GroupMemberSummary {
   role: GroupMemberRole;
   joinedAt?: string;
   isMe?: boolean;
+
+  alias?: string | null;
+  displayName?: string | null;
 }
 
 export interface GroupDetailData {

@@ -24,19 +24,15 @@ const getThemeCategoryName = (themeCode?: string) => {
 export default function GroupPage() {
   const navigate = useNavigate();
   const [groups, setGroups] = useState<PrivateGroupData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
 
   // 서버에서 내 그룹 목록 가져오기
   useEffect(() => {
     const loadGroups = async () => {
       try {
-        setLoading(true);
         const data = await fetchMyGroups();
         setGroups(data);
       } catch (error) {
         console.error("내 그룹 목록 불러오기 실패:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -51,12 +47,6 @@ export default function GroupPage() {
     navigate(`/group/${groupId}`);
   };
 
-  if (loading) {
-    return (
-      <div className="group-loading">그룹 목록을 불러오는 중입니다...</div>
-    );
-  }
-
   return (
     <div className="group-app-wrapper">
       <div className="group-phone-screen">
@@ -70,68 +60,56 @@ export default function GroupPage() {
         <main className="group-main-content">
           <h2 className="group-section-title">내 그룹</h2>
 
-          {groups.length === 0 ? (
-            <div className="group-empty-state">
-              <p>참여 중인 그룹이 없습니다.</p>
-              <button
-                onClick={handleCreateGroup}
-                className="group-create-empty-btn"
+          <ul className="group-list">
+            {groups.map((group) => (
+              <li
+                key={group.groupId}
+                className="group-item"
+                onClick={() => handleGroupClick(group.groupId)}
               >
-                + 새 그룹 만들기
-              </button>
-            </div>
-          ) : (
-            <ul className="group-list">
-              {groups.map((group) => (
-                <li
-                  key={group.groupId}
-                  className="group-item"
-                  onClick={() => handleGroupClick(group.groupId)}
-                >
-                  <div className="group-image-wrapper">
-                    <img
-                      src={group.imageUrl || defaultProfile}
-                      alt={group.name}
-                      className="group-main-img"
-                      onError={(e) => {
-                        e.currentTarget.src = defaultProfile;
-                      }}
-                    />
+                <div className="group-image-wrapper">
+                  <img
+                    src={group.imageUrl || defaultProfile}
+                    alt={group.name}
+                    className="group-main-img"
+                    onError={(e) => {
+                      e.currentTarget.src = defaultProfile;
+                    }}
+                  />
+                </div>
+
+                <div className="group-info">
+                  <div className="group-title-row">
+                    <span className="group-name">{group.name}</span>
+                    <span className="group-badge">
+                      {getThemeCategoryName(group.themeCode)}
+                    </span>
                   </div>
 
-                  <div className="group-info">
-                    <div className="group-title-row">
-                      <span className="group-name">{group.name}</span>
-                      <span className="group-badge">
-                        {getThemeCategoryName(group.themeCode)}
-                      </span>
+                  <div className="group-members-row">
+                    <div className="group-avatar-stack">
+                      {Array.from({
+                        length: Math.min(group.memberCount || 1, 6),
+                      }).map((_, idx) => (
+                        <img
+                          key={idx}
+                          src={defaultProfile}
+                          alt="멤버 프로필"
+                          className="group-avatar-mini"
+                          style={{ zIndex: 10 - idx }}
+                        />
+                      ))}
                     </div>
-
-                    <div className="group-members-row">
-                      <div className="group-avatar-stack">
-                        {Array.from({
-                          length: Math.min(group.memberCount || 1, 6),
-                        }).map((_, idx) => (
-                          <img
-                            key={idx}
-                            src={defaultProfile}
-                            alt="멤버 프로필"
-                            className="group-avatar-mini"
-                            style={{ zIndex: 10 - idx }}
-                          />
-                        ))}
-                      </div>
-                      <span className="group-member-count">
-                        {group.memberCount}명
-                      </span>
-                    </div>
+                    <span className="group-member-count">
+                      {group.memberCount}명
+                    </span>
                   </div>
+                </div>
 
-                  <span className="group-arrow">›</span>
-                </li>
-              ))}
-            </ul>
-          )}
+                <span className="group-arrow">›</span>
+              </li>
+            ))}
+          </ul>
         </main>
       </div>
     </div>
