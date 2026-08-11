@@ -16,7 +16,7 @@ export default function QuestionPage() {
   const [answerTimeLimitMs, setAnswerTimeLimitMs] = useState<number>(10000); // 스웨거 기본 예시값
   const [showReadyButton, setShowReadyButton] = useState(false);
   const navigate = useNavigate();
-  const currentGroupId = useGroupStore((state) => state.currentGroupId) ?? 12; // TODO: 로그인/그룹 연동되면 이 fallback 제거
+  const currentGroupId = useGroupStore((state) => state.currentGroupId); // TODO: 로그인/그룹 연동되면 이 fallback 제거
 
   // 시작하기를 누른 이후(chat, camera)에는 뒤로가기/홈 버튼만 숨김 (헤더 바 자체는 유지)
   const showHeaderButtons = phase === 'question' || phase === 'ready';
