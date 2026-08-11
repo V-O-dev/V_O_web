@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { QRCodeSVG } from 'qrcode.react'; 
 import { Header } from '../components/common/Header';
+import { CustomToast } from '../components/common/CustomToast';
+import { axiosInstance } from '../apis/axiosInstance'; 
 
 // 에셋 임포트
 import heartIcon from '../assets/heart_icon.svg'; 
@@ -11,27 +13,86 @@ export default function GroupInviteSharePage() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  const inviteCode = location.state?.inviteCode || "NUFSOU9"; 
-  const shareUrl = `${window.location.origin}/join?code=${inviteCode}`;
+  // 이전 페이지에서 넘어온 초대코드 및 groupId
+  const inviteCode = location.state?.inviteCode; 
+  const groupId = location.state?.groupId;
 
-  // 🎯 HTTP 환경 및 구형 브라우저에서도 동작하는 안전한 텍스트 복사 함수
+  // 🎯 실제 배포된 Vercel 도메인 주소 적용
+  const PRODUCTION_URL = 'https://v-o-web-1fqd.vercel.app';
+  
+  // 🎯 카카오톡, 문자 등에서 바로 클릭 가능한 파란색 하이퍼링크 URL 생성
+  const shareUrl = `${PRODUCTION_URL}/join?code=${inviteCode || ''}`;
+
+  // QR 및 토스트 상태 관리
+  const [qrImageUrl, setQrImageUrl] = useState<string>('');
+  const [isQrLoading, setIsQrLoading] = useState<boolean>(true);
+  
+  const [toast, setToast] = useState<{ isOpen: boolean; message: string; subMessage?: string }>({
+    isOpen: false,
+    message: '',
+    subMessage: ''
+  });
+
+  const showToast = (message: string, subMessage?: string) => {
+    setToast({ isOpen: true, message, subMessage });
+  };
+
+  // QR 이미지 불러오기
+  useEffect(() => {
+    let active = true;
+    let objectUrl = '';
+
+    const fetchQrImage = async () => {
+      if (!inviteCode) {
+        setIsQrLoading(false);
+        return;
+      }
+
+      try {
+        setIsQrLoading(true);
+        const response = await axiosInstance.get(`/api/v1/invites/${inviteCode}/qr`, {
+          params: { size: 512 },
+          responseType: 'blob'
+        });
+
+        if (active) {
+          const blob = new Blob([response.data], { type: 'image/png' });
+          objectUrl = URL.createObjectURL(blob);
+          setQrImageUrl(objectUrl);
+        }
+      } catch (err) {
+        console.error('QR 이미지 로딩 실패:', err);
+      } finally {
+        if (active) {
+          setIsQrLoading(false);
+        }
+      }
+    };
+
+    fetchQrImage();
+
+    return () => {
+      active = false;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [inviteCode]);
+
+  // 클립보드 복사 함수
   const copyToClipboard = async (text: string): Promise<boolean> => {
-    // 1) 최신 Clipboard API 시도 (HTTPS 또는 localhost 환경)
     if (navigator.clipboard && window.isSecureContext) {
       try {
         await navigator.clipboard.writeText(text);
         return true;
       } catch (err) {
-        console.warn('Clipboard API 실패, Fallback 실행:', err);
+        console.warn('Clipboard API 실패:', err);
       }
     }
 
-    // 2) HTTP / 미지원 환경용 레거시 Fallback 로직
     try {
       const textArea = document.createElement('textarea');
       textArea.value = text;
-      
-      // 화면 밖으로 숨김
       textArea.style.position = 'fixed';
       textArea.style.top = '0';
       textArea.style.left = '-9999px';
@@ -49,38 +110,59 @@ export default function GroupInviteSharePage() {
     }
   };
 
-  // 1. 🎯 시스템 공유창 호출 (모바일 Web Share API)
+  // 1. [링크 공유]
   const handleShare = async () => {
-    if (navigator.share) {
+    if (!inviteCode) return;
+
+    const shareData = {
+      title: 'v_O 그룹 초대',
+      text: `v_O에서 그룹 초대장이 도착했어요!\n아래 링크를 눌러 들어오세요 🚀\n초대코드: ${inviteCode}\n`,
+      url: shareUrl,
+    };
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
       try {
-        await navigator.share({
-          title: 'v_O 그룹 초대',
-          text: `v_O에서 초대장이 도착했어요! 초대코드: ${inviteCode}`,
-          url: shareUrl,
-        });
-      } catch (err) {
-        // 사용자가 공유창을 취소했을 때 발생시키는 에러 무시
-        console.log('공유 취소 또는 에러:', err);
+        await navigator.share(shareData);
+        return;
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.log('공유 실패');
+        } else {
+          return;
+        }
       }
+    }
+
+    // PC 등 공유창 미지원 환경 지원
+    const success = await copyToClipboard(`${shareData.text}${shareUrl}`);
+    if (success) {
+      showToast('초대 링크 메시지가 복사되었습니다! 🚀', shareUrl);
     } else {
-      // 미지원 환경(PC 브라우저 등)에서는 클립보드 복사로 자동 대체
-      await handleCopyLink();
+      showToast('초대코드', inviteCode);
     }
   };
 
-  // 2. 🎯 클립보드 링크 복사
+  // 2. [링크 복사하기]
   const handleCopyLink = async () => {
+    if (!inviteCode) return;
+
     const success = await copyToClipboard(shareUrl);
     if (success) {
-      alert('초대 링크가 클립보드에 복사되었습니다! 🚀');
+      showToast('초대 링크가 복사되었습니다! 🎉', shareUrl);
     } else {
-      alert(`복사에 실패했습니다. 초대코드를 직접 공유해 주세요: ${inviteCode}`);
+      showToast('복사 실패, 코드로 공유해 보세요', inviteCode);
     }
   };
 
-  // 3. 완료 버튼 클릭 시 이동
+  // 3. 완료 버튼 클릭 시 /group/name 페이지로 이동
   const handleComplete = () => {
-    navigate('/group/name'); 
+    navigate('/group/name', {
+      state: {
+        ...location.state,
+        groupId,
+        inviteCode
+      }
+    }); 
   };
 
   return (
@@ -139,7 +221,7 @@ export default function GroupInviteSharePage() {
           친구 초대하기
         </h1>
 
-        {/* 초대코드 */}
+        {/* 동적 초대코드 */}
         <div style={{
           marginTop: '10px',
           display: 'flex',
@@ -154,7 +236,7 @@ export default function GroupInviteSharePage() {
             lineHeight: '24px',
             letterSpacing: '0.05em'
           }}>
-            {inviteCode}
+            {inviteCode || "------"}
           </span>
           <div style={{
             width: '100%',
@@ -164,7 +246,7 @@ export default function GroupInviteSharePage() {
           }} />
         </div>
 
-        {/* QR 카드 배경 */}
+        {/* QR 카드 영역 */}
         <div style={{
           marginTop: '20px', 
           width: '260px',
@@ -186,15 +268,24 @@ export default function GroupInviteSharePage() {
             alignItems: 'center',
             justifyContent: 'center',
             boxSizing: 'border-box',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)'
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)',
+            overflow: 'hidden'
           }}>
-            <QRCodeSVG 
-              value={shareUrl} 
-              size={188} 
-              fgColor="#000000"
-              bgColor="#ffffff"
-              level="M"
-            />
+            {isQrLoading ? (
+              <span style={{ fontSize: '13px', color: '#888' }}>QR 불러오는 중...</span>
+            ) : qrImageUrl ? (
+              <img 
+                src={qrImageUrl} 
+                alt="초대 QR 코드" 
+                style={{
+                  width: '188px',
+                  height: '188px',
+                  objectFit: 'contain'
+                }}
+              />
+            ) : (
+              <span style={{ fontSize: '12px', color: '#ff4d4f' }}>QR 로딩 실패</span>
+            )}
           </div>
         </div>
 
@@ -207,15 +298,16 @@ export default function GroupInviteSharePage() {
           width: '100%'
         }}>
           
-          {/* 링크 공유 버튼 */}
+          {/* 1) 링크 공유 버튼 */}
           <button 
             type="button"
             onClick={handleShare}
+            disabled={!inviteCode}
             style={{
               background: 'none',
               border: 'none',
               padding: 0,
-              cursor: 'pointer',
+              cursor: inviteCode ? 'pointer' : 'default',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -249,15 +341,16 @@ export default function GroupInviteSharePage() {
             </span>
           </button>
 
-          {/* 링크 복사하기 버튼 */}
+          {/* 2) 링크 복사하기 버튼 */}
           <button 
             type="button"
             onClick={handleCopyLink}
+            disabled={!inviteCode}
             style={{
               background: 'none',
               border: 'none',
               padding: 0,
-              cursor: 'pointer',
+              cursor: inviteCode ? 'pointer' : 'default',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -332,6 +425,14 @@ export default function GroupInviteSharePage() {
           완료
         </button>
       </div>
+
+      {/* 커스텀 토스트 알림 */}
+      <CustomToast 
+        isOpen={toast.isOpen}
+        message={toast.message}
+        subMessage={toast.subMessage}
+        onClose={() => setToast({ ...toast, isOpen: false })}
+      />
 
       {/* 4. 바닥 여백 영역 */}
       <div style={{ position: 'absolute', bottom: 0, height: '94px', width: '100%' }} />

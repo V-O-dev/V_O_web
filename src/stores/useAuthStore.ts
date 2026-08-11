@@ -18,12 +18,13 @@ interface AuthState {
     phoneNumber: string;
     isVerified: boolean;
     profileImage: string | null;
+    profileFile: File | null; // 🎯 추가
     nickname: string;
   };
 
   setSignupPhone: (phone: string) => void;
   setSignupVerified: (verified: boolean) => void;
-  setSignupProfile: (imageUrl: string | null) => void;
+  setSignupProfile: (imageUrl: string | null, file?: File | null) => void; // 🎯 file 인자 추가
   setSignupNickname: (nickname: string) => void;
   clearSignupProgress: () => void;
 
@@ -41,6 +42,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     phoneNumber: "",
     isVerified: false,
     profileImage: null,
+    profileFile: null, // 🎯 추가
     nickname: "",
   },
 
@@ -54,9 +56,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       signupProgress: { ...state.signupProgress, isVerified: verified },
     })),
 
-  setSignupProfile: (imageUrl) =>
+  setSignupProfile: (imageUrl, file = null) =>
     set((state) => ({
-      signupProgress: { ...state.signupProgress, profileImage: imageUrl },
+      signupProgress: {
+        ...state.signupProgress,
+        profileImage: imageUrl,
+        profileFile: file, // 🎯 File 객체도 같이 저장
+      },
     })),
 
   setSignupNickname: (nickname) =>
@@ -68,6 +74,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         phoneNumber: "",
         isVerified: false,
         profileImage: null,
+        profileFile: null, // 🎯 추가
         nickname: "",
       },
     }),

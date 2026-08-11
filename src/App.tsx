@@ -29,6 +29,7 @@ import GroupCreateCompletePage from "./pages/GroupCreateCompletePage";
 import GroupInvitePage from "./pages/GroupInvitePage";
 import GroupInviteSharePage from "./pages/GroupInviteSharePage";
 import GroupNamePage from "./pages/GroupNamePage";
+import JoinGroupPage from "./pages/JoinGroupPage"; // 🎯 초대 링크 수신 및 그룹 참여 페이지
 
 // 촬영 및 기타 페이지
 import SplashPage from "./pages/SplashPage";
@@ -53,7 +54,7 @@ function App() {
         <Route path="/signup/name" element={<NameStep />} />
         <Route path="/signup/complete" element={<CompleteStep />} />
 
-        {/* 그룹 생성 플로우 */}
+        {/* 그룹 생성 및 참여 플로우 */}
         <Route path="/group/create" element={<GroupMainPage />} />
         <Route path="/group/theme" element={<GroupThemeSelect />} />
         <Route path="/group/examples" element={<GroupExamplesPage />} />
@@ -66,6 +67,7 @@ function App() {
         <Route path="/group/invite" element={<GroupInvitePage />} />
         <Route path="/group/invite-share" element={<GroupInviteSharePage />} />
         <Route path="/group/name" element={<GroupNamePage />} />
+        <Route path="/join" element={<JoinGroupPage />} /> {/* 🎯 초대 링크 수신 경로 */}
 
         {/* 메인 피드 및 서비스 페이지 */}
         <Route path="/home" element={<HomePage />} />
