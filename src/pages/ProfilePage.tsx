@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./ProfilePage.css";
 import { SubPageHeader } from "@/components/common/SubHeader";
 import { UserProfileData } from "@/types/user";
+import { useAuthStore } from "@/stores/useAuthStore"; // 🎯 추가
 import {
   fetchMyProfile,
   updateNickname,
@@ -33,6 +34,10 @@ export default function ProfilePage() {
   // 현재 열려있는 모달 상태 관리
   const [activeModal, setActiveModal] = useState<ModalType>("NONE");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // 🎯 zustand 스토어 초기화 액션 가져오기
+  const logout = useAuthStore((state) => state.logout);
+  const clearSignupProgress = useAuthStore((state) => state.clearSignupProgress);
 
   // 내 정보 초기 조회
   useEffect(() => {
@@ -136,8 +141,7 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("로그아웃 요청 실패", error);
     } finally {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      logout(); // 🎯 zustand user/token 상태 + localStorage 토큰 초기화
       setActiveModal("NONE");
       navigate("/login");
     }
@@ -147,8 +151,8 @@ export default function ProfilePage() {
   const handleConfirmWithdraw = async () => {
     try {
       await withdrawApi();
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      logout(); // 🎯 zustand user/token 상태 + localStorage 토큰 초기화
+      clearSignupProgress(); // 🎯 이전 회원가입 진행 상태(프로필 이미지, 닉네임 등) 초기화
       setActiveModal("NONE");
       console.log("회원 탈퇴가 완료되었습니다.");
       navigate("/login");

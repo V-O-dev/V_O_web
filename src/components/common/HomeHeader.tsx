@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchMyProfile } from "@/apis/api";
+import { useGroupStore } from "@/stores/useGroupStore";
 
 export function HomeHeader() {
   const navigate = useNavigate();
+  const setCurrentGroupId = useGroupStore((state) => state.setCurrentGroupId);
   const [profileImage, setProfileImage] = useState<string>("/profile.svg");
 
   useEffect(() => {
@@ -19,6 +21,11 @@ export function HomeHeader() {
     };
     loadProfile();
   }, []);
+
+  const handleLogoClick = () => {
+    setCurrentGroupId(null); // "전체" 선택 상태로 초기화
+    navigate("/home");
+  };
 
   return (
     <header
@@ -36,14 +43,27 @@ export function HomeHeader() {
       }}
     >
       <h1 style={{ margin: 0, display: "flex", alignItems: "center" }}>
-        <img
-          src="/logo.png"
-          alt="V_O 로고"
+        <button
+          type="button"
+          onClick={handleLogoClick}
           style={{
-            height: "17px",
-            objectFit: "contain",
+            background: "none",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
           }}
-        />
+        >
+          <img
+            src="/logo.png"
+            alt="V_O 로고"
+            style={{
+              height: "17px",
+              objectFit: "contain",
+            }}
+          />
+        </button>
       </h1>
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <button

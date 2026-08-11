@@ -45,9 +45,11 @@ export default function JoinGroupPage() {
       setIsSubmitting(true);
       const token = localStorage.getItem('accessToken');
 
+      // 🎯 스웨거 스펙에 맞게 경로/필드명 수정
+      // POST /api/v1/groups/join, body: { code: string }
       const response = await axiosInstance.post(
-        '/api/v1/invites/join',
-        { inviteCode: cleanCode },
+        '/api/v1/groups/join',
+        { code: cleanCode },
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         }
