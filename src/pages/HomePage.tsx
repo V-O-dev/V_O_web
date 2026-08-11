@@ -307,7 +307,7 @@ function HomeMainContent() {
                   </div>
                 </div>
 
-                {isCurrentGroupAnswered && questionText && (
+                {!isLocked && questionText && (
                   <div className="home-feed-question-box">
                     <span className="home-question-q">Q</span>
                     <span className="home-question-text">{questionText}</span>
