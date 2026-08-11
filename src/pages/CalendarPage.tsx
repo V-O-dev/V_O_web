@@ -174,7 +174,8 @@ export default function CalendarPage() {
                 >
                   <span style={{
                     fontSize: '14px',
-                    fontWeight: isToday ? 700 : 500,
+                    fontWeight: isToday ? 900 : 500,
+                    WebkitTextStroke: isToday ? '0.7px currentColor' : 'none',
                     color: isSelected ? 'white' : 
                         (firstDay + i) % 7 === 0 ? '#FF3B30' :  // 일요일
                         (firstDay + i) % 7 === 6 ? '#007AFF' :  // 토요일
@@ -258,8 +259,8 @@ export default function CalendarPage() {
                   }}>
                     <img src="/no_record.svg" alt="기록없음" style={{ width: '120px' }} />
                   </div>
-                  <p style={{ fontSize: '16px', fontWeight: 800, marginBottom: '8px' }}>기록이 없어요</p>
-                  <p style={{ fontSize: '13px', fontWeight: 800, color: '#999494' }}>이 날엔 아무도 답변을 남기지 않았어요.</p>
+                  <p style={{ fontSize: '16px', fontWeight: 750, marginBottom: '8px' }}>기록이 없어요</p>
+                  <p style={{ fontSize: '13px', fontWeight: 500, color: '#999494' }}>이 날엔 아무도 답변을 남기지 않았어요.</p>
                 </div>
               </div>
             )}
