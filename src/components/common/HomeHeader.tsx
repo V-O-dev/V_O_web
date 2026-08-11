@@ -1,7 +1,32 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { fetchMyProfile } from "@/apis/api";
+import { useGroupStore } from "@/stores/useGroupStore";
 
 export function HomeHeader() {
   const navigate = useNavigate();
+  const setCurrentGroupId = useGroupStore((state) => state.setCurrentGroupId);
+  const [profileImage, setProfileImage] = useState<string>("/profile.svg");
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const data = await fetchMyProfile();
+        if (data?.profileImageUrl) {
+          setProfileImage(data.profileImageUrl);
+        }
+      } catch (error) {
+        console.error("헤더 프로필 이미지 조회 실패:", error);
+      }
+    };
+    loadProfile();
+  }, []);
+
+  const handleLogoClick = () => {
+    setCurrentGroupId(null); // "전체" 선택 상태로 초기화
+    navigate("/home");
+  };
+
   return (
     <header
       style={{
@@ -18,16 +43,29 @@ export function HomeHeader() {
       }}
     >
       <h1 style={{ margin: 0, display: "flex", alignItems: "center" }}>
-        <img
-          src="/logo.png"
-          alt="V_O 로고"
+        <button
+          type="button"
+          onClick={handleLogoClick}
           style={{
-            height: "17px",
-            objectFit: "contain",
+            background: "none",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
           }}
-        />
+        >
+          <img
+            src="/logo.png"
+            alt="V_O 로고"
+            style={{
+              height: "17px",
+              objectFit: "contain",
+            }}
+          />
+        </button>
       </h1>
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <button
           type="button"
           onClick={() => navigate("/alert")}
@@ -55,8 +93,8 @@ export function HomeHeader() {
           type="button"
           onClick={() => navigate("/profile")}
           style={{
-            width: "26px",
-            height: "26px",
+            width: "30px",
+            height: "30px",
             borderRadius: "50%",
             overflow: "hidden",
             border: "none",
@@ -69,7 +107,7 @@ export function HomeHeader() {
           }}
         >
           <img
-            src="/profile.svg"
+            src={profileImage}
             alt="프로필"
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />

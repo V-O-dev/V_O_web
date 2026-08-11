@@ -77,7 +77,7 @@ export default function GroupPage() {
 
   useEffect(() => {
     loadGroupDetail();
-  }, [groupId]);
+  }, [groupId, location.pathname]);
 
   // 현재 로그인한 '나'가 방장인지 확인
   const isCurrentLeader = members.some(
@@ -145,11 +145,11 @@ export default function GroupPage() {
       } else if (activeModal === "LEAVE") {
         await leaveGroup(groupId);
         console.log("그룹에서 나가기 처리되었습니다.");
-        navigate("/Allgroup");
+        navigate("/Allgroup", { replace: true });
       } else if (activeModal === "DELETE") {
         await deleteGroup(groupId);
         console.log("그룹이 삭제되었습니다.");
-        navigate("/Allgroup");
+        navigate("/Allgroup", { replace: true });
       }
     } catch (error) {
       console.error("그룹 요청 처리 실패:", error);
@@ -160,7 +160,7 @@ export default function GroupPage() {
   };
 
   if (!groupInfo) {
-    return <div className="group-loading">그룹 정보를 불러오는 중...</div>;
+    return null;
   }
 
   return (
@@ -240,14 +240,26 @@ export default function GroupPage() {
                     className="group-member-row"
                   >
                     <div
-                      onClick={() =>
-                        navigate(`/edit-nickname/${member.userId}`)
-                      }
-                      style={{ cursor: "pointer" }}
+                      onClick={() => {
+                        if (!member.isMe) {
+                          navigate(
+                            `/group/${groupId}/member/${member.memberId}/edit-nickname`,
+                            {
+                              state: { member },
+                            }
+                          );
+                        }
+                      }}
+                      style={{ cursor: member.isMe ? "default" : "pointer" }}
                     >
                       <UserProfileInfo
                         profileImageUrl={member.profileImageUrl}
-                        nickname={member.nickname || `유저 ${member.userId}`}
+                        nickname={
+                          member.displayName ||
+                          member.alias ||
+                          member.nickname ||
+                          `유저 ${member.userId}`
+                        }
                         subText={member.isMe ? "소유자 계정" : "그룹 멤버"}
                       />
                     </div>

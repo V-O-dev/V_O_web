@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./ProfilePage.css";
 import { SubPageHeader } from "@/components/common/SubHeader";
 import { UserProfileData } from "@/types/user";
+import { useAuthStore } from "@/stores/useAuthStore"; // 🎯 추가
 import {
   fetchMyProfile,
   updateNickname,
@@ -34,6 +35,10 @@ export default function ProfilePage() {
   const [activeModal, setActiveModal] = useState<ModalType>("NONE");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // 🎯 zustand 스토어 초기화 액션 가져오기
+  const logout = useAuthStore((state) => state.logout);
+  const clearSignupProgress = useAuthStore((state) => state.clearSignupProgress);
+
   // 내 정보 초기 조회
   useEffect(() => {
     const loadProfile = async () => {
@@ -55,10 +60,10 @@ export default function ProfilePage() {
       await updateNickname(nameInput);
       setProfile({ ...profile, nickname: nameInput });
       setIsEditingName(false);
-      alert("프로필이 성공적으로 수정되었습니다.");
+      console.log("프로필이 성공적으로 수정되었습니다.");
     } catch (error) {
       console.error("닉네임 수정 실패:", error);
-      alert("닉네임 수정 중 오류가 발생했습니다.");
+      console.log("닉네임 수정 중 오류가 발생했습니다.");
     }
   };
 
@@ -121,10 +126,10 @@ export default function ProfilePage() {
         ...profile,
         profileImageUrl: res.profileImageUrl,
       });
-      alert("프로필 이미지가 변경되었습니다.");
+      console.log("프로필 이미지가 변경되었습니다.");
     } catch (error) {
       console.error("프로필 이미지 변경 실패:", error);
-      alert("이미지 업로드에 실패했습니다.");
+      console.log("이미지 업로드에 실패했습니다.");
     }
   };
 
@@ -136,8 +141,7 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("로그아웃 요청 실패", error);
     } finally {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      logout(); // 🎯 zustand user/token 상태 + localStorage 토큰 초기화
       setActiveModal("NONE");
       navigate("/login");
     }
@@ -147,8 +151,8 @@ export default function ProfilePage() {
   const handleConfirmWithdraw = async () => {
     try {
       await withdrawApi();
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      logout(); // 🎯 zustand user/token 상태 + localStorage 토큰 초기화
+      clearSignupProgress(); // 🎯 이전 회원가입 진행 상태(프로필 이미지, 닉네임 등) 초기화
       setActiveModal("NONE");
       console.log("회원 탈퇴가 완료되었습니다.");
       navigate("/login");
@@ -160,7 +164,7 @@ export default function ProfilePage() {
   };
 
   if (!profile) {
-    return <div className="profile-loading">프로필을 불러오는 중입니다...</div>;
+    return null;
   }
 
   return (

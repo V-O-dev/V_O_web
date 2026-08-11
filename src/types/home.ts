@@ -12,6 +12,7 @@ export interface PrivateGroupData {
   memberCount?: number;
   role?: string;
   isAnsweredToday?: boolean;
+  memberProfileImages?: string[];
 }
 
 export interface FeedUserSummary {
@@ -25,6 +26,11 @@ export interface VideoFeedItem {
   videoId: number;
   userId: number;
   nickname: string;
+  displayName?: string;
+  alias?: string;
+  groupId?: number;
+  memberId?: number;
+  isMe?: boolean;
   profileImageUrl: string | null;
   questionId: number;
   questionContent: string;
