@@ -73,7 +73,10 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/group/:groupId" element={<GroupPage />} />
-        <Route path="/edit-nickname/:userId" element={<EditNicknamePage />} />
+        <Route
+          path="/group/:groupId/member/:memberId/edit-nickname"
+          element={<EditNicknamePage />}
+        />
         <Route path="/alert" element={<AlertPage />} />
         <Route path="/allGroup" element={<AllGroupPage />} />
         <Route path="/feed" element={<FeedPage />} />

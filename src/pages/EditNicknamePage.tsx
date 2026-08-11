@@ -1,54 +1,95 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import "./EditNicknamePage.css";
 import { SubPageHeader } from "@/components/common/SubHeader";
+import { fetchGroupDetail, updateMemberAlias } from "@/apis/api";
 import profileIcon from "@/assets/home/profile.svg";
 
 interface TargetUserProfile {
-  userId: number;
+  memberId: number;
   originalName: string;
   customName: string;
   profileImageUrl: string | null;
 }
 
-const MOCK_TARGET_USER: TargetUserProfile = {
-  userId: 102,
-  originalName: "홍길동",
-  customName: "엄마",
-  profileImageUrl: null,
-};
-
 export default function EditNicknamePage() {
   const navigate = useNavigate();
-  const { userId } = useParams<{ userId: string }>();
+  const location = useLocation();
+  const { groupId: paramGroupId, memberId: paramMemberId } = useParams<{
+    groupId: string;
+    memberId: string;
+  }>();
+
+  const groupId = Number(paramGroupId);
+  const memberId = Number(paramMemberId);
 
   const [userInfo, setUserInfo] = useState<TargetUserProfile | null>(null);
   const [nicknameInput, setNicknameInput] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setUserInfo(MOCK_TARGET_USER);
-    setNicknameInput(MOCK_TARGET_USER.customName);
-  }, [userId]);
+    const loadTargetMember = async () => {
+      // 이전 페이지(GroupPage)에서 state로 멤버 정보를 넘겨받은 경우 바로 사용
+      if (location.state?.member) {
+        const m = location.state.member;
+        setUserInfo({
+          memberId: m.memberId,
+          originalName: m.nickname || `유저 ${m.userId}`,
+          customName: m.alias || m.displayName || "",
+          profileImageUrl: m.profileImageUrl ?? null,
+        });
+        setNicknameInput(m.alias || m.displayName || "");
+        setLoading(false);
+        return;
+      }
+
+      // direct 진입 시 그룹 상세조회 API를 통해 대상 멤버 정보 추출
+      if (!groupId || !memberId) return;
+      try {
+        const groupData = await fetchGroupDetail(groupId);
+        const target = (groupData.members || []).find(
+          (m: any) => m.memberId === memberId
+        );
+
+        if (target) {
+          setUserInfo({
+            memberId: target.memberId,
+            originalName: target.nickname || `유저 ${target.userId}`,
+            customName: target.alias || target.displayName || "",
+            profileImageUrl: target.profileImageUrl ?? null,
+          });
+          setNicknameInput(target.alias || target.displayName || "");
+        }
+      } catch (error) {
+        console.error("멤버 정보 불러오기 실패:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTargetMember();
+  }, [groupId, memberId, location.state]);
 
   const handleClearInput = () => {
     setNicknameInput("");
   };
 
-  const handleSave = () => {
-    if (!userInfo) return;
+  const handleSave = async () => {
+    if (!groupId || !memberId) {
+      console.log("그룹 또는 멤버 정보가 유효하지 않습니다.");
+      return;
+    }
 
-    const payload = {
-      targetUserId: userInfo.userId,
-      customName: nicknameInput,
-    };
-
-    console.log("백엔드로 보낼 호칭 수정 Payload:", payload);
-    alert(`호칭이 '${nicknameInput}'(으)로 변경되었습니다.`);
-    navigate(-1);
+    try {
+      await updateMemberAlias(groupId, memberId, nicknameInput.trim());
+      navigate(-1);
+    } catch (error) {
+      console.error("호칭 수정 실패:", error);
+    }
   };
 
-  if (!userInfo) {
-    return <div className="edit-nickname-loading">불러오는 중...</div>;
+  if (loading || !userInfo) {
+    return null;
   }
 
   return (
@@ -64,12 +105,12 @@ export default function EditNicknamePage() {
                 alt="프로필"
                 className="edit-nickname-avatar-img"
                 onError={(e) => {
-                  e.currentTarget.src = profileIcon
+                  e.currentTarget.src = profileIcon;
                 }}
               />
             </div>
             <p className="edit-nickname-original-text">
-              상대방 설정한 원래 이름은 '{userInfo.originalName}'입니다.
+              상대방이 설정한 원래 이름은 '{userInfo.originalName}'입니다.
             </p>
           </div>
 

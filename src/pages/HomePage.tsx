@@ -62,11 +62,12 @@ function HomeMainContent() {
 
             const combinedItems: VideoFeedItem[] = [];
             allFeedResults.forEach((res, idx) => {
-              const gName = groups[idx]?.name || "그룹";
+              const targetGroup = groups[idx];
               (res.items || []).forEach((item: any) => {
                 combinedItems.push({
                   ...item,
-                  groupName: gName,
+                  groupId: targetGroup?.groupId,
+                  groupName: targetGroup?.name || "그룹",
                 });
               });
             });
@@ -92,6 +93,7 @@ function HomeMainContent() {
             groups.find((g) => g.groupId === selectedTabId)?.name || "그룹";
           const itemsWithGName = (feedData.items || []).map((item: any) => ({
             ...item,
+            groupId: item.groupId || selectedTabId,
             groupName: currentGName,
           }));
 
@@ -250,7 +252,7 @@ function HomeMainContent() {
 
           {feeds.map((feed) => {
             const isLocked = !isCurrentGroupAnswered;
-            const displayName = feed.nickname;
+            const displayName = feed.displayName || feed.alias || feed.nickname;
 
             // 피드 자체에 질문이 들어있거나 오늘 배정된 질문 텍스트 가져오기
             const questionText =
@@ -262,7 +264,24 @@ function HomeMainContent() {
               <div key={feed.videoId} className="home-feed-card">
                 <div
                   className="home-card-profile-row"
-                  onClick={() => navigate(`/edit-nickname/${feed.userId}`)}
+                  onClick={() => {
+                    const gId =
+                      feed.groupId ||
+                      (selectedTabId !== 0 ? selectedTabId : undefined);
+                    const mId = feed.memberId || feed.userId;
+
+                    if (gId && mId && feed.isMe !== true) {
+                      navigate(`/group/${gId}/member/${mId}/edit-nickname`, {
+                        state: {
+                          member: {
+                            ...feed,
+                            memberId: mId,
+                          },
+                        },
+                      });
+                    }
+                  }}
+                  style={{ cursor: feed.isMe === true ? "default" : "pointer" }}
                 >
                   <img
                     src={feed.profileImageUrl || profileIcon}
