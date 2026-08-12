@@ -121,7 +121,7 @@ export default function GroupInviteSharePage() {
   const handleSmsShare = async () => {
     if (!inviteCode) return;
 
-    const shareText = `v_O에서 그룹 초대장이 도착했어요!\n아래 링크를 눌러 들어오세요 🚀\n초대코드: ${inviteCode}\n${shareUrl}`;
+    const shareText = `V_O에서 그룹 초대장이 도착했어요!\n아래 링크를 눌러 들어오세요 🚀\n초대코드: ${inviteCode}\n${shareUrl}`;
     
     // 모바일 기기(iOS/Android) 체크
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
