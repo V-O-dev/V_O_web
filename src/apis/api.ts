@@ -121,6 +121,8 @@ export interface VideoDetail {
 
 /**
  * 오늘의 질문에 대한 답변 영상을 업로드합니다.
+ * 스웨거 스펙상 metadata를 하나로 묶은 JSON이 아니라,
+ * video 파일과 함께 groupId/questionId 등을 각각 개별 폼 필드로 받음.
  */
 export async function uploadVideo(
   videoBlob: Blob,
@@ -128,15 +130,24 @@ export async function uploadVideo(
 ): Promise<VideoDetail> {
   const formData = new FormData();
   formData.append("video", videoBlob, `video-${Date.now()}.mp4`);
-  formData.append(
-    "metadata",
-    new Blob([JSON.stringify(metadata)], { type: "application/json" })
-  );
+  formData.append("groupId", String(metadata.groupId));
+  formData.append("questionId", String(metadata.questionId));
+  formData.append("durationMs", String(metadata.durationMs));
+  formData.append("width", String(metadata.width));
+  formData.append("height", String(metadata.height));
+  formData.append("cameraFacing", metadata.cameraFacing);
+  formData.append("capturedAt", metadata.capturedAt);
 
   const res = await axiosInstance.post<ApiEnvelope<VideoDetail>>(
     "/api/v1/videos",
     formData,
-    { headers: { "Content-Type": "multipart/form-data" } }
+    {
+      // axios 기본 transformRequest가 FormData를 감지 못하고 JSON으로 바꿔버리는 걸 방지.
+      // FormData를 손대지 않고 그대로 전송해야 브라우저가 boundary를 포함한
+      // multipart/form-data Content-Type을 자동으로 설정해줌.
+      transformRequest: (data) => data,
+      headers: { "Content-Type": undefined },
+    }
   );
 
   return unwrap(res.data);
@@ -210,7 +221,8 @@ export async function updateProfileImage(
   const res = await axiosInstance.patch<
     ApiEnvelope<{ profileImageUrl: string }>
   >("/api/v1/users/me/profile/image", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+    transformRequest: (data) => data,
+    headers: { "Content-Type": undefined },
   });
   return unwrap(res.data);
 }
@@ -268,7 +280,8 @@ export async function updateGroupInfo(
     `/api/v1/groups/${groupId}`,
     formData,
     {
-      headers: { "Content-Type": "multipart/form-data" },
+      transformRequest: (data) => data,
+      headers: { "Content-Type": undefined },
     }
   );
   return unwrap(res.data);

@@ -39,6 +39,7 @@ export default function GroupNamePage() {
     inputRef.current?.focus();
   };
 
+  // 앨범에서 이미지 선택 시
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -47,12 +48,23 @@ export default function GroupNamePage() {
     }
   };
 
-  const handleQuickSelect = (iconUrl: string) => {
-    setSelectedImage(iconUrl);
-    setImageFile(null);
+  // 🎯 [핵심 수정] 빠른 선택 이모지 클릭 시 해당 이미지를 fetch하여 실제 File 객체로 변환 후 저장
+  const handleQuickSelect = async (iconUrl: string, fileNameKey: string) => {
+    try {
+      setSelectedImage(iconUrl);
+
+      // 로컬 이미지 URL을 fetch하여 blob으로 변환
+      const response = await fetch(iconUrl);
+      const blob = await response.blob();
+
+      // blob을 multipart/form-data 업로드용 File 객체로 생성
+      const file = new File([blob], `quick_${fileNameKey}.png`, { type: 'image/png' });
+      setImageFile(file);
+    } catch (err) {
+      console.error('이모지 이미지 파일 변환 실패:', err);
+    }
   };
 
-  // 🎯 [핵심 수정] 이전 페이지에서 만들어진 groupId가 있으면 PUT/PATCH(수정), 없으면 POST(생성)
   const handleNext = async () => {
     if (!isButtonEnabled) return;
 
@@ -61,18 +73,18 @@ export default function GroupNamePage() {
 
       const cleanGroupName = groupName.trim();
       const token = localStorage.getItem('accessToken');
-      const existingGroupId = location.state?.groupId; // TimePicker 등 이전 스텝에서 생성된 groupId
+      const existingGroupId = location.state?.groupId; 
 
       const formData = new FormData();
       formData.append('groupName', cleanGroupName);
 
+      // 🎯 이제 빠른 선택 이모지도 imageFile 객체로 변환되었으므로 정상 첨부됩니다!
       if (imageFile) {
         formData.append('image', imageFile);
       }
 
       let finalGroupId = existingGroupId;
 
-      // 1. 이전 단계에서 이미 생성된 groupId가 있는 경우 -> 수정(PUT / PATCH)으로 그룹명 업에이트 (2개 생성 방지)
       if (existingGroupId) {
         try {
           await axiosInstance.put(`/api/v1/groups/${existingGroupId}`, formData, {
@@ -82,7 +94,6 @@ export default function GroupNamePage() {
             },
           });
         } catch (putErr) {
-          // 백엔드 API 규격이 PATCH일 경우 Fallback 처리
           await axiosInstance.patch(`/api/v1/groups/${existingGroupId}`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -91,7 +102,6 @@ export default function GroupNamePage() {
           });
         }
       } else {
-        // 2. 만약 이전 단계에서 생성된 groupId가 없는 경우에만 새로 POST 호출
         const themeCode = location.state?.themeCode || location.state?.groupThemeCode || location.state?.code || 'FAMILY';
         let startTime = location.state?.notificationStartTime || location.state?.startTime || '20:00';
         let endTime = location.state?.notificationEndTime || location.state?.endTime || '21:00';
@@ -113,7 +123,6 @@ export default function GroupNamePage() {
 
       console.log('그룹 설정 완료! groupId:', finalGroupId);
 
-      // 🎯 성공 시 바로 /home으로 이동
       navigate('/home', {
         state: {
           ...location.state,
@@ -440,7 +449,7 @@ export default function GroupNamePage() {
               <button
                 key={item.key}
                 type="button"
-                onClick={() => handleQuickSelect(item.icon)}
+                onClick={() => handleQuickSelect(item.icon, item.key)}
                 style={{
                   width: '56px',
                   height: '56px',

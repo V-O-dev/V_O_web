@@ -23,6 +23,7 @@ export default function CameraPage() {
   const chunksRef = useRef<Blob[]>([]);
   const videoBlobRef = useRef<Blob | null>(null);
   const recordingStartedAtRef = useRef<number>(0);
+  const actualDurationMsRef = useRef<number>(0); // 녹화 종료 시점에 확정되는 실제 촬영 시간(ms)
   const videoSettingsRef = useRef<MediaTrackSettings | null>(null);
   const cameraBoxRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -107,6 +108,11 @@ export default function CameraPage() {
     mediaRecorderRef.current = mediaRecorder;
     mediaRecorder.ondataavailable = (e) => chunksRef.current.push(e.data);
     mediaRecorder.onstop = () => {
+      // 녹화가 실제로 종료된 시점에 duration을 확정.
+      // (업로드 버튼을 누르는 시점까지 재면, 결과 화면에서 머문 시간까지 포함돼버려서
+      //  서버 검증(15초 이하)에 걸리는 버그가 있었음)
+      actualDurationMsRef.current = Date.now() - recordingStartedAtRef.current;
+
       const blob = new Blob(chunksRef.current, { type: 'video/webm' });
       videoBlobRef.current = blob;
       setVideoUrl(URL.createObjectURL(blob));
@@ -137,9 +143,8 @@ export default function CameraPage() {
     try {
       const settings = videoSettingsRef.current;
       const cameraFacing: CameraFacing = settings?.facingMode === 'environment' ? 'BACK' : 'FRONT';
-      const durationMs = recordingStartedAtRef.current
-        ? Date.now() - recordingStartedAtRef.current
-        : recordingProgress * recordingTickMs;
+      // 녹화 종료 시점에 확정해둔 실제 촬영 시간을 사용 (업로드 버튼 클릭 시점 기준이 아님)
+      const durationMs = actualDurationMsRef.current;
 
       await uploadVideo(videoBlobRef.current, {
         groupId,
