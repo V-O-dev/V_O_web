@@ -2,12 +2,18 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Header } from '../components/common/Header';
 import { Button } from '../components/common/Button';
+import { CustomToast } from '../components/common/CustomToast';
 import { axiosInstance } from '../apis/axiosInstance';
 
 // 에셋 임포트
 import heartIcon from '../assets/heart_icon.svg';
 import copyIcon from '../assets/copy_icon.svg';
 import qrGuideIcon from '../assets/qr_guide_icon.svg';
+import shareIcon from '../assets/share_icon.svg';
+import linkIcon from '../assets/link_icon.svg';
+
+// 🎯 실제 배포된 프로덕션 도메인 (GroupInviteSharePage와 동일하게 유지)
+const PRODUCTION_URL = 'https://v-o-web-1fqd.vercel.app';
 
 /**
  * 이미 존재하는 그룹의 초대코드/QR을 보여주는 화면.
@@ -29,6 +35,17 @@ export default function GroupInviteSimplePage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    isOpen: boolean;
+    message: string;
+    subMessage?: string;
+  }>({ isOpen: false, message: '', subMessage: '' });
+
+  const showToast = (message: string, subMessage?: string) => {
+    setToast({ isOpen: true, message, subMessage });
+  };
+
+  const shareUrl = `${PRODUCTION_URL}/join?code=${inviteCode || ''}`;
 
   useEffect(() => {
     let objectUrl = '';
@@ -107,6 +124,77 @@ export default function GroupInviteSimplePage() {
     navigate(-1);
   };
 
+  // 클립보드 복사 (HTTPS 미지원/구형 브라우저 대비 fallback 포함)
+  const copyToClipboard = async (text: string): Promise<boolean> => {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (err) {
+        console.warn('Clipboard API 실패:', err);
+      }
+    }
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.top = '0';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return successful;
+    } catch (err) {
+      console.error('Fallback 복사 실패:', err);
+      return false;
+    }
+  };
+
+  // 링크 공유 (Web Share API, 미지원 시 텍스트 복사로 대체)
+  const handleShare = async () => {
+    if (!inviteCode) return;
+
+    const shareData = {
+      title: 'v_O 그룹 초대',
+      text: `v_O에서 그룹 초대장이 도착했어요!\n아래 링크를 눌러 들어오세요 🚀\n초대코드: ${inviteCode}\n`,
+      url: shareUrl,
+    };
+
+    if (
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare(shareData)
+    ) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err: any) {
+        if (err.name === 'AbortError') return; // 사용자가 공유 취소
+        console.log('공유 실패');
+      }
+    }
+
+    const success = await copyToClipboard(`${shareData.text}${shareUrl}`);
+    if (success) {
+      showToast('초대 링크 메시지가 복사되었습니다! 🚀', shareUrl);
+    } else {
+      showToast('초대코드', inviteCode);
+    }
+  };
+
+  // 링크만 복사
+  const handleCopyLink = async () => {
+    if (!inviteCode) return;
+    const success = await copyToClipboard(shareUrl);
+    if (success) {
+      showToast('초대 링크가 복사되었습니다! 🎉', shareUrl);
+    } else {
+      showToast('복사 실패, 코드로 공유해 보세요', inviteCode);
+    }
+  };
+
   return (
     <div
       style={{
@@ -118,24 +206,23 @@ export default function GroupInviteSimplePage() {
         height: '800px',
         margin: '0 auto',
         boxSizing: 'border-box',
-        position: 'relative',
         overflow: 'hidden',
       }}
     >
       {/* 헤더 */}
       <Header />
 
-      {/* 중앙 컨텐츠 */}
+      {/* 중앙 컨텐츠: 남는 공간을 채우고, 넘치면 스크롤 (더 이상 절대좌표 아님) */}
       <div
         style={{
-          position: 'absolute',
-          top: '64px',
-          left: '50%',
-          transform: 'translateX(-50%)',
+          flex: 1,
+          minHeight: 0,
+          overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           width: '312px',
+          margin: '0 auto',
           boxSizing: 'border-box',
         }}
       >
@@ -143,7 +230,7 @@ export default function GroupInviteSimplePage() {
           src={heartIcon}
           alt="하트 데코레이션"
           style={{
-            marginTop: '12px',
+            marginTop: '8px',
             width: '77.4px',
             height: '39.6px',
             objectFit: 'contain',
@@ -445,20 +532,120 @@ export default function GroupInviteSimplePage() {
             </>
           )}
         </div>
+
+        {/* 링크 공유 & 링크 복사 버튼 */}
+        <div
+          style={{
+            marginTop: '28px',
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '40px',
+            width: '100%',
+          }}
+        >
+          <button
+            type="button"
+            onClick={handleShare}
+            disabled={!inviteCode}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: inviteCode ? 'pointer' : 'default',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '10px',
+            }}
+          >
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                backgroundColor: '#EDE8FD',
+                borderRadius: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(126, 73, 233, 0.08)',
+              }}
+            >
+              <img
+                src={shareIcon}
+                alt="링크 공유"
+                style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+              />
+            </div>
+            <span
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontSize: '13px',
+                fontWeight: 700,
+                color: '#8E8E93',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              링크 공유
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            disabled={!inviteCode}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: inviteCode ? 'pointer' : 'default',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '10px',
+            }}
+          >
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                backgroundColor: '#EDE8FD',
+                borderRadius: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(126, 73, 233, 0.08)',
+              }}
+            >
+              <img
+                src={linkIcon}
+                alt="링크 복사하기"
+                style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+              />
+            </div>
+            <span
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontSize: '13px',
+                fontWeight: 700,
+                color: '#8E8E93',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              링크 복사하기
+            </span>
+          </button>
+        </div>
       </div>
 
-      {/* 하단 버튼: 친구 초대하기(공유) 하나만 */}
+      {/* 하단 버튼: 닫기 (일반 flex 흐름 — 콘텐츠 길이와 무관하게 항상 맨 아래 고정) */}
       <div
         style={{
-          position: 'absolute',
-          bottom: '94px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '312px',
-          height: '48px',
+          flexShrink: 0,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          width: '100%',
+          padding: '12px 0 32px 0',
           boxSizing: 'border-box',
         }}
       >
@@ -469,7 +656,13 @@ export default function GroupInviteSimplePage() {
         />
       </div>
 
-      <div style={{ position: 'absolute', bottom: 0, height: '94px', width: '100%' }} />
+      {/* 커스텀 토스트 알림 */}
+      <CustomToast
+        isOpen={toast.isOpen}
+        message={toast.message}
+        subMessage={toast.subMessage}
+        onClose={() => setToast({ ...toast, isOpen: false })}
+      />
     </div>
   );
 }
