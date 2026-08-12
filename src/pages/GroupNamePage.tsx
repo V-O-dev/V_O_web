@@ -48,16 +48,14 @@ export default function GroupNamePage() {
     }
   };
 
-  // 🎯 [핵심 수정] 빠른 선택 이모지 클릭 시 해당 이미지를 fetch하여 실제 File 객체로 변환 후 저장
+  // 빠른 선택 이모지 클릭 시 해당 이미지를 fetch하여 실제 File 객체로 변환 후 저장
   const handleQuickSelect = async (iconUrl: string, fileNameKey: string) => {
     try {
       setSelectedImage(iconUrl);
 
-      // 로컬 이미지 URL을 fetch하여 blob으로 변환
       const response = await fetch(iconUrl);
       const blob = await response.blob();
 
-      // blob을 multipart/form-data 업로드용 File 객체로 생성
       const file = new File([blob], `quick_${fileNameKey}.png`, { type: 'image/png' });
       setImageFile(file);
     } catch (err) {
@@ -78,7 +76,6 @@ export default function GroupNamePage() {
       const formData = new FormData();
       formData.append('groupName', cleanGroupName);
 
-      // 🎯 이제 빠른 선택 이모지도 imageFile 객체로 변환되었으므로 정상 첨부됩니다!
       if (imageFile) {
         formData.append('image', imageFile);
       }
@@ -123,7 +120,8 @@ export default function GroupNamePage() {
 
       console.log('그룹 설정 완료! groupId:', finalGroupId);
 
-      navigate('/home', {
+      // 🎯 생성 완료 페이지(/group/create-complete)로 이동
+      navigate('/group/create-complete', {
         state: {
           ...location.state,
           groupId: finalGroupId,

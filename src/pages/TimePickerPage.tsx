@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Header } from '../components/common/Header';
 import { Button } from '../components/common/Button';
-import { axiosInstance } from '../apis/axiosInstance'; 
 
 // Swiper CSS 로드
 import 'swiper/css';
@@ -16,81 +15,33 @@ export default function TimePickerPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [startTime, setStartTime] = useState('02:00');
+  // 🎯 기본값을 00:00 ~ 00:00 으로 변경
+  const [startTime, setStartTime] = useState('00:00');
   const [endTime, setEndTime] = useState('00:00');
 
-  // 🎯 타임피커 설정 후 백엔드 그룹 생성 API 호출
-  const handleNext = async () => {
-    try {
-      console.log('최종 설정된 시간대:', startTime, '~', endTime);
+  // 🎯 시간 설정 후 백엔드 요청 없이 다음 단계인 GroupNamePage로 이동
+  const handleNext = () => {
+    let finalEndTime = endTime;
 
-      // 1. 스웨거 명세에 맞춘 FormData 객체 생성
-      const formData = new FormData();
-
-      // 🎯 특수문자(_) 제거된 한글/숫자 조합 안전한 폴백 이름
-      const randomSuffix = Math.floor(Math.random() * 8999) + 1000;
-      const fallbackGroupName = `내그룹${randomSuffix}`;
-
-      const groupName = location.state?.groupName || location.state?.name || fallbackGroupName;
-      const themeCode = location.state?.themeCode || location.state?.groupThemeCode || location.state?.code || "FRIEND";
-
-      // 스웨거 필수 파라미터 append (필드명 정확히 일치)
-      formData.append('groupName', groupName);
-      formData.append('themeCode', themeCode);
-      formData.append('notificationStartTime', startTime); 
-      formData.append('notificationEndTime', endTime);     
-
-      // 선택 사항: 이미지가 있는 경우 추가
-      if (location.state?.image) {
-        formData.append('image', location.state.image);
-      }
-
-      console.log("전송할 그룹 생성 데이터:", {
-        groupName,
-        themeCode,
-        notificationStartTime: startTime,
-        notificationEndTime: endTime
-      });
-
-      // 2. 그룹 생성 API 호출 (multipart/form-data 헤더 설정)
-      const response = await axiosInstance.post('/api/v1/groups', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      // 3. 스웨거 응답 구조(data.groupId)에 맞춰 groupId 추출
-      const resData = response.data?.data;
-      const createdGroupId = resData?.groupId || resData?.group?.groupId;
-
-      console.log('그룹 생성 성공! groupId:', createdGroupId);
-
-      // 4. 완료 페이지로 생성된 groupId 및 state 전달
-      navigate('/group/create-complete', { 
-        state: { 
-          ...location.state, 
-          groupName,
-          startTime, 
-          endTime,
-          groupId: createdGroupId
-        } 
-      }); 
-
-    } catch (error: any) {
-      console.error('그룹 생성 실패 백엔드 전체 응답:', error.response?.data);
-      
-      const serverData = error.response?.data;
-      let alertMsg = '그룹 생성에 실패했습니다.';
-
-      if (serverData?.errors && Array.isArray(serverData.errors) && serverData.errors.length > 0) {
-        const firstErr = serverData.errors[0];
-        alertMsg = `[입력값 오류]\n필드: ${firstErr.field || '알 수 없음'}\n원인: ${firstErr.reason || firstErr.message || '유효하지 않은 값입니다.'}`;
-      } else if (serverData?.message) {
-        alertMsg = serverData.message;
-      }
-
-      alert(`그룹 생성 실패:\n${alertMsg}`);
+    // 🎯 시작 시간과 종료 시간이 같다면 (24시간 선택), 종료 시간에서 1분을 빼서 백엔드 오류 방지
+    // 예: 00:00 ~ 00:00 -> 00:00 ~ 23:59 / 01:00 ~ 01:00 -> 01:00 ~ 00:59
+    if (startTime === endTime) {
+      const startHour = parseInt(startTime.split(':')[0], 10);
+      const adjustedHour = startHour === 0 ? 23 : startHour - 1;
+      finalEndTime = `${String(adjustedHour).padStart(2, '0')}:59`;
     }
+
+    console.log('설정된 시간대:', startTime, '~', finalEndTime);
+
+    navigate('/group/name', { 
+      state: { 
+        ...location.state, 
+        notificationStartTime: startTime, 
+        notificationEndTime: finalEndTime,
+        startTime,
+        endTime: finalEndTime
+      } 
+    }); 
   };
 
   return (
@@ -164,7 +115,7 @@ export default function TimePickerPage() {
             slidesPerView={5}
             centeredSlides={true}
             loop={true}
-            initialSlide={2} // 02:00 기본 위치
+            initialSlide={0} // 🎯 00:00 위치로 설정
             onSlideChange={(swiper) => {
               const realIndex = swiper.realIndex;
               setStartTime(HOURS[realIndex]);
@@ -220,7 +171,7 @@ export default function TimePickerPage() {
             slidesPerView={5}
             centeredSlides={true}
             loop={true}
-            initialSlide={0} // 00:00 기본 위치
+            initialSlide={0} // 🎯 00:00 위치로 설정
             onSlideChange={(swiper) => {
               const realIndex = swiper.realIndex;
               setEndTime(HOURS[realIndex]);

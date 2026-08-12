@@ -10,6 +10,18 @@ import ProfileStep from "./pages/ProfileStep";
 import NameStep from "./pages/NameStep";
 import CompleteStep from "./pages/CompleteStep";
 
+// 그룹 생성 및 초대 플로우 관련 페이지
+import GroupMainPage from "./pages/GroupMainPage";
+import GroupThemeSelect from "./pages/GroupThemeSelect";
+import GroupExamplesPage from "./pages/GroupExamplesPage";
+import GroupThemeCompletePage from "./pages/GroupThemeCompletePage";
+import TimePickerPage from "./pages/TimePickerPage";
+import GroupNamePage from "./pages/GroupNamePage";
+import GroupCreateCompletePage from "./pages/GroupCreateCompletePage";
+import GroupInvitePage from "./pages/GroupInvitePage";
+import GroupInviteSharePage from "./pages/GroupInviteSharePage";
+import JoinGroupPage from "./pages/JoinGroupPage"; // 🎯 초대 링크 수신 및 그룹 참여 페이지
+
 // 메인 피드 및 마이페이지
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
@@ -18,18 +30,6 @@ import EditNicknamePage from "./pages/EditNicknamePage";
 import AlertPage from "./pages/AlertPage";
 import FeedPage from "./pages/FeedPage";
 import AllGroupPage from "./pages/AllGroupPage";
-
-// 그룹 생성 플로우 관련 페이지
-import GroupMainPage from "./pages/GroupMainPage";
-import GroupThemeSelect from "./pages/GroupThemeSelect";
-import GroupExamplesPage from "./pages/GroupExamplesPage";
-import GroupThemeCompletePage from "./pages/GroupThemeCompletePage";
-import TimePickerPage from "./pages/TimePickerPage";
-import GroupCreateCompletePage from "./pages/GroupCreateCompletePage";
-import GroupInvitePage from "./pages/GroupInvitePage";
-import GroupInviteSharePage from "./pages/GroupInviteSharePage";
-import GroupNamePage from "./pages/GroupNamePage";
-import JoinGroupPage from "./pages/JoinGroupPage"; // 🎯 초대 링크 수신 및 그룹 참여 페이지
 
 // 촬영 및 기타 페이지
 import SplashPage from "./pages/SplashPage";
@@ -55,19 +55,16 @@ function App() {
         <Route path="/signup/name" element={<NameStep />} />
         <Route path="/signup/complete" element={<CompleteStep />} />
 
-        {/* 그룹 생성 및 참여 플로우 */}
+        {/* 그룹 생성 및 초대 플로우 (올바른 순서로 재배치) */}
         <Route path="/group/create" element={<GroupMainPage />} />
         <Route path="/group/theme" element={<GroupThemeSelect />} />
         <Route path="/group/examples" element={<GroupExamplesPage />} />
         <Route path="/group/complete" element={<GroupThemeCompletePage />} />
         <Route path="/group/time-picker" element={<TimePickerPage />} />
-        <Route
-          path="/group/create-complete"
-          element={<GroupCreateCompletePage />}
-        />
+        <Route path="/group/name" element={<GroupNamePage />} />
+        <Route path="/group/create-complete" element={<GroupCreateCompletePage />} />
         <Route path="/group/invite" element={<GroupInvitePage />} />
         <Route path="/group/invite-share" element={<GroupInviteSharePage />} />
-        <Route path="/group/name" element={<GroupNamePage />} />
         <Route path="/join" element={<JoinGroupPage />} /> {/* 🎯 초대 링크 수신 경로 */}
         <Route path="/group/:groupId/invite" element={<GroupInviteSimplePage />} />
 

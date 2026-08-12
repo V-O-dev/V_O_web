@@ -117,7 +117,7 @@ export default function GroupInviteSharePage() {
     setIsShareModalOpen(true);
   };
 
-  // 🎯 2. 모달 내에서 [문자 메시지(SMS)로 공유] 선택 시 실행
+  // 2. 모달 내에서 [문자 메시지(SMS)로 공유] 선택 시 실행
   const handleSmsShare = async () => {
     if (!inviteCode) return;
 
@@ -127,12 +127,10 @@ export default function GroupInviteSharePage() {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     if (isMobile) {
-      // 최신 모바일 OS 공통 표준 sms 스킴
       const smsUrl = `sms:?body=${encodeURIComponent(shareText)}`;
       setIsShareModalOpen(false);
       window.location.href = smsUrl;
     } else {
-      // PC 등 문자 앱 미지원 환경 예외 처리 (클립보드 자동 복사 + 토스트)
       const success = await copyToClipboard(shareText);
       setIsShareModalOpen(false);
       if (success) {
@@ -154,9 +152,9 @@ export default function GroupInviteSharePage() {
     setIsShareModalOpen(false);
   };
 
-  // 완료 버튼 클릭 시 /group/name 페이지로 이동
+  // 🎯 완료 버튼 클릭 시 메인 피드(/home)로 이동
   const handleComplete = () => {
-    navigate('/group/name', {
+    navigate('/home', {
       state: {
         ...location.state,
         groupId,

@@ -33,15 +33,14 @@ export default function GroupInvitePage() {
 
         let activeCode = inviteCode;
 
-        // 🎯 1. 만약 넘겨받은 inviteCode가 없지만 groupId가 있다면 직접 발급 API 호출!
+        // 1. 만약 넘겨받은 inviteCode가 없지만 groupId가 있다면 직접 발급 API 호출!
         if (!activeCode && groupId) {
           const codeRes = await axiosInstance.post(`/api/v1/groups/${groupId}/invite-code`);
-          // 스웨거 응답 구조에 맞게 추출 (result / data)
           activeCode = codeRes.data.data?.code || codeRes.data.result?.code || codeRes.data.code;
           setInviteCode(activeCode);
         }
 
-        // 🎯 2. 확보된 진짜 inviteCode로 QR 이미지 조회 (Blob)
+        // 2. 확보된 inviteCode로 QR 이미지 조회 (Blob)
         if (activeCode) {
           const qrRes = await axiosInstance.get(`/api/v1/invites/${activeCode}/qr`, {
             params: { size: 512 },
@@ -52,7 +51,6 @@ export default function GroupInvitePage() {
           objectUrl = URL.createObjectURL(blob);
           setQrImageUrl(objectUrl);
         } else {
-          // groupId도 없고 inviteCode도 없는 경우 fallback
           setErrorMsg("유효한 그룹 정보가 없습니다.");
         }
       } catch (err: any) {
@@ -82,6 +80,7 @@ export default function GroupInvitePage() {
     }
   };
 
+  // 🎯 '친구 초대하기' 클릭 시 초대 공유 페이지(/group/invite-share)로 이동
   const handleShare = () => {
     navigate('/group/invite-share', { 
       state: { 
@@ -92,11 +91,13 @@ export default function GroupInvitePage() {
     });
   };
 
+  // 🎯 초대 생성 플로우를 모두 마치고 메인 피드(/home)로 이동
   const handleComplete = () => {
-    navigate('/group/name', { 
+    navigate('/home', { 
       state: { 
         ...location.state, 
-        inviteCode 
+        inviteCode,
+        groupId 
       } 
     }); 
   };
