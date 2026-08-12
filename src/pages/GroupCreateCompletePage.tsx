@@ -8,7 +8,7 @@ export default function GroupCreateCompletePage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 🎯 '계속' 클릭 시 이전 state(groupId, inviteCode 등)를 그대로 보존하여 /group/invite로 이동
+  // 🎯 '계속' 클릭 시 이전 state(groupId 등)를 보존하여 초대 코드 페이지(/group/invite)로 이동
   const handleNext = () => {
     navigate('/group/invite', {
       state: {
