@@ -43,6 +43,7 @@ export interface VideoFeedItem {
   capturedAt: string;
   uploadedAt: string;
   groupName?: string;
+  isLocked?: boolean;
 }
 
 export interface GroupFeedResponse {

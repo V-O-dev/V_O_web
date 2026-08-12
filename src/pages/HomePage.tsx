@@ -65,25 +65,36 @@ function HomeMainContent() {
               groups.map((g) =>
                 fetchGroupFeed(g.groupId).catch((err) => ({
                   items: err?.response?.data?.items || [],
-                  unlocked: true,
-                  viewerAnswerStatus: "UPLOADED",
+                  unlocked: false,
+                  viewerAnswerStatus: "NOT_UPLOADED",
                 }))
               )
             );
 
             const combinedItems: VideoFeedItem[] = [];
-            allFeedResults.forEach((res, idx) => {
+            allFeedResults.forEach((res: any, idx) => {
               const targetGroup = groups[idx];
+
+              // 해당 그룹의 잠금 여부 및 답변 상태
+              const groupUnlocked = res.unlocked ?? false;
+              const groupViewerStatus =
+                res.viewerAnswerStatus ?? "NOT_UPLOADED";
+
               (res.items || []).forEach((item: any) => {
                 combinedItems.push({
                   ...item,
                   groupId: targetGroup?.groupId,
                   groupName: targetGroup?.name || "그룹",
+                  // 각 피드 아이템별로 속한 그룹의 잠금 상태를 가지고 있게 함
+                  isLocked: !(
+                    groupUnlocked && groupViewerStatus !== "NOT_UPLOADED"
+                  ),
                 });
               });
             });
 
             setFeeds(combinedItems);
+            // 전체 탭 자체의 글로벌 상단 질문 배너용 상태값 (필요 시 세팅)
             setIsUnlocked(true);
             setViewerStatus("UPLOADED");
             setDailyQuestion(null);
@@ -267,7 +278,10 @@ function HomeMainContent() {
           </div>
 
           {feeds.map((feed) => {
-            const isLocked = !isCurrentGroupAnswered;
+            const isLocked =
+              selectedTabId === 0
+                ? feed.isLocked ?? false
+                : !isCurrentGroupAnswered;
             const displayName = feed.displayName || feed.alias || feed.nickname;
 
             // 피드 자체에 질문이 들어있거나 오늘 배정된 질문 텍스트 가져오기
