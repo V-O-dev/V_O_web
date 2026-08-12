@@ -23,6 +23,7 @@ import transferButton from "@/assets/group/transfer_button.svg";
 import removeButton from "@/assets/group/remove_button.svg";
 import removeIcon from "@/assets/profile/remove_icon.svg";
 import deleteIcon from "@/assets/group/delete_icon.svg";
+import meIcon from "@/assets/group/me_icon.svg";
 
 type ModalType = "NONE" | "DELEGATE" | "KICK" | "LEAVE" | "DELETE";
 
@@ -265,10 +266,12 @@ export default function GroupPage() {
                     </div>
 
                     <div className="group-member-actions">
-                      {member.isMe && <span className="group-tag-me">나</span>}
-
                       {isOwner ? (
-                        <img src={ownerButton} alt="소유자" />
+                        <img
+                          src={ownerButton}
+                          alt="소유자"
+                          className="group-owner-badge"
+                        />
                       ) : isCurrentLeader ? (
                         <div className="group-leader-action-panel">
                           <button
@@ -285,6 +288,14 @@ export default function GroupPage() {
                           </button>
                         </div>
                       ) : null}
+
+                      {member.isMe && (
+                        <img
+                          src={meIcon}
+                          alt="나"
+                          className="group-tag-me-img"
+                        />
+                      )}
                     </div>
                   </div>
                 );
