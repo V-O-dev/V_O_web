@@ -17,15 +17,16 @@ export default function GroupInviteSharePage() {
   const inviteCode = location.state?.inviteCode; 
   const groupId = location.state?.groupId;
 
-  // 🎯 실제 배포된 Vercel 도메인 주소 적용
+  // 실제 배포된 Vercel 도메인 주소 적용
   const PRODUCTION_URL = 'https://v-o-web-1fqd.vercel.app';
   
-  // 🎯 카카오톡, 문자 등에서 바로 클릭 가능한 파란색 하이퍼링크 URL 생성
+  // 파란색 하이퍼링크 URL 생성
   const shareUrl = `${PRODUCTION_URL}/join?code=${inviteCode || ''}`;
 
-  // QR 및 토스트 상태 관리
+  // QR 및 모달, 토스트 상태 관리
   const [qrImageUrl, setQrImageUrl] = useState<string>('');
   const [isQrLoading, setIsQrLoading] = useState<boolean>(true);
+  const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
   
   const [toast, setToast] = useState<{ isOpen: boolean; message: string; subMessage?: string }>({
     isOpen: false,
@@ -110,39 +111,37 @@ export default function GroupInviteSharePage() {
     }
   };
 
-  // 1. [링크 공유]
-  const handleShare = async () => {
+  // 1. [링크 공유] 클릭 시 공유 선택 모달 열기
+  const handleOpenShareModal = () => {
+    if (!inviteCode) return;
+    setIsShareModalOpen(true);
+  };
+
+  // 🎯 2. 모달 내에서 [문자 메시지(SMS)로 공유] 선택 시 실행
+  const handleSmsShare = async () => {
     if (!inviteCode) return;
 
-    const shareData = {
-      title: 'v_O 그룹 초대',
-      text: `v_O에서 그룹 초대장이 도착했어요!\n아래 링크를 눌러 들어오세요 🚀\n초대코드: ${inviteCode}\n`,
-      url: shareUrl,
-    };
+    const shareText = `v_O에서 그룹 초대장이 도착했어요!\n아래 링크를 눌러 들어오세요 🚀\n초대코드: ${inviteCode}\n${shareUrl}`;
+    
+    // 모바일 기기(iOS/Android) 체크
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-      try {
-        await navigator.share(shareData);
-        return;
-      } catch (err: any) {
-        if (err.name !== 'AbortError') {
-          console.log('공유 실패');
-        } else {
-          return;
-        }
-      }
-    }
-
-    // PC 등 공유창 미지원 환경 지원
-    const success = await copyToClipboard(`${shareData.text}${shareUrl}`);
-    if (success) {
-      showToast('초대 링크 메시지가 복사되었습니다! 🚀', shareUrl);
+    if (isMobile) {
+      // 최신 모바일 OS 공통 표준 sms 스킴
+      const smsUrl = `sms:?body=${encodeURIComponent(shareText)}`;
+      setIsShareModalOpen(false);
+      window.location.href = smsUrl;
     } else {
-      showToast('초대코드', inviteCode);
+      // PC 등 문자 앱 미지원 환경 예외 처리 (클립보드 자동 복사 + 토스트)
+      const success = await copyToClipboard(shareText);
+      setIsShareModalOpen(false);
+      if (success) {
+        showToast('모바일 전용 기능입니다.', '초대 메시지가 복사되었습니다.');
+      }
     }
   };
 
-  // 2. [링크 복사하기]
+  // 3. [링크 복사하기]
   const handleCopyLink = async () => {
     if (!inviteCode) return;
 
@@ -152,9 +151,10 @@ export default function GroupInviteSharePage() {
     } else {
       showToast('복사 실패, 코드로 공유해 보세요', inviteCode);
     }
+    setIsShareModalOpen(false);
   };
 
-  // 3. 완료 버튼 클릭 시 /group/name 페이지로 이동
+  // 완료 버튼 클릭 시 /group/name 페이지로 이동
   const handleComplete = () => {
     navigate('/group/name', {
       state: {
@@ -298,10 +298,10 @@ export default function GroupInviteSharePage() {
           width: '100%'
         }}>
           
-          {/* 1) 링크 공유 버튼 */}
+          {/* 1) 링크 공유 버튼 (클릭 시 공유 선택 모달 열림) */}
           <button 
             type="button"
-            onClick={handleShare}
+            onClick={handleOpenShareModal}
             disabled={!inviteCode}
             style={{
               background: 'none',
@@ -426,6 +426,112 @@ export default function GroupInviteSharePage() {
         </button>
       </div>
 
+      {/* 4. 공유 선택 모달 (팝업) */}
+      {isShareModalOpen && (
+        <div 
+          onClick={() => setIsShareModalOpen(false)}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              backgroundColor: '#FFFFFF',
+              borderTopLeftRadius: '24px',
+              borderTopRightRadius: '24px',
+              padding: '24px 20px 32px 20px',
+              boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}
+          >
+            <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+              <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '16px', color: '#0F0F0F' }}>
+                공유 방식 선택
+              </span>
+            </div>
+
+            {/* SMS(문자 메시지) 공유 선택 버튼 */}
+            <button
+              type="button"
+              onClick={handleSmsShare}
+              style={{
+                width: '100%',
+                height: '52px',
+                backgroundColor: '#F5F2FF',
+                border: 'none',
+                borderRadius: '16px',
+                fontFamily: 'Manrope, sans-serif',
+                fontSize: '15px',
+                fontWeight: 600,
+                color: '#7E49E9',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              💬 문자 메시지(SMS)로 공유하기
+            </button>
+
+            {/* 초대 링크 복사 선택 버튼 */}
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              style={{
+                width: '100%',
+                height: '52px',
+                backgroundColor: '#F8F9FA',
+                border: 'none',
+                borderRadius: '16px',
+                fontFamily: 'Manrope, sans-serif',
+                fontSize: '15px',
+                fontWeight: 600,
+                color: '#333333',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              🔗 초대 링크 복사하기
+            </button>
+
+            {/* 닫기 버튼 */}
+            <button
+              type="button"
+              onClick={() => setIsShareModalOpen(false)}
+              style={{
+                width: '100%',
+                height: '48px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                fontFamily: 'Manrope, sans-serif',
+                fontSize: '14px',
+                fontWeight: 500,
+                color: '#8E8E93',
+                cursor: 'pointer',
+                marginTop: '4px'
+              }}
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 커스텀 토스트 알림 */}
       <CustomToast 
         isOpen={toast.isOpen}
@@ -434,7 +540,7 @@ export default function GroupInviteSharePage() {
         onClose={() => setToast({ ...toast, isOpen: false })}
       />
 
-      {/* 4. 바닥 여백 영역 */}
+      {/* 5. 바닥 여백 영역 */}
       <div style={{ position: 'absolute', bottom: 0, height: '94px', width: '100%' }} />
 
     </div>
