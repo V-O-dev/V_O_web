@@ -25,7 +25,13 @@ import removeIcon from "@/assets/profile/remove_icon.svg";
 import deleteIcon from "@/assets/group/delete_icon.svg";
 import meIcon from "@/assets/group/me_icon.svg";
 
-type ModalType = "NONE" | "DELEGATE" | "KICK" | "LEAVE" | "DELETE";
+type ModalType =
+  | "NONE"
+  | "DELEGATE"
+  | "KICK"
+  | "LEAVE"
+  | "DELETE"
+  | "SAVE_SUCCESS";
 
 export default function GroupPage() {
   const navigate = useNavigate();
@@ -107,11 +113,18 @@ export default function GroupPage() {
       );
       console.log("그룹 정보가 성공적으로 저장되었습니다.");
       setIsEditingName(false);
-      loadGroupDetail();
+      await loadGroupDetail();
+      setActiveModal("SAVE_SUCCESS"); // 저장 성공 모달 표시
     } catch (error) {
       console.error("그룹 정보 수정 실패:", error);
       alert("그룹 정보 수정 중 오류가 발생했습니다.");
     }
+  };
+
+  // 저장 성공 모달의 '완료' 버튼 클릭 시 홈으로 이동
+  const handleSaveSuccessConfirm = () => {
+    setActiveModal("NONE");
+    navigate("/home");
   };
 
   // 카메라 버튼 클릭
@@ -465,6 +478,20 @@ export default function GroupPage() {
                       onClick={handleActionConfirm}
                     >
                       삭제하기
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {activeModal === "SAVE_SUCCESS" && (
+                <>
+                  <h3 className="group-modal-title">저장되었습니다!</h3>
+                  <div className="group-modal-buttons group-modal-buttons-single">
+                    <button
+                      className="group-modal-btn-confirm btn-yellow"
+                      onClick={handleSaveSuccessConfirm}
+                    >
+                      완료
                     </button>
                   </div>
                 </>

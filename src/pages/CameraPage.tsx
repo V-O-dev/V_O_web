@@ -13,6 +13,7 @@ type Phase = 'countdown' | 'recording' | 'result';
 interface CameraLocationState {
   groupId?: number;
   questionId?: number; // TODO: 오늘의 질문 컨텍스트/store가 확인되면 그쪽에서 받아오기
+  questionContent?: string; // QuestionPage에서 넘어온 오늘의 질문 텍스트 (촬영 중 상단 표시용)
   answerTimeLimitMs?: number; // QuestionPage에서 오늘의 질문 조회 시 받아온 답변 제한시간
 }
 
@@ -32,7 +33,7 @@ export default function CameraPage() {
 
   const currentGroupIdRaw = useGroupStore(s => s.currentGroupId);
   const groupId = locationState.groupId ?? (currentGroupIdRaw ? Number(currentGroupIdRaw) : undefined);
-  const { questionId } = locationState;
+  const { questionId, questionContent } = locationState;
   // 질문마다 답변 제한시간이 다를 수 있어서 QuestionPage에서 넘어온 값을 씀 (없으면 10초 기본값)
   const recordingDurationMs = locationState.answerTimeLimitMs ?? 10000;
   const recordingTickMs = Math.max(recordingDurationMs / 100, 10);
@@ -226,6 +227,43 @@ export default function CameraPage() {
               objectFit: 'cover',
             }}
           />
+        )}
+
+        {/* 오늘의 질문 - 촬영 중일 때만 상단에 표시 */}
+        {phase === 'recording' && questionContent && (
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            right: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            pointerEvents: 'none',
+          }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '13px',
+              fontWeight: 700,
+              color: '#7C3AED',
+            }}>
+              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#7C3AED' }} />
+              오늘의 질문
+            </span>
+            <p style={{
+              margin: 0,
+              fontSize: '13px',
+              fontWeight: 500,
+              color: '#55545e',
+              textAlign: 'center',
+              lineHeight: '18px',
+            }}>
+              {questionContent}
+            </p>
+          </div>
         )}
 
         {/* 카운트다운 */}
