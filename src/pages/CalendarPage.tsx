@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { HomeHeader } from '@/components/common/HomeHeader';
 import { HomeBottomNav } from '@/components/common/HomeBottomNav';
 import { ArrowButton } from '@/components/common/ArrowButton';
-import { useGroupStore } from '@/stores/useGroupStore';
 import videoButton from '@/assets/home/video_button.svg';
 import logoWhite from '@/assets/logo_white.svg';
 import {
@@ -27,10 +26,10 @@ export default function CalendarPage() {
   const [month, setMonth] = useState(today.getMonth()); // 0-indexed (JS Date 관례)
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // useGroupStore의 currentGroupId는 string이라 숫자로 변환해서 씀.
-  // 값이 없으면(그룹 미선택 상태) undefined로 넘겨서 "내가 속한 모든 그룹 통합 조회"가 됨.
-  const currentGroupIdRaw = useGroupStore(s => s.currentGroupId);
-  const currentGroupId = currentGroupIdRaw ? Number(currentGroupIdRaw) : undefined;
+  // 캘린더 페이지는 특정 그룹으로 필터링하지 않고
+  // 내가 속한 "모든 그룹"의 기록을 통합해서 보여줌.
+  // (fetchCalendarRecordDates / fetchDailyArchives에 groupId를 undefined로 넘기면
+  //  전체 그룹 통합 조회가 되도록 API가 설계되어 있음)
 
   // 달력 dot 표시용: 이번 달 중 기록이 있는 '일(day)' 목록
   const [recordDays, setRecordDays] = useState<Set<number>>(new Set());
@@ -45,7 +44,7 @@ export default function CalendarPage() {
   // 현재 전체화면으로 재생 중인 기록 (없으면 null)
   const [playingRecord, setPlayingRecord] = useState<PlayingRecord | null>(null);
 
-  // 연/월이 바뀔 때마다 이번 달 기록 날짜(dot) 조회
+  // 연/월이 바뀔 때마다 이번 달 기록 날짜(dot) 조회 (모든 그룹 통합)
   useEffect(() => {
     let cancelled = false;
 
@@ -53,7 +52,7 @@ export default function CalendarPage() {
       setIsCalendarLoading(true);
       setCalendarError(null);
       try {
-        const days = await fetchCalendarRecordDates(year, month + 1, currentGroupId);
+        const days = await fetchCalendarRecordDates(year, month + 1, undefined);
         if (!cancelled) setRecordDays(new Set(days));
       } catch (err) {
         if (!cancelled) {
@@ -66,9 +65,9 @@ export default function CalendarPage() {
 
     load();
     return () => { cancelled = true; };
-  }, [year, month, currentGroupId]);
+  }, [year, month]);
 
-  // 날짜를 선택하면 그날의 기록 카드들을 조회
+  // 날짜를 선택하면 그날의 기록 카드들을 조회 (모든 그룹 통합)
   useEffect(() => {
     if (!selectedDate) {
       setSelectedRecords(null);
@@ -81,7 +80,7 @@ export default function CalendarPage() {
       setIsDayLoading(true);
       setDayError(null);
       try {
-        const records = await fetchDailyArchives(selectedDate, currentGroupId);
+        const records = await fetchDailyArchives(selectedDate, undefined);
         if (!cancelled) setSelectedRecords(records);
       } catch (err) {
         if (!cancelled) {
@@ -94,7 +93,7 @@ export default function CalendarPage() {
 
     load();
     return () => { cancelled = true; };
-  }, [selectedDate, currentGroupId]);
+  }, [selectedDate]);
 
   const getDaysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDate();
   const getFirstDay = (y: number, m: number) => new Date(y, m, 1).getDay();

@@ -156,7 +156,7 @@ export default function FeedPage() {
     }
   };
 
-  // 내 댓글 클릭 시 모달 열기
+  // 내 댓글의 "..." 버튼 클릭 시 수정/삭제 모달 열기
   const handleCommentClick = (comment: CommentItem) => {
     if (comment.isMine) {
       setSelectedComment(comment);
@@ -348,7 +348,7 @@ export default function FeedPage() {
                 <div
                   key={comment?.commentId}
                   className={`comment-item ${comment?.isMine ? "is-me" : ""}`}
-                  onClick={() => comment && handleCommentClick(comment)}
+                  style={{ position: "relative" }}
                 >
                   <img
                     src={comment?.writer?.profileImageUrl || defaultProfile}
@@ -372,6 +372,38 @@ export default function FeedPage() {
                     </div>
                     <p className="comment-text">{comment?.content}</p>
                   </div>
+
+                  {/* 내 댓글에만: 우측 상단 가로 점 두 개 -> 수정/삭제 메뉴 트리거 */}
+                  {comment?.isMine && (
+                    <button
+                      type="button"
+                      className="comment-more-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCommentClick(comment);
+                      }}
+                      aria-label="댓글 옵션 더보기"
+                      style={{
+                        position: "absolute",
+                        top: "4px",
+                        right: "4px",
+                        background: "none",
+                        border: "none",
+                        padding: "6px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#9491A8",
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <circle cx="5" cy="12" r="1.8" fill="currentColor" />
+                        <circle cx="12" cy="12" r="1.8" fill="currentColor" />
+                        <circle cx="19" cy="12" r="1.8" fill="currentColor" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

@@ -441,3 +441,25 @@ export const updateMemberAlias = async (
   );
   return response.data.data;
 };
+
+// apis/api.ts 에 추가해주세요 (기존 axiosInstance import 그대로 사용)
+
+export interface VideoReactionResult {
+  videoId: number;
+  likeCount: number;
+  isLiked: boolean;
+}
+
+// 영상에 좋아요 추가 (이미 누른 상태면 서버에서 멱등 처리됨)
+export const likeVideo = async (videoId: number): Promise<VideoReactionResult> => {
+  const res = await axiosInstance.post(`/api/v1/videos/${videoId}/reactions`);
+  return res.data.data;
+};
+
+// 영상 좋아요 취소
+// TODO: 실제 스펙 문서(Swagger)에 있는 정확한 method/path로 맞춰주세요.
+// 우선 POST와 대칭되는 REST 컨벤션(DELETE, 같은 경로)으로 가정했어요.
+export const unlikeVideo = async (videoId: number): Promise<VideoReactionResult> => {
+  const res = await axiosInstance.delete(`/api/v1/videos/${videoId}/reactions`);
+  return res.data.data;
+};

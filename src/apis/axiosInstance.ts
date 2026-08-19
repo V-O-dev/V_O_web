@@ -3,7 +3,7 @@ import { useAuthStore } from "../stores/useAuthStore";
 
 export const axiosInstance = axios.create({
   baseURL: "https://54.206.52.35.nip.io", // 백엔드 서버 주소
-  timeout: 5000,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },

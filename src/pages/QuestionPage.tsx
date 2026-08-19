@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/common/Button';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -17,6 +17,13 @@ export default function QuestionPage() {
   const [showReadyButton, setShowReadyButton] = useState(false);
   const navigate = useNavigate();
   const currentGroupId = useGroupStore((state) => state.currentGroupId); // TODO: 로그인/그룹 연동되면 이 fallback 제거
+
+  // ----- 카메라 권한 안내 모달 관련 상태 -----
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+  // 이미 "차단"된 상태라 브라우저가 팝업을 다시 띄워주지 않고 즉시 실패한 경우
+  const [permissionBlocked, setPermissionBlocked] = useState(false);
+  const permissionStatusRef = useRef<PermissionStatus | null>(null);
 
   // 시작하기를 누른 이후(chat, camera)에는 뒤로가기/홈 버튼만 숨김 (헤더 바 자체는 유지)
   const showHeaderButtons = phase === 'question' || phase === 'ready';
@@ -41,6 +48,63 @@ export default function QuestionPage() {
     }
     setShowReadyButton(false);
   }, [phase]);
+
+  // 'ready' 단계에 진입하면 카메라 권한 상태를 확인해서, 이미 차단되어 있으면 안내 모달을 띄움.
+  // (Permissions API를 지원하는 브라우저에서만 사전 감지가 가능. iOS Safari 등 미지원 브라우저는
+  //  사전 감지를 할 수 없어서 이 시점엔 모달이 뜨지 않지만, 아래 버튼 로직 자체는 그대로 동작함)
+  useEffect(() => {
+    if (phase !== 'ready') return;
+
+    let cancelled = false;
+
+    const checkPermission = async () => {
+      if (!navigator.permissions?.query) return;
+
+      try {
+        const status = await navigator.permissions.query({ name: 'camera' as PermissionName });
+        if (cancelled) return;
+
+        permissionStatusRef.current = status;
+        setShowPermissionModal(status.state === 'denied');
+
+        status.onchange = () => {
+          // 사용자가 브라우저 설정에서 직접 허용/차단을 바꾸면 실시간으로 반영
+          setShowPermissionModal(status.state === 'denied');
+          if (status.state !== 'denied') setPermissionBlocked(false);
+        };
+      } catch {
+        // 'camera' permission을 지원하지 않는 브라우저 (Safari 등) - 사전 감지 불가, 조용히 넘어감
+      }
+    };
+
+    checkPermission();
+
+    return () => {
+      cancelled = true;
+      if (permissionStatusRef.current) permissionStatusRef.current.onchange = null;
+    };
+  }, [phase]);
+
+  // "카메라 권한 허용하기" 버튼 클릭 시 실제 권한 요청을 트리거
+  const handleRequestCameraPermission = async () => {
+    setIsRequestingPermission(true);
+    setPermissionBlocked(false);
+    try {
+      // 권한이 아직 "물어본 적 없음" 상태라면 여기서 브라우저 네이티브 팝업이 뜨고,
+      // 이미 허용된 상태라면 팝업 없이 바로 성공함.
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      // 실제 촬영은 카메라 페이지에서 다시 스트림을 받으므로, 여기서는 확인 후 바로 정지
+      stream.getTracks().forEach((track) => track.stop());
+      setShowPermissionModal(false);
+    } catch {
+      // 이미 명시적으로 "차단"된 상태라면 브라우저가 팝업을 다시 띄우지 않고 즉시 실패함.
+      // 이건 브라우저 보안 정책이라 JS로 우회할 수 없고, 사용자가 브라우저/시스템 설정에서
+      // 직접 허용으로 바꿔야만 함.
+      setPermissionBlocked(true);
+    } finally {
+      setIsRequestingPermission(false);
+    }
+  };
 
   // 오늘의 질문을 백엔드에서 가져오기
   useEffect(() => {
@@ -223,6 +287,7 @@ export default function QuestionPage() {
                 state: {
                   groupId: Number(currentGroupId),
                   questionId: todayQuestionId,
+                  questionContent: todayQuestion,
                   answerTimeLimitMs,
                 },
               });
@@ -231,10 +296,78 @@ export default function QuestionPage() {
         </div>
       )}
 
+      {/* 카메라 권한 차단 안내 바텀시트 - 'ready' 단계에서 권한이 차단되어 있으면 표시 */}
+      {phase === 'ready' && showPermissionModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(15, 15, 15, 0.45)',
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+          zIndex: 200,
+        }}>
+          <div style={{
+            width: '100%',
+            maxWidth: '480px',
+            background: '#ffffff',
+            borderTopLeftRadius: '28px',
+            borderTopRightRadius: '28px',
+            padding: '12px 24px 32px',
+            boxSizing: 'border-box',
+            animation: 'slideUp 0.25s ease',
+          }}>
+            {/* 드래그 핸들 */}
+            <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: '#E5E1F5', margin: '0 auto 20px' }} />
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <p style={{ fontSize: '20px', fontWeight: 700, margin: 0, lineHeight: '28px' }}>
+                질문이 나오면<br />바로 답할 수 있게
+              </p>
+              <span style={{ fontSize: '34px', lineHeight: 1 }}>🔔</span>
+            </div>
+
+            <p style={{ fontSize: '13px', color: '#9491A8', margin: '0 0 20px 0', lineHeight: '19px' }}>
+              카메라를 켜고 영상을 촬영할 수 있도록 권한을 허용해주세요.
+            </p>
+
+            {permissionBlocked && (
+              <p style={{ fontSize: '12px', color: '#FF3B30', margin: '0 0 12px 0', lineHeight: '17px' }}>
+                이미 차단된 권한이라 자동으로 다시 물어볼 수 없어요. 브라우저 주소창의 카메라 아이콘(또는 사이트 설정)에서 직접 허용한 뒤 다시 시도해주세요.
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={handleRequestCameraPermission}
+              disabled={isRequestingPermission}
+              style={{
+                width: '100%',
+                height: '52px',
+                border: 'none',
+                borderRadius: '16px',
+                background: 'linear-gradient(90deg, #7B3FF2 0%, #A855F7 100%)',
+                color: '#ffffff',
+                fontSize: '16px',
+                fontWeight: 700,
+                cursor: isRequestingPermission ? 'not-allowed' : 'pointer',
+                opacity: isRequestingPermission ? 0.7 : 1,
+              }}
+            >
+              {isRequestingPermission ? '확인 중...' : '카메라 권한 허용하기'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { transform: translateY(24px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
       `}</style>
     </div>
