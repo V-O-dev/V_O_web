@@ -1,7 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import Cropper, { Area } from 'react-easy-crop';
 import { Header } from '../components/common/Header';
 import { axiosInstance } from '../apis/axiosInstance';
+import { getCroppedImg } from '../utils/cropImage';
 
 // 에셋 임포트
 import addPhotoIcon from '../assets/add_photo_icon.svg';
@@ -10,7 +12,7 @@ import clearInputIcon from '../assets/clear_input_icon.svg';
 import errorInfoIcon from '../assets/error_info_icon.svg';
 
 // 빠른 선택 이모지 에셋
-import quickHome from '../assets/quick_home.png'; 
+import quickHome from '../assets/quick_home.png';
 import quickHeart from '../assets/quick_heart.png';
 import quickHandshake from '../assets/quick_handshake.png';
 import quickSparkles from '../assets/quick_sparkles.png';
@@ -23,9 +25,18 @@ export default function GroupNamePage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
+
+  // ----- 크롭 모달 관련 상태 -----
+  const [isCropOpen, setIsCropOpen] = useState(false);
+  const [rawImageSrc, setRawImageSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [isCropping, setIsCropping] = useState(false);
 
   // 완성형 한글, 영문, 숫자, 공백만 허용
   const isInvalidName = /[^a-zA-Z0-9가-힣\s]/.test(groupName);
@@ -39,16 +50,59 @@ export default function GroupNamePage() {
     inputRef.current?.focus();
   };
 
-  // 앨범에서 이미지 선택 시
+  // 앨범에서 이미지 선택 시 -> 바로 반영하지 않고 크롭 모달을 먼저 띄움
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setImageFile(file);
-      setSelectedImage(URL.createObjectURL(file));
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const previewUrl = URL.createObjectURL(file);
+    setRawImageSrc(previewUrl);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+    setIsCropOpen(true);
+  };
+
+  const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixelsValue: Area) => {
+    setCroppedAreaPixels(croppedAreaPixelsValue);
+  }, []);
+
+  // 크롭 취소 -> 파일 선택 자체를 취소 처리
+  const handleCropCancel = () => {
+    if (rawImageSrc) URL.revokeObjectURL(rawImageSrc);
+    setRawImageSrc(null);
+    setIsCropOpen(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // 크롭 확정 -> 실제로 정사각형 이미지를 잘라내서 imageFile / selectedImage에 반영
+  const handleCropConfirm = async () => {
+    if (!rawImageSrc || !croppedAreaPixels) return;
+
+    try {
+      setIsCropping(true);
+      const croppedBlob = await getCroppedImg(rawImageSrc, croppedAreaPixels);
+      const croppedFile = new File([croppedBlob], 'group_profile.png', {
+        type: 'image/png',
+      });
+
+      setImageFile(croppedFile);
+      setSelectedImage(URL.createObjectURL(croppedBlob));
+
+      URL.revokeObjectURL(rawImageSrc);
+      setRawImageSrc(null);
+      setIsCropOpen(false);
+    } catch (err) {
+      console.error('이미지 크롭 실패:', err);
+      alert('이미지를 자르는 중 오류가 발생했습니다.');
+    } finally {
+      setIsCropping(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   // 빠른 선택 이모지 클릭 시 해당 이미지를 fetch하여 실제 File 객체로 변환 후 저장
+  // (이미 정사각형 에셋이므로 크롭 없이 바로 사용)
   const handleQuickSelect = async (iconUrl: string, fileNameKey: string) => {
     try {
       setSelectedImage(iconUrl);
@@ -71,7 +125,7 @@ export default function GroupNamePage() {
 
       const cleanGroupName = groupName.trim();
       const token = localStorage.getItem('accessToken');
-      const existingGroupId = location.state?.groupId; 
+      const existingGroupId = location.state?.groupId;
 
       const formData = new FormData();
       formData.append('groupName', cleanGroupName);
@@ -87,14 +141,14 @@ export default function GroupNamePage() {
           await axiosInstance.put(`/api/v1/groups/${existingGroupId}`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
-              ...(token ? { Authorization: `Bearer ${token}` } : {})
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
           });
         } catch (putErr) {
           await axiosInstance.patch(`/api/v1/groups/${existingGroupId}`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
-              ...(token ? { Authorization: `Bearer ${token}` } : {})
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
           });
         }
@@ -110,7 +164,7 @@ export default function GroupNamePage() {
         const response = await axiosInstance.post('/api/v1/groups', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
         });
 
@@ -127,9 +181,8 @@ export default function GroupNamePage() {
           groupId: finalGroupId,
           groupName: cleanGroupName,
           groupImage: selectedImage,
-        }
+        },
       });
-
     } catch (error: any) {
       console.error('그룹 처리 실패 백엔드 응답 전체:', error.response?.data);
       const serverData = error.response?.data;
@@ -161,7 +214,7 @@ export default function GroupNamePage() {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      
+
       {/* 1. 공통 헤더 */}
       <Header />
 
@@ -220,9 +273,9 @@ export default function GroupNamePage() {
           flexDirection: 'column',
           position: 'relative'
         }}>
-          
+
           <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-            
+
             {/* 프로필 사진 영역 */}
             <label style={{
               position: 'relative',
@@ -231,11 +284,12 @@ export default function GroupNamePage() {
               cursor: 'pointer',
               flexShrink: 0
             }}>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={handleImageChange} 
-                style={{ display: 'none' }} 
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                style={{ display: 'none' }}
               />
               <div style={{
                 width: '67.6px',
@@ -250,41 +304,41 @@ export default function GroupNamePage() {
                 boxSizing: 'border-box'
               }}>
                 {selectedImage ? (
-                  <img 
-                    src={selectedImage} 
-                    alt="그룹 프로필" 
-                    style={{ 
-                      width: '100%', 
-                      height: '100%', 
-                      objectFit: 'cover', 
-                      borderRadius: '20px', 
-                      transform: 'scale(1.35)', 
-                      display: 'block' 
-                    }} 
+                  // 크롭이 끝난 이미지는 이미 1:1 정사각형이므로
+                  // 별도 scale 트릭 없이 cover만으로 빈틈없이 꽉 차게 표시됨
+                  <img
+                    src={selectedImage}
+                    alt="그룹 프로필"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
                   />
                 ) : (
                   <img src={addPhotoIcon} alt="사진 추가" style={{ width: '24px', height: '24px' }} />
                 )}
               </div>
 
-              <img 
-                src={cameraBadgeIcon} 
-                alt="카메라" 
-                style={{ 
+              <img
+                src={cameraBadgeIcon}
+                alt="카메라"
+                style={{
                   position: 'absolute',
                   bottom: '-10px',
                   right: '-10px',
-                  width: '40px', 
-                  height: '40px', 
+                  width: '40px',
+                  height: '40px',
                   zIndex: 2,
                   display: 'block'
-                }} 
+                }}
               />
             </label>
 
             {/* 입력 폼 영역 */}
             <div style={{ marginLeft: '14px', flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              
+
               <span style={{
                 fontFamily: 'Manrope, sans-serif',
                 fontWeight: 600,
@@ -308,10 +362,10 @@ export default function GroupNamePage() {
                 marginTop: '4px',
                 gap: '8px'
               }}>
-                <div 
+                <div
                   onClick={() => inputRef.current?.focus()}
-                  style={{ 
-                    position: 'relative', 
+                  style={{
+                    position: 'relative',
                     flex: 1,
                     display: 'flex',
                     alignItems: 'center',
@@ -355,7 +409,7 @@ export default function GroupNamePage() {
                   gap: '2px',
                   flexShrink: 0
                 }}>
-                  <button 
+                  <button
                     onClick={handleClear}
                     type="button"
                     style={{
@@ -467,17 +521,17 @@ export default function GroupNamePage() {
                   transition: 'outline 0.15s ease'
                 }}
               >
-                <img 
-                  src={item.icon} 
-                  alt="빠른 선택 이모지" 
-                  style={{ 
-                    width: '100%', 
-                    height: '100%', 
+                <img
+                  src={item.icon}
+                  alt="빠른 선택 이모지"
+                  style={{
+                    width: '100%',
+                    height: '100%',
                     objectFit: 'cover',
-                    transform: 'scale(1.35)', 
+                    transform: 'scale(1.35)',
                     borderRadius: '20px',
                     display: 'block'
-                  }} 
+                  }}
                 />
               </button>
             );
@@ -489,7 +543,7 @@ export default function GroupNamePage() {
       {/* 5. 하단 계속 버튼 */}
       <div style={{
         position: 'absolute',
-        bottom: '94px', 
+        bottom: '94px',
         left: '50%',
         transform: 'translateX(-50%)',
         width: '310px',
@@ -505,15 +559,15 @@ export default function GroupNamePage() {
           disabled={!isButtonEnabled}
           style={{
             border: 'none',
-            background: isButtonEnabled ? '#7B3FF2' : '#C3ACFF', 
+            background: isButtonEnabled ? '#7B3FF2' : '#C3ACFF',
             fontFamily: 'Manrope, sans-serif',
             fontSize: '16px',
-            fontWeight: 600, 
-            lineHeight: '22px', 
-            color: '#ffffff', 
+            fontWeight: 600,
+            lineHeight: '22px',
+            color: '#ffffff',
             width: '310px',
             height: '48px',
-            borderRadius: '16px', 
+            borderRadius: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -528,6 +582,134 @@ export default function GroupNamePage() {
       {/* 6. 바닥 여백 영역 */}
       <div style={{ position: 'absolute', bottom: 0, height: '94px', width: '100%' }} />
 
-    </div> 
+      {/* 7. 이미지 크롭 모달 */}
+      {isCropOpen && rawImageSrc && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 15, 15, 0.75)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            width: '90%',
+            maxWidth: '340px',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '24px',
+            padding: '20px',
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            <h3 style={{
+              fontFamily: 'Manrope, sans-serif',
+              fontWeight: 700,
+              fontSize: '16px',
+              color: '#0F0F0F',
+              margin: '0 0 4px 0'
+            }}>
+              사진 위치 조정
+            </h3>
+            <p style={{
+              fontFamily: 'Manrope, sans-serif',
+              fontWeight: 500,
+              fontSize: '12px',
+              color: '#9491A8',
+              margin: '0 0 16px 0'
+            }}>
+              드래그로 위치를, 슬라이더로 확대/축소를 조절하세요
+            </p>
+
+            {/* 원형 가이드가 표시되는 크롭 영역 */}
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              height: '260px',
+              borderRadius: '16px',
+              overflow: 'hidden',
+              backgroundColor: '#111111'
+            }}>
+              <Cropper
+                image={rawImageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </div>
+
+            {/* 확대/축소 슬라이더 */}
+            <input
+              type="range"
+              min={1}
+              max={3}
+              step={0.01}
+              value={zoom}
+              onChange={(e) => setZoom(Number(e.target.value))}
+              style={{
+                marginTop: '16px',
+                width: '100%',
+                accentColor: '#7B3FF2'
+              }}
+            />
+
+            {/* 취소 / 적용 버튼 */}
+            <div style={{
+              marginTop: '20px',
+              display: 'flex',
+              gap: '10px'
+            }}>
+              <button
+                type="button"
+                onClick={handleCropCancel}
+                disabled={isCropping}
+                style={{
+                  flex: 1,
+                  height: '44px',
+                  borderRadius: '14px',
+                  border: '1.5px solid #E5E1F5',
+                  backgroundColor: '#FFFFFF',
+                  color: '#7B3FF2',
+                  fontFamily: 'Manrope, sans-serif',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  cursor: isCropping ? 'not-allowed' : 'pointer'
+                }}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleCropConfirm}
+                disabled={isCropping || !croppedAreaPixels}
+                style={{
+                  flex: 1,
+                  height: '44px',
+                  borderRadius: '14px',
+                  border: 'none',
+                  backgroundColor: '#7B3FF2',
+                  color: '#FFFFFF',
+                  fontFamily: 'Manrope, sans-serif',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  cursor: isCropping ? 'not-allowed' : 'pointer',
+                  opacity: isCropping ? 0.7 : 1
+                }}
+              >
+                {isCropping ? '적용 중...' : '적용하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
   );
 }

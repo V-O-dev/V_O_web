@@ -20,6 +20,22 @@ import playIcon from "@/assets/home/play_icon.svg";
 import homeImg from "@/assets/home/home_img.svg";
 import profileIcon from "@/assets/home/profile.svg";
 
+// 채워진 빨간 하트 (좋아요를 누른 상태) - 별도 에셋 없이 인라인 SVG로 처리
+function FilledHeartIcon() {
+  return (
+    <svg
+      className="home-reaction-icon"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="#FF3B30"
+      aria-label="좋아요됨"
+    >
+      <path d="M12 21s-6.716-4.35-9.428-8.243C.89 10.083 1.6 6.6 4.343 5.2 6.5 4.1 9 4.9 12 7.5 15 4.9 17.5 4.1 19.657 5.2c2.743 1.4 3.453 4.883 1.771 7.557C18.716 16.65 12 21 12 21z" />
+    </svg>
+  );
+}
+
 function HomeMainContent() {
   const navigate = useNavigate();
 
@@ -290,6 +306,10 @@ function HomeMainContent() {
               dailyQuestion?.content ||
               dailyQuestion?.questionContent;
 
+            // 피드 조회 API(GET /api/v1/groups/{groupId}/feed) 응답의 reactedByMe 필드로 표시.
+            // (여기서 직접 좋아요를 누르는 기능은 없음 - 영상 재생 화면에서 누른 결과만 반영)
+            const isLiked = feed.reactedByMe === true;
+
             return (
               <div key={feed.videoId} className="home-feed-card">
                 <div
@@ -413,12 +433,17 @@ function HomeMainContent() {
                 </div>
 
                 <div className="home-card-reaction-bar">
+                  {/* 피드에서는 좋아요를 직접 누를 수 없음 - 영상 재생 화면(/feed)에서 누른 결과만 표시 */}
                   <div className="home-reaction-item">
-                    <img
-                      src={heartIcon}
-                      alt="좋아요"
-                      className="home-reaction-icon"
-                    />
+                    {isLiked ? (
+                      <FilledHeartIcon />
+                    ) : (
+                      <img
+                        src={heartIcon}
+                        alt="좋아요"
+                        className="home-reaction-icon"
+                      />
+                    )}
                     <span>{feed.reactionCount}</span>
                   </div>
                   <div className="home-reaction-item">
