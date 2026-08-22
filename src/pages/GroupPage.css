@@ -21,9 +21,11 @@
 
 .group-main-content {
   flex: 1;
+  min-height: 0; /* flex 아이템 기본값(auto) 때문에 내용이 부모를 밀어내며 잘리는 문제 방지 */
   overflow-y: auto;
+  scrollbar-gutter: stable; /* 스크롤바가 생겨도 콘텐츠 폭이 좌우로 밀리지 않도록 자리 확보 */
   padding: 16px 16px 30px 16px;
-  position: hidden;
+  box-sizing: border-box;
 }
 
 .group-avatar-container {
