@@ -11,8 +11,8 @@
 .group-phone-screen {
   width: 100%;
   background-color: #ffffff;
-  min-height: 100vh;
-  height: 100%;
+  height: 100vh;
+  height: 100dvh; /* 모바일 브라우저 주소창 등으로 인한 뷰포트 높이 오차 보정 (지원 브라우저에서 덮어씀) */
   display: flex;
   flex-direction: column;
   position: relative;
